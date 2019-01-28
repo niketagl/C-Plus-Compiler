@@ -40,7 +40,18 @@
 \"([^"]|\\\")*\"		return STRING;
 "//".*		return COMMENT;
 "/*"([^*]|\*+[^/])*"*/"		return COMMENT;
-
+"||"|"&&"|"!"		return LOGICALOPERATOR;
+"++"|"--"	return UNARYOPERATOR;
+"+"|"-"|"*"|"/"|"%"   return ARITHEMATICOPERATOR;
+"<"|"<="|">"|">="|"=="|"!="	return RELATIONALOPERATOR;
+"&"|"|"|"<<"|">>"|"~"|"^"   return BITWISEOPERATOR;
+"="|"+="|"-="|"*="|"/="|"%="	return ASSIGNMENTOPERATOR;
+[\n]	return NEWLINE;
+[\t]	return TAB;
+[ ]		return SPACE;
+[{}()\[\]]	return PARANTHESES;
+[?:;#]	return OTHERSYMBOLS;
+.	return ERROR;	
 
 
 

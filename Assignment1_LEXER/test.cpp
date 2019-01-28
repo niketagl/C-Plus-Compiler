@@ -18,6 +18,17 @@ ofstream output_file;
 
 void lexeme_printer(char* lexeme, int i)
 {
+	if(i+1 == NEWLINE)
+		output_file<<"<br>\n";
+	else if(i+1 == SPACE)
+	{
+		output_file<<"&nbsp;";
+	}
+	else if(i+1 == TAB)
+	{
+		output_file<<"&nbsp;&nbsp;&nbsp;&nbsp;";
+	}
+	else
 	output_file<<"<font color='"<<colours[i]<<"'>"<<lexeme<<"</font>";
 }
 
@@ -49,12 +60,21 @@ int main()
 		cfg_file>>rang;
 		if(tag.length())
 		{	
-			for(int i=0; i< tagnames.size(); i++)
+			if(tag=="KEYWORD")
 			{
-				if(tag==tagnames[i])
+				for(int i=0; i<30; i++)
+					colours[i]=rang;
+			}
+			else
+			{
+
+				for(int i=0; i< tagnames.size(); i++)
 				{
-					colours[i] = rang;
-					break;
+					if(tag==tagnames[i])
+					{
+						colours[i] = rang;
+						break;
+					}
 				}
 			}
 		}
@@ -67,12 +87,14 @@ int main()
 	*/
 	
 	output_file.open("sample.html");
-
-    for(int j=0; j<11; j++)
+	int i;
+    do
     {
-    	int i=yylex();
+    	i=yylex();
+    	cout<<tagnames[i-1]<<" "<<endl;
     	lexeme_printer(yytext, i-1);
     }
-    
+    while(i);
+
     return 0;
 }
