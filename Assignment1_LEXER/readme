@@ -1,0 +1,11 @@
+first install lex:
+  sudo apt-get install flex
+
+compile one.l using lex program :
+  lex one.l
+  
+then compile test file along with generated code:
+  g++ -o LEX_ME test.cpp lex.yy.c
+  
+run :
+  ./LEX_ME
