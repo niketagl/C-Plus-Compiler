@@ -7,5 +7,5 @@ compile one.l using lex program :
 then compile test file along with generated code:
   g++ -o LEX_ME test.cpp lex.yy.c
   
-run and provide input in stdin :
-  ./LEX_ME < sample_input.txt
+run :
+  ./LEX_ME
