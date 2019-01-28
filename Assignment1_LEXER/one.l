@@ -37,8 +37,11 @@
 "static"		return STATIC;
 "while"		return WHILE;
 [a-z_A-Z][a-zA-Z_0-9]*	return IDENTIFIER;
-\"[^"]*\"		return STRING;
-\/\/[^\n]*		return COMMENT;
+\"([^"]|\\\")*\"		return STRING;
+"//".*		return COMMENT;
+"/*"([^*]|\*+[^/])*"*/"		return COMMENT;
+
+
 
 
 %%
