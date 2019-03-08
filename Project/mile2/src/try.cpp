@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include "symboltable.h"
 
 using namespace std;
 
