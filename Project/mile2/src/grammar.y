@@ -3,14 +3,25 @@
 extern int yylex();
 void yyerror(const char*);
 void yyerror2(const char*);
-#include<stdio.h>
+#include <stdio.h>
+
+extern char yytext[];
+extern int column;
+extern int yylineno;
 
 
 %}
 
+%code requires {
+	#include "src/symboltable.h"
+	#include <stack>
+	extern stack < table_ptr > table_stack;
+}
+
 %union{
 	int intval;
 	char *stringval;
+	type_ptr type;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -197,21 +208,22 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+	| declaration_specifiers init_declarator_list ';' 
 	;
 
+
 declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
-	| type_specifier
-	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
+	: storage_class_specifier    { $<type>$ = $<type>1;}
+	| storage_class_specifier declaration_specifiers   { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_specifier      { $<type>$ = $<type>1;}
+	| type_specifier declaration_specifiers   { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_qualifier       { $<type>$ = $<type>1;}
+	| type_qualifier declaration_specifiers   { $<type>$ = merge_type($<type>1 , $<type>2);}
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator    
+	| init_declarator_list ',' M {$<type>3 = $<type>0;} init_declarator   
 	| error ',' {yyerror2("expecting declarator");} init_declarator
 	;
 
@@ -222,22 +234,22 @@ init_declarator
 
 storage_class_specifier
 	: TYPEDEF
-	| EXTERN
-	| STATIC
+	| EXTERN      { $<type>$ = new_basic_type(EXTRN); }
+	| STATIC      { $<type>$ = new_basic_type(STAT); }
 	| AUTO
-	| REGISTER
+	| REGISTER    { $<type>$ = new_basic_type(REGIS); }
 	;
 
 type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
+	: VOID    { $<type>$ = new_basic_type(NOTYPE); }
+	| CHAR    { $<type>$ = new_basic_type(CHR); }
+	| SHORT   { $<type>$ = new_basic_type(SHORTER); }
+	| INT     { $<type>$ = new_basic_type(INTEGER); }
+	| LONG    { $<type>$ = new_basic_type(LONGER); }
+	| FLOAT   { $<type>$ = new_basic_type(FLT); }
+	| DOUBLE  { $<type>$ = new_basic_type(DBL); }
+	| SIGNED   { $<type>$ = new_basic_type(SIGN); }
+	| UNSIGNED  { $<type>$ = new_basic_type(UNSIGN); }
 	| struct_or_union_specifier
 	| enum_specifier
 	| TYPE_NAME
@@ -300,8 +312,8 @@ enumerator
 	;
 
 type_qualifier
-	: CONST
-	| VOLATILE
+	: CONST       { $<type>$ = new_basic_type(CONSTNT); }
+	| VOLATILE		{ $<type>$ = new_basic_type(VOLAT); }
 	;
 
 declarator
@@ -310,7 +322,7 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER
+	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );} 
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
@@ -458,7 +470,7 @@ translation_unit
 
 external_declaration
 	: function_definition
-	| declaration
+	| declaration   
 	;
 
 function_definition
@@ -468,12 +480,10 @@ function_definition
 	| declarator compound_statement
 	;
 
-%%
-#include <stdio.h>
+M : ;
 
-extern char yytext[];
-extern int column;
-extern int yylineno;
+%%
+
 
 
 void yyerror(const char *s)
