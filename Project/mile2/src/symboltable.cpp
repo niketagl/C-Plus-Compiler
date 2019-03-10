@@ -204,6 +204,14 @@ type_ptr new_pointer_type(type_ptr t1)
 	t->info = POINTER;
 	t->p1 = t1;
 	t->p2 = NULL;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;
+	t->constnt=0;
+	t->regis=0;
 	return t;
 }
 

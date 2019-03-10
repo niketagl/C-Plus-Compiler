@@ -1,9 +1,7 @@
-void swap() 
+void swap(int a, int **ff) 
 { 
-	int t = *a; 
-	*a = *b; 
-	*b = t; 
-	float x;
+	int **t ; 
+	float x,l,m;
 	long int bb;
 	volatile long y;
 

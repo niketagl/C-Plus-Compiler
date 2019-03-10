@@ -15,6 +15,7 @@ extern int yylineno;
 %code requires {
 	#include "src/symboltable.h"
 	#include <stack>
+	#include <iostream>
 	extern stack < table_ptr > table_stack;
 }
 
@@ -43,14 +44,16 @@ extern int yylineno;
 %%
 
 primary_expression
-	: IDENTIFIER
+	: IDENTIFIER     { $<stringval>$ = $<stringval>1; 
+					   $<type>$ = lookup(table_stack.top(), $<stringval>1); 
+						}
 	| CONSTANT
 	| STRING_LITERAL
 	| '(' expression ')'
 	;
 
 postfix_expression
-	: primary_expression
+	: primary_expression  { $$ = $1; }
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
@@ -74,7 +77,7 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression   { $$ = $1; }
 	| INC_OP unary_expression
 	| DEC_OP unary_expression
 	| unary_operator cast_expression
@@ -223,9 +226,10 @@ declaration_specifiers
 
 init_declarator_list
 	: init_declarator    
-	| init_declarator_list ',' M {$<type>3 = $<type>0;} init_declarator   
+	| init_declarator_list ',' init_declarator_listM init_declarator   
 	| error ',' {yyerror2("expecting declarator");} init_declarator
 	;
+init_declarator_listM : {$<type>$ = $<type>-2;};
 
 init_declarator
 	: declarator
@@ -334,11 +338,12 @@ direct_declarator
 	;
 
 pointer
-	: '*'
+	: '*' {$<type>$ = new_pointer_type($<type>0);}
 	| '*' type_qualifier_list
-	| '*' pointer
-	| '*' type_qualifier_list pointer
+	| '*' pointerM pointer {$<type>$ = new_pointer_type($<type>3);}
+	| '*' type_qualifier_list pointer 
 	;
+pointerM : {$<type>$ = $<type>-1;} ;
 
 type_qualifier_list
 	: type_qualifier
@@ -480,7 +485,6 @@ function_definition
 	| declarator compound_statement
 	;
 
-M : ;
 
 %%
 
