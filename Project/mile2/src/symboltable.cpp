@@ -17,6 +17,11 @@ table_ptr mktable( table_ptr parent = NULL)
 string print_type(type_ptr t)
 {
 	string s;
+	if(!t)
+	{
+		s.append("NIL");
+		return s;
+	}
 	if(t->info == ERROR)
 	{
 		s.append("ERROR");
@@ -57,19 +62,30 @@ string print_type(type_ptr t)
 	return s;
 }
 
+void print_table(table_ptr t, ofstream &f1, string scope)
+{
+	map < string , table_entry_ptr > ::iterator i;
+	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
+	{
+		f1<<scope<<", "<<i->first;
+		table_entry_ptr e = i->second;
+		f1<<", "<<print_type(e->type)<<", "<< e->offset <<", "<<e->width<<"\n";
+
+		if(e->proc==1)
+		{
+			print_table(e->t, f1, e->name);
+		}
+	}
+}
+
 
 void savetable(table_ptr t, char* filename)
 {
 	ofstream f1;
 	f1.open(filename);
-	f1<<"Name, Type, Offset, Width\n";
-	map < string , table_entry_ptr > ::iterator i;
-	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
-	{
-		f1<<i->first;
-		table_entry_ptr e = i->second;
-		f1<<", "<<print_type(e->type)<<", "<< e->offset<<", "<<e->width<<"\n";
-	}
+	f1<<"Scope, Name, Type, Offset, Width\n";
+	string s = "Global";
+	print_table(t,f1,s);
 	f1.close();
 
 }
@@ -184,6 +200,14 @@ type_ptr new_function_type(type_ptr t1, type_ptr t2)
 	t->info = FUNCTION;
 	t->p1 = t1;
 	t->p2 = t2;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;
+	t->constnt=0;
+	t->regis=0;
 	return t;
 }
 
@@ -194,6 +218,14 @@ type_ptr new_cartesian_type(type_ptr a, type_ptr t1)
 	t->info = CARTESIAN;
 	t->p1 = a;
 	t->p2 = t1;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;
+	t->constnt=0;
+	t->regis=0;
 	return t;
 }
 

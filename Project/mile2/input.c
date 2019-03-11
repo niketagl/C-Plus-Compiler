@@ -1,12 +1,18 @@
-void swap(int a, int **ff) 
+int y8;
+
+
+int swap() 
 { 
 	int **t ; 
 	float x,l,m;
 	long int bb;
 	volatile long y;
 
+	x = l;
+
 } 
 
+int ppl;
 // #define el 0
 
 // /* This function takes last element as pivot, places 

@@ -14,6 +14,7 @@ extern int yylineno;
 
 %code requires {
 	#include "src/symboltable.h"
+	#include "src/tac.h"
 	#include <stack>
 	#include <iostream>
 	extern stack < table_ptr > table_stack;
@@ -23,6 +24,7 @@ extern int yylineno;
 	int intval;
 	char *stringval;
 	type_ptr type;
+	table_entry_ptr entry;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -44,16 +46,14 @@ extern int yylineno;
 %%
 
 primary_expression
-	: IDENTIFIER     { $<stringval>$ = $<stringval>1; 
-					   $<type>$ = lookup(table_stack.top(), $<stringval>1); 
-						}
-	| CONSTANT
+	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
+	| CONSTANT    
 	| STRING_LITERAL
-	| '(' expression ')'
+	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
 
 postfix_expression
-	: primary_expression  { $$ = $1; }
+	: primary_expression  { $<entry>$ = $<entry>1; }
 	| postfix_expression '[' expression ']'
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
@@ -77,7 +77,7 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression   { $$ = $1; }
+	: postfix_expression   { $<entry>$ = $<entry>1; }
 	| INC_OP unary_expression
 	| DEC_OP unary_expression
 	| unary_operator cast_expression
@@ -95,12 +95,12 @@ unary_operator
 	;
 
 cast_expression
-	: unary_expression
+	: unary_expression   { $<entry>$ = $<entry>1; }
 	| '(' type_name ')' cast_expression
 	;
 
 multiplicative_expression
-	: cast_expression
+	: cast_expression    { $<entry>$ = $<entry>1; }
 	| multiplicative_expression '*' cast_expression
 	| multiplicative_expression '/' cast_expression
 	| multiplicative_expression '%' cast_expression
@@ -110,7 +110,7 @@ multiplicative_expression
 	;
 
 additive_expression
-	: multiplicative_expression
+	: multiplicative_expression   { $<entry>$ = $<entry>1; }
 	| additive_expression '+' multiplicative_expression
 	| additive_expression '-' multiplicative_expression
 	| error '+' {yyerror2("expecting expression");} multiplicative_expression
@@ -118,7 +118,7 @@ additive_expression
 	;
 
 shift_expression
-	: additive_expression
+	: additive_expression       { $<entry>$ = $<entry>1; }
 	| shift_expression LEFT_OP additive_expression
 	| shift_expression RIGHT_OP additive_expression
 	| error LEFT_OP {yyerror2("expecting expression");} additive_expression
@@ -126,7 +126,7 @@ shift_expression
 	;
 
 relational_expression
-	: shift_expression
+	: shift_expression        { $<entry>$ = $<entry>1; }
 	| relational_expression '<' shift_expression
 	| relational_expression '>' shift_expression
 	| relational_expression LE_OP shift_expression
@@ -138,7 +138,7 @@ relational_expression
 	;
 
 equality_expression
-	: relational_expression
+	: relational_expression     { $<entry>$ = $<entry>1; }
 	| equality_expression EQ_OP relational_expression
 	| equality_expression NE_OP relational_expression
 	| error EQ_OP {yyerror2("expecting expression");} relational_expression
@@ -146,43 +146,43 @@ equality_expression
 	;
 
 and_expression
-	: equality_expression
+	: equality_expression       { $<entry>$ = $<entry>1; }
 	| and_expression '&' equality_expression
 	| error '&' {yyerror2("expecting expression");} equality_expression
 	;
 
 exclusive_or_expression
-	: and_expression
+	: and_expression            { $<entry>$ = $<entry>1; }
 	| exclusive_or_expression '^' and_expression
 	| error '^' {yyerror2("expecting expression");} and_expression
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
+	: exclusive_or_expression    { $<entry>$ = $<entry>1; }
 	| inclusive_or_expression '|' exclusive_or_expression
 	| error '|' {yyerror2("expecting expression");} exclusive_or_expression
 	;
 
 logical_and_expression
-	: inclusive_or_expression
+	: inclusive_or_expression      { $<entry>$ = $<entry>1; }
 	| logical_and_expression AND_OP inclusive_or_expression
 	| error AND_OP {yyerror2("expecting logical expression");} inclusive_or_expression
 	;
 
 logical_or_expression
-	: logical_and_expression
+	: logical_and_expression        { $<entry>$ = $<entry>1; }
 	| logical_or_expression OR_OP logical_and_expression
 	| error OR_OP {yyerror2("expecting logical expression");} logical_and_expression
 	;
 
-conditional_expression
-	: logical_or_expression
+conditional_expression  
+	: logical_or_expression      { $<entry>$ = $<entry>1; }
 	| logical_or_expression '?' expression ':' conditional_expression
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression     { $<entry>$ = $<entry>1; }
+	| unary_expression assignment_operator assignment_expression {cout<<$<entry>1->name<<" = "<<$<entry>3->name<<endl;}
 	;
 
 assignment_operator
@@ -321,18 +321,35 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
+	: pointer direct_declarator   {$<type>$ = $<type>2; }
+	| direct_declarator    {$<type>$ = $<type>1; }
 	;
 
 direct_declarator
-	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );} 
+	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
+					$<type>$ = $<type>0; } 
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+
+	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
+							{ 
+								$<type>$ = new_function_type($<type>3,$<type>0); 
+								table_ptr t1 = table_stack.top();
+								table_stack.pop();
+								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								table_stack.push(t1);
+							}
+
+	| IDENTIFIER '(' mk_tbl  identifier_list ')'
+	| IDENTIFIER '(' mk_tbl ')'  
+							{ 
+								$<type>$ = new_function_type(NULL,$<type>0); 
+								table_ptr t1 = table_stack.top();
+								table_stack.pop();
+								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								table_stack.push(t1);
+							}
 	| error '[' {yyerror2("expecting declarator");} ']'
 	| error '(' {yyerror2("expecting declarator");} ')'
 	;
@@ -352,20 +369,20 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list
+	: parameter_list    {$<type>$ = $<type>1;}
 	| parameter_list ',' ELLIPSIS
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	: parameter_declaration     {$<type>$ = $<type>1;}
+	| parameter_list ',' parameter_declaration    {$<type>$ = new_cartesian_type($<type>1,$<type>3); }
 	| error ',' {yyerror2("expecting parameter");} parameter_declaration
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers declarator     {$<type>$ = $<type>2;}
 	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	| declaration_specifiers     {$<type>$ = $<type>1;}
 	;
 
 identifier_list
@@ -415,7 +432,7 @@ statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement
-	| declaration
+	| declaration    {if($<type>1->info==FUNCTION)table_stack.pop();}
 	;
 
 labeled_statement
@@ -475,16 +492,20 @@ translation_unit
 
 external_declaration
 	: function_definition
-	| declaration   
+	| declaration   {if($<type>1->info==FUNCTION)table_stack.pop();}
 	;
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
+															{table_stack.pop();}
+	| declaration_specifiers declarator compound_statement  {table_stack.pop();}
+	| declarator declaration_list compound_statement  		{table_stack.pop();}
+	| declarator compound_statement 						{table_stack.pop();}   
 	;
 
+
+mk_tbl : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); } ;
+	
 
 %%
 
