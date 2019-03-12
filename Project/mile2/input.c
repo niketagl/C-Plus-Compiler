@@ -9,6 +9,8 @@ int swap()
 	volatile long y;
 
 	x = l;
+	int a;
+	f[x];
 
 } 
 

@@ -3,6 +3,8 @@
 extern int yylex();
 void yyerror(const char*);
 void yyerror2(const char*);
+void yyerror3(const char*);
+
 #include <stdio.h>
 
 extern char yytext[];
@@ -14,7 +16,6 @@ extern int yylineno;
 
 %code requires {
 	#include "src/symboltable.h"
-	#include "src/tac.h"
 	#include <stack>
 	#include <iostream>
 	extern stack < table_ptr > table_stack;
@@ -54,7 +55,7 @@ primary_expression
 
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
-	| postfix_expression '[' expression ']'
+	| postfix_expression '[' expression ']'	{ if ( $<entry>3->type->info != INTEGER ) yyerror3("expecting integer expression");  }
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
@@ -521,4 +522,9 @@ void yyerror2(const char *s)
 {
 	fflush(stdout);
 	printf("\t%s before token ( %s )\n", s, yylval.stringval);
+}
+void yyerror3(const char *s)
+{
+	fflush(stdout);
+	printf("Semantic Error in line no : %d \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
 }

@@ -152,8 +152,8 @@ type_ptr new_basic_type (type_inf info)
 	t->p2 = NULL;
 
 	switch(info){
-		case LONGER : t->longer = 1; break;
-		case SHORTER : t->shorter = 1; break;
+		case LONGER : t->longer = 1; t->info = INTEGER; break;
+		case SHORTER : t->shorter = 1; t->info = INTEGER; break;
 		case UNSIGN : t->unsign =1; break;
 		case SIGN : t->sign =1 ; break;
 		case EXTRN : t->extrn = 1 ; break;
@@ -168,7 +168,7 @@ type_ptr new_basic_type (type_inf info)
 
 type_ptr merge_type (type_ptr t1, type_ptr t2)
 {
-	if (t1->info!=NOTYPE && t2->info!=NOTYPE)
+	if ((t1->info!=NOTYPE && t2->info!=NOTYPE) || (t1->info!=t2->info && t1->info!=INTEGER))
 	{
 		t1->info = ERROR;
 		return t1;
@@ -241,8 +241,8 @@ type_ptr new_pointer_type(type_ptr t1)
 	t->unsign=0;
 	t->sign=0;
 	t->extrn=0;
-	t->volat=0;
-	t->constnt=0;
+	t->volat=0;		
+	t->constnt=0;	
 	t->regis=0;
 	return t;
 }
@@ -253,6 +253,7 @@ int type_match (type_ptr t1, type_ptr t2)
 		return 0;
 
 	if(t1->info == t2->info)
+	{
 		switch ( t1->info ) 
 		{
 			case CARTESIAN:
@@ -268,14 +269,18 @@ int type_match (type_ptr t1, type_ptr t2)
 			default:
 				return 1;
 		}
+	}
+
 }
 
 
 table_entry_ptr lookup ( table_ptr t, char* name)
 {
+	if(t==NULL) return NULL;
+
 	string nam = name;
 	if ( t->entries.find(nam) == t->entries.end() )
-		return NULL;
+		return lookup(t->parent, name);
 
 	return t->entries.find(nam)->second;
 
