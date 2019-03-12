@@ -3,9 +3,13 @@
 #include <map>
 #include <fstream>
 #include "symboltable.h"
+#include "tac.h"
 using namespace std;
 
 int count = 0;
+extern vector < code_ptr > V;
+extern stack < table_ptr > table_stack;
+extern void warning(const char*);
 
 table_ptr mktable( table_ptr parent = NULL)
 {

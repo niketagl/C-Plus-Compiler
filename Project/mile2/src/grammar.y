@@ -4,6 +4,7 @@ extern int yylex();
 void yyerror(const char*);
 void yyerror2(const char*);
 void yyerror3(char*);
+void warning(const char *s);
 
 #include <stdio.h>
 
@@ -532,4 +533,11 @@ void yyerror3(char *s)
 {
 	fflush(stdout);
 	printf("Semantic Error in line no : %d \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
+}
+
+void warning(const char *s)
+{
+	fflush(stdout);
+	printf("Line No : %d [ WARNING ! ] \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
+
 }
