@@ -16,9 +16,13 @@ extern int yylineno;
 
 %code requires {
 	#include "src/symboltable.h"
+	#include "src/tac.h"
 	#include <stack>
 	#include <iostream>
+	#include <vector>
 	extern stack < table_ptr > table_stack;
+	extern int code_line;
+	extern vector < code_ptr > V;
 }
 
 %union{
@@ -183,7 +187,8 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression {cout<<$<entry>1->name<<" = "<<$<entry>3->name<<endl;}
+	| unary_expression assignment_operator assignment_expression 
+	 {emit(V,$<entry>1->name,"=",$<entry>3->name);}
 	;
 
 assignment_operator
@@ -211,8 +216,8 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';' 
+	: declaration_specifiers ';' { $<type>$ = $<type>1;}
+	| declaration_specifiers init_declarator_list ';' { $<type>$ = $<type>1;}
 	;
 
 
@@ -335,7 +340,7 @@ direct_declarator
 
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
 							{ 
-								$<type>$ = new_function_type($<type>3,$<type>0); 
+								$<type>$ = new_function_type($<type>4,$<type>0); 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
 								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
@@ -433,7 +438,7 @@ statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement
-	| declaration    {if($<type>1->info==FUNCTION)table_stack.pop();}
+	| declaration    { if($<type>1->info==FUNCTION)table_stack.pop(); }
 	;
 
 labeled_statement

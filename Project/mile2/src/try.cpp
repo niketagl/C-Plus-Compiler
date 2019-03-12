@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "symboltable.h"
+#include "tac.h"
 #include <stack>
 
 using namespace std;
@@ -10,7 +11,9 @@ using namespace std;
 extern int yyparse();
 extern FILE *yyin;
 
+int code_line = 100;
 stack < table_ptr > table_stack;
+vector < code_ptr > V;
 
 void preprocess()
 {
@@ -30,4 +33,6 @@ int main(int argc, char **argv)
 	yyparse();
 
 	savetable(global_table, "global_table.csv");
+
+	print_code(V);
 }

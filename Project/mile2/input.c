@@ -1,20 +1,14 @@
-int y8;
 
 
-int swap() 
+
+int swap( int *tt ) 
 { 
-	int **t ; 
-	float x,l,m;
 	long int bb;
 	volatile long y;
 
-	x = l;
-	int a;
-	f[x];
 
 } 
 
-int ppl;
 // #define el 0
 
 // /* This function takes last element as pivot, places 
