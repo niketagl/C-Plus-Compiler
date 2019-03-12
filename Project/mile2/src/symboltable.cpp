@@ -173,7 +173,7 @@ type_ptr new_basic_type (type_inf info)
 
 type_ptr merge_type (type_ptr t1, type_ptr t2)
 {
-	if ((t1->info!=NOTYPE && t2->info!=NOTYPE) || !(t1->info==t2->info && t1->info==INTEGER))
+	if ((t1->info!=NOTYPE && t2->info!=NOTYPE) && !(t1->info==t2->info && t1->info==INTEGER))
 	{
 		t1->info = ERROR;
 		return t1;
@@ -493,4 +493,5 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			emit(V,name,"=",temp->name,f_op,entry_in2->name);
 		}
 	}
+	return NULL;
 }

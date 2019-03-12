@@ -1,12 +1,8 @@
-
-
-
 int swap( int *tt ) 
 { 
-	long int bb;
-	volatile long y;
-
-
+	long int a;
+	float b;
+	a+b; 
 } 
 
 // #define el 0

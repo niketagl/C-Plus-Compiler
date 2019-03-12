@@ -117,8 +117,8 @@ multiplicative_expression
 
 additive_expression
 	: multiplicative_expression   { $<entry>$ = $<entry>1; }
-	| additive_expression '+' multiplicative_expression 	
-	| additive_expression '-' multiplicative_expression 	
+	| additive_expression '+' multiplicative_expression 	{ if(char* s = type_check("+",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| additive_expression '-' multiplicative_expression 	{ if(char* s = type_check("-",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '+' {yyerror2("expecting expression");} multiplicative_expression
 	| error '-' {yyerror2("expecting expression");} multiplicative_expression
 	;
@@ -189,7 +189,6 @@ conditional_expression
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
 	| unary_expression assignment_operator assignment_expression 
-	 {emit(V,$<entry>1->name,"=",$<entry>3->name);}
 	;
 
 assignment_operator
