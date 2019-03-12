@@ -90,3 +90,5 @@ type_ptr new_function_type(type_ptr, type_ptr);
 type_ptr new_cartesian_type(type_ptr, type_ptr);
 
 type_ptr new_pointer_type(type_ptr);
+
+char* type_check(string, table_entry_ptr, table_entry_ptr, table_entry_ptr);

@@ -5,6 +5,7 @@
 #include "symboltable.h"
 using namespace std;
 
+int count = 0;
 
 table_ptr mktable( table_ptr parent = NULL)
 {
@@ -168,7 +169,7 @@ type_ptr new_basic_type (type_inf info)
 
 type_ptr merge_type (type_ptr t1, type_ptr t2)
 {
-	if ((t1->info!=NOTYPE && t2->info!=NOTYPE) || (t1->info!=t2->info && t1->info!=INTEGER))
+	if ((t1->info!=NOTYPE && t2->info!=NOTYPE) || !(t1->info==t2->info && t1->info==INTEGER))
 	{
 		t1->info = ERROR;
 		return t1;
@@ -286,3 +287,206 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 
 }
 
+
+char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
+{
+	string f_op;
+	type_ptr t1 = entry_in1->type;
+	type_ptr t2 = entry_in2->type;
+	char name[8];
+	sprintf(name, "%s%d", "t-", count); 
+	if(op=="*" || op=="/" || op=="+" || op=="-")
+	{
+		if(t1->info==INTEGER && t2->info==INTEGER)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			entry_out->type->unsign = t1->unsign & t2->unsign;
+			entry_out->type->longer = t1->longer | t2->longer;
+			entry_out->type->shorter = t1->shorter & t2->shorter;
+			f_op = "int" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==FLT && t2->info==FLT)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==DBL && t2->info==DBL)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==CHR && t2->info==CHR)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(CHR), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "int" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==FLT && t2->info==INTEGER)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			temp->type->constnt = t2->constnt;
+			emit(V,name,"=","cast_to_float (",entry_in2->name,")");
+			warning("Implicit Typecast from INTEGER to FLOAT");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+		}
+		else if(t1->info==INTEGER && t2->info==FLT)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			temp->type->constnt = t1->constnt;
+			emit(V,name,"=","cast_to_float (",entry_in1->name,")");
+			warning("Implicit Typecast from INTEGER to FLOAT");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==DBL && t2->info==INTEGER)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t2->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			warning("Implicit Typecast from INTEGER to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+		}
+		else if(t1->info==INTEGER && t2->info==DBL)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t1->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			warning("Implicit Typecast from INTEGER to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==DBL && t2->info==FLT)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t2->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			warning("Implicit Typecast from FLOAT to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+		}
+		else if(t1->info==FLT && t2->info==DBL)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t1->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			warning("Implicit Typecast from FLOAT to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==CHR && t2->info==INTEGER)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "int" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==INTEGER && t2->info==CHR)
+		{
+			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "int" + op;
+			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==FLT && t2->info==CHR)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			temp->type->constnt = t2->constnt;
+			emit(V,name,"=","cast_to_float (",entry_in2->name,")");
+			warning("Implicit Typecast from CHAR to FLOAT");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+		}
+		else if(t1->info==CHR && t2->info==FLT)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			temp->type->constnt = t1->constnt;
+			emit(V,name,"=","cast_to_float (",entry_in1->name,")");
+			warning("Implicit Typecast from CHAR to FLOAT");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+		}
+		else if(t1->info==DBL && t2->info==CHR)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t2->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			warning("Implicit Typecast from CHAR to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+		}
+		else if(t1->info==CHR && t2->info==DBL)
+		{
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			temp->type->constnt = t1->constnt;
+			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			warning("Implicit Typecast from CHAR to DOUBLE");
+			sprintf(name, "%s%d", "t-", count);
+			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
+			count++;
+			entry_out->type->constnt = t1->constnt & t2->constnt;
+			f_op = "real" + op;
+			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+		}
+	}
+}

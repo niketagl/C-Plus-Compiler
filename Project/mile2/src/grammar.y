@@ -3,7 +3,7 @@
 extern int yylex();
 void yyerror(const char*);
 void yyerror2(const char*);
-void yyerror3(const char*);
+void yyerror3(char*);
 
 #include <stdio.h>
 
@@ -102,9 +102,9 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression    { $<entry>$ = $<entry>1; }
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	| multiplicative_expression '*' cast_expression 	{ if(char* s = type_check("*",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); } 
+	| multiplicative_expression '/' cast_expression 	{ if(char* s = type_check("/",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| multiplicative_expression '%' cast_expression 	{ if(char* s = type_check("%",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '*' {yyerror2("expecting expression");} cast_expression
 	| error '/' {yyerror2("expecting expression");} cast_expression
 	| error '%' {yyerror2("expecting expression");} cast_expression
@@ -112,16 +112,16 @@ multiplicative_expression
 
 additive_expression
 	: multiplicative_expression   { $<entry>$ = $<entry>1; }
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	| additive_expression '+' multiplicative_expression 	
+	| additive_expression '-' multiplicative_expression 	
 	| error '+' {yyerror2("expecting expression");} multiplicative_expression
 	| error '-' {yyerror2("expecting expression");} multiplicative_expression
 	;
 
 shift_expression
 	: additive_expression       { $<entry>$ = $<entry>1; }
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	| shift_expression LEFT_OP additive_expression 		
+	| shift_expression RIGHT_OP additive_expression 	
 	| error LEFT_OP {yyerror2("expecting expression");} additive_expression
 	| error RIGHT_OP {yyerror2("expecting expression");} additive_expression
 	;
@@ -523,7 +523,7 @@ void yyerror2(const char *s)
 	fflush(stdout);
 	printf("\t%s before token ( %s )\n", s, yylval.stringval);
 }
-void yyerror3(const char *s)
+void yyerror3(char *s)
 {
 	fflush(stdout);
 	printf("Semantic Error in line no : %d \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
