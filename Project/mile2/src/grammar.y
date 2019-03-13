@@ -56,7 +56,20 @@ extern int yylineno;
 %%
 
 primary_expression
-	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
+	: IDENTIFIER   	{ 
+						if(!lookup(table_stack.top(),$<stringval>1))
+						{
+							char* error = (char *) malloc (100 * sizeof(char));
+							sprintf(error, "%s%s%s","Identifier \"", $<stringval>1, "\" not declared");
+							yyerror3(error);
+							$<entry>$ = new table_entry;
+							$<entry>$->type = new_basic_type(ERROR);
+						}
+						else
+						{
+							$<entry>$ = lookup(table_stack.top(), $<stringval>1);
+						} 
+					}
 	| INTEGER_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(INTEGER); $<entry>$->type->value = $<intval>1; }    
 	| CHAR_CONSTANT 		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(CHR); $<entry>$->type->value = (int)$<charval>1; }
 	| FLOAT_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(FLT); $<entry>$->type->value = (int)$<floatval>1; }
@@ -257,7 +270,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID    { $<type>$ = new_basic_type(NOTYPE); }
+	: VOID    { $<type>$ = new_basic_type(VOD); }
 	| CHAR    { $<type>$ = new_basic_type(CHR); }
 	| SHORT   { $<type>$ = new_basic_type(SHORTER); }
 	| INT     { $<type>$ = new_basic_type(INTEGER); }
@@ -276,9 +289,19 @@ struct_or_union_specifier
 									{
 										table_ptr t1 = table_stack.top();
 										table_stack.pop();
-										$<type>$ = new_struct_type($<type>5) ;
-										enter_proc(struct_namespace, $<stringval>2, $<type>$, t1);
-										t1->scope = table_stack.top()->name;
+										if(same_lookup(table_stack.top(),$<stringval>1))
+										{
+											char* error = (char *) malloc (100 * sizeof(char));
+											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>1, "\"");
+											yyerror3(error);
+											$<type>$ = new_basic_type(ERROR); 
+										}
+										else
+										{
+											$<type>$ = new_struct_type($<type>5) ;
+											enter_proc(struct_namespace, $<stringval>2, $<type>$, t1);
+											t1->scope = table_stack.top()->name;
+										}
 									}
 
 	| struct_or_union '{' struct_declaration_list '}'
@@ -348,40 +371,95 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
-					$<type>$ = $<type>0; } 
+	: IDENTIFIER  	{ 
+						if(same_lookup(table_stack.top(),$<stringval>1))
+						{
+							char* error = (char *) malloc (100 * sizeof(char));
+							sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+							yyerror3(error);
+							$<type>$ = new_basic_type(ERROR);
+						}
+						else
+						{
+							enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
+							$<type>$ = $<type>0;
+						}
+					} 
 	| '(' declarator ')'
-	| IDENTIFIER '[' constant_expression ']'    {
+	| IDENTIFIER '[' constant_expression ']'    {	
+													if(same_lookup(table_stack.top(),$<stringval>1))
+													{
+														char* error = (char *) malloc (100 * sizeof(char));
+														sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+														yyerror3(error);
+														$<type>$ = new_basic_type(ERROR);
+													}
+													else
+													{
 														$<type>$ = new_array_type($<type>0, $<type>3->value);
 														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
-														cout<<"here\n";
-													}
-	| IDENTIFIER '[' ']'   {
-								$<type>$ = new_pointer_type($<type>0);
-								enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+													}	
+												}
+	| IDENTIFIER '[' ']'  	{
+								if(same_lookup(table_stack.top(),$<stringval>1))
+								{
+									char* error = (char *) malloc (100 * sizeof(char));
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									yyerror3(error);
+									$<type>$ = new_basic_type(ERROR);
+								}
+								else
+								{
+									$<type>$ = new_pointer_type($<type>0);
+									enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+								}
 							}
 
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
-							{ 
-								$<type>$ = new_function_type($<type>4,$<type>0); 
+							{
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
-								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
-								t1->name.append($<stringval>1);
-								t1->scope = t1->name;
-								table_stack.push(t1);
+								if(same_lookup(table_stack.top(),$<stringval>1))
+								{
+									char* error = (char *) malloc (100 * sizeof(char));
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									yyerror3(error);
+									$<type>$ = new_basic_type(ERROR);
+									table_ptr temp = new table;
+									table_stack.push(temp); 
+								}
+								else
+								{
+									$<type>$ = new_function_type($<type>4,$<type>0);
+									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									t1->name.append($<stringval>1);
+									t1->scope = t1->name;
+									table_stack.push(t1);
+								}
 							}
 
 	| IDENTIFIER '(' mk_tbl  identifier_list ')'
 	| IDENTIFIER '(' mk_tbl ')'  
 							{ 
-								$<type>$ = new_function_type(NULL,$<type>0); 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
-								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
-								t1->name.append($<stringval>1);
-								t1->scope = t1->name;
-								table_stack.push(t1);
+								if(same_lookup(table_stack.top(),$<stringval>1))
+								{
+									char* error = (char *) malloc (100 * sizeof(char));
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									yyerror3(error);
+									$<type>$ = new_basic_type(ERROR);
+									table_ptr temp = new table;
+									table_stack.push(temp); 
+								}
+								else
+								{
+									$<type>$ = new_function_type(NULL,$<type>0);
+									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									t1->name.append($<stringval>1);
+									t1->scope = t1->name;
+									table_stack.push(t1);
+								}
 							}
 	| error '[' {yyerror2("expecting declarator");} ']'
 	| error '(' {yyerror2("expecting declarator");} ')'
