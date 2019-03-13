@@ -108,6 +108,29 @@ void savetable(table_ptr t, char* filename)
 
 }
 
+int type_width(type_ptr type)
+{
+	int width = 0;
+	if(type->info == INTEGER || type->info == FLT)
+	{
+		width = 32;
+		if(type->shorter) width = 16;
+		if(type->longer) width = 64;
+	}
+	if(type->info == CHR) width = 8;
+	if(type->info == DBL)
+	{
+		width = 64;
+		if(type->longer) width = 128;
+	}
+	if(type->info == POINTER) width = 64;
+	if(type->info == ARRAY) width = type_width(type->p1) * type->array_size;
+	if(type->info == STRCT) width = type_width(type->p1);
+	if(type->info == CARTESIAN) width = type_width(type->p1) + type_width(type->p2);
+	if(type->info == NOTYPE || type->info == VOD || type->info == ERROR) width = 0;
+	return width;
+}
+
 table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 {
 	table_entry_ptr t_entry = new table_entry;
@@ -120,6 +143,7 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 	t_entry->offset = offset;
 
 	// will have to write code for infering width using type,
+	t_entry->width = type_width(type);
 
 	string nam = name;
 
@@ -225,7 +249,7 @@ type_ptr merge_type (type_ptr t1, type_ptr t2)
 		if(t1->volat && t2->volat) t1->info = ERROR;
 		if(t1->constnt && t2->constnt) t1->info = ERROR;
 	}
-	
+
 	t1->longer = t1->longer || t2->longer;
 	t1->shorter = t1->shorter || t2->shorter ;
 	t1->unsign = t1->unsign || t2->unsign;
