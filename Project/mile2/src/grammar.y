@@ -57,9 +57,9 @@ extern int yylineno;
 
 primary_expression
 	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
-	| INTEGER_CONSTANT		{ cout << $<intval>1 << endl; }    
-	| CHAR_CONSTANT 		{ cout << $<charval>1 << endl; }
-	| FLOAT_CONSTANT		{ cout << $<floatval>1 << endl; }
+	| INTEGER_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(INTEGER); $<entry>$->type->value = $<intval>1; }    
+	| CHAR_CONSTANT 		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(CHR); $<entry>$->type->value = (int)$<charval>1; }
+	| FLOAT_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(FLT); $<entry>$->type->value = (int)$<floatval>1; }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
@@ -354,6 +354,7 @@ direct_declarator
 	| IDENTIFIER '[' constant_expression ']'    {
 														$<type>$ = new_array_type($<type>0, $<type>3->value);
 														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+														cout<<"here\n";
 													}
 	| IDENTIFIER '[' ']'   {
 								$<type>$ = new_pointer_type($<type>0);

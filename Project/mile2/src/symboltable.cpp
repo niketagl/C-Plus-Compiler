@@ -200,6 +200,21 @@ type_ptr merge_type (type_ptr t1, type_ptr t2)
 	if(t1->longer && t2->shorter || t1->shorter && t2->longer)
 		t1->info=ERROR;
 
+	if((t1->sign && t2->info==INTEGER) || (t1->unsign && t2->info==INTEGER))
+	{
+		t1->info = INTEGER;
+		return t1;
+	}
+	else if((t1->longer && t2->info==INTEGER) || (t1->shorter && t2->info==INTEGER))
+	{
+		return t1;
+	}
+	else
+	{
+		t1->info = ERROR;
+		return t1;
+	}
+
 	t1->longer = t1->longer || t2->longer;
 	t1->shorter = t1->shorter || t2->shorter ;
 	t1->unsign = t1->unsign || t2->unsign;
