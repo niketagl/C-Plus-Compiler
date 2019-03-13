@@ -1,6 +1,9 @@
+int a;
+
 int swap( int tt ) 
 {
-	int a,b,d,e,f; 
+	int a,b,d,e,f;
+	int tt;
 	float x[9];
 	int c;
 	c <<= b;
@@ -17,6 +20,7 @@ int swap( int tt )
     float h = 12e-1;
     float i = .23e2;
     float j = 32.e-2;
+    y = 5;
 } 
 
 // #define el 0

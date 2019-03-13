@@ -82,6 +82,8 @@ void addwidth(table_ptr t, int width);
 
 table_entry_ptr lookup( table_ptr , char*);
 
+table_entry_ptr same_lookup( table_ptr , char*);
+
 //type system interface
 string print_type(type_ptr);
 

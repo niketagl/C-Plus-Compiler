@@ -1,0 +1,22 @@
+Scope, Name, Type, Offset, Width
+Global, a, INT, 0, 0
+GLOBAL, swap, FUNCTION : INT -> INT, 0, 0
+swap, a, INT, 0, 0
+swap, b, INT, 0, 0
+swap, c, INT, 0, 0
+swap, d, INT, 0, 0
+swap, e, INT, 0, 0
+swap, f, INT, 0, 0
+swap, g, FLOAT, 0, -1196951552
+swap, h, FLOAT, 0, 0
+swap, i, FLOAT, 0, 0
+swap, j, FLOAT, 0, 0
+swap, t-0, INT, 0, 0
+swap, t-1, INT, 0, 0
+swap, t-2, INT, 0, 0
+swap, t-3, INT, 0, 0
+swap, t-4, INT, 0, 0
+swap, t-5, INT, 0, 0
+swap, t-6, INT, 0, 0
+swap, tt, INT, 0, 0
+swap, x, *FLOAT, 0, 0
