@@ -153,19 +153,19 @@ equality_expression
 
 and_expression
 	: equality_expression       { $<entry>$ = $<entry>1; }
-	| and_expression '&' equality_expression
+	| and_expression '&' equality_expression    { if(char* s = type_check("&",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '&' {yyerror2("expecting expression");} equality_expression
 	;
 
 exclusive_or_expression
 	: and_expression            { $<entry>$ = $<entry>1; }
-	| exclusive_or_expression '^' and_expression
+	| exclusive_or_expression '^' and_expression    { if(char* s = type_check("^",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '^' {yyerror2("expecting expression");} and_expression
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression    { $<entry>$ = $<entry>1; }
-	| inclusive_or_expression '|' exclusive_or_expression
+	| inclusive_or_expression '|' exclusive_or_expression   { if(char* s = type_check("|",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '|' {yyerror2("expecting expression");} exclusive_or_expression
 	;
 
@@ -188,21 +188,21 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression 
+	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	;
 
 assignment_operator
 	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	| MUL_ASSIGN    { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "*="); }
+	| DIV_ASSIGN { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "/="); }
+	| MOD_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "%="); }
+	| ADD_ASSIGN { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+="); }
+	| SUB_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-="); }
+	| LEFT_ASSIGN  { $<stringval>$ = (char*)malloc(4*sizeof(char)); sprintf($<stringval>$, "<<="); }
+	| RIGHT_ASSIGN  { $<stringval>$ = (char*)malloc(4*sizeof(char)); sprintf($<stringval>$, ">>="); }
+	| AND_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "&="); }
+	| XOR_ASSIGN   { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "^="); }
+	| OR_ASSIGN   { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "|="); }
 	;
 
 expression

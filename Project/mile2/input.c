@@ -1,8 +1,10 @@
 int swap( int *tt ) 
-{ 
-	long int a;
-	int b;
-	a%b; 
+{
+	int a,b,d,e,f; 
+	int c;
+	c <<= b;
+	d >>= e;
+	a+b+c+d+e+f;
 } 
 
 // #define el 0

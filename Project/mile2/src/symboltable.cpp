@@ -293,7 +293,7 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 }
 
 
-char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
+char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
 	string f_op;
 	type_ptr t1 = entry_in1->type;
@@ -337,6 +337,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -448,7 +449,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			return NULL;
 		}
 	}
-	else if(op=="%" || op=="<<" || op==">>")
+	else if(op=="%" || op=="<<" || op==">>" || op=="&" || op == "|" || op == "^")
 	{
 		if(t1->info==INTEGER && t2->info==INTEGER)
 		{
@@ -467,6 +468,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -509,6 +511,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -604,29 +607,54 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			return NULL;
 		}
 	}
-	else if(op=="&" || op == "|" || op == "^")
+	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=" || op=="&=" || op == "|=" || op == "^=" || op=="%=" || op=="<<=" || op==">>=")
 	{
-
-	}
-	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=")
-	{
-		// entry_in2 will be null in this case
-	}
-	else if(op=="%=")
-	{
-		// entry_in2 will be null in this case
-	}
-	else if(op=="&=" || op == "|=" || op == "^=")
-	{
-		// entry_in2 will be null in this case
+		table_entry_ptr temp;
+		string oper1;
+		oper = op.substr(0, op.size()-1);
+		if(char *s = type_check(oper, temp, entry_in1, entry_in2)) return s;
+	    return type_check("=", entry_out, entry_in1, temp);
 	}
 	else if(op=="=")
 	{
-		// entry_in2 will be null in this case
+		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL )
+		{
+			if(t1->info == t2->info)
+			{
+				emit(V,entry_in1->name,"=",entry_in2->name);
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->info == INTEGER && ( t2->info == FLT || t2->info == CHR || t2->info == DBL  ) )
+			{
+				emit(V, entry_in1->name, "= cast_to_int (", entry_in2->name,")");
+				warning("Implicit Typecast to INTEGER");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->info == CHR && ( t2->info == FLT || t2->info == INTEGER || t2->info == DBL  ) )
+			{
+				emit(V, entry_in1->name, "= cast_to_int (", entry_in2->name,")");
+				warning("Implicit Typecast to CHAR");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->info == FLT && ( t2->info == INTEGER || t2->info == CHR || t2->info == DBL  ) )
+			{
+				emit(V, entry_in1->name, "= cast_to_float (", entry_in2->name,")");
+				warning("Implicit Typecast to FLOAT");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->info == DBL && ( t2->info == FLT || t2->info == CHR || t2->info == INTEGER  ) )
+			{
+				emit(V, entry_in1->name, "= cast_to_double (", entry_in2->name,")");
+				warning("Implicit Typecast to DOUBLE");
+				entry_out = entry_in1;
+				return NULL;
+			}
+		}
 	}
-
-	
-
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 
     char* type_error;
     type_error = (char *)malloc((terror.length()+1)*sizeof(char));  

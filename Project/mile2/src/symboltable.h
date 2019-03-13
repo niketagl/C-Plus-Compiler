@@ -91,4 +91,4 @@ type_ptr new_cartesian_type(type_ptr, type_ptr);
 
 type_ptr new_pointer_type(type_ptr);
 
-char* type_check(string, table_entry_ptr, table_entry_ptr, table_entry_ptr);
+char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
