@@ -300,7 +300,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 	type_ptr t2 = entry_in2->type;
 	char name[8];
 	sprintf(name, "%s%d", "t-", count); 
-	if(op=="*" || op=="/" || op=="+" || op=="-")
+	if(op=="*" || op=="/" || op=="+" || op=="-" )
 	{
 		if(t1->info==INTEGER && t2->info==INTEGER)
 		{
@@ -604,6 +604,27 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			return NULL;
 		}
 	}
+	else if(op=="&" || op == "|" || op == "^")
+	{
+
+	}
+	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="%=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="&=" || op == "|=" || op == "^=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="=")
+	{
+		// entry_in2 will be null in this case
+	}
+
 	
 
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 
