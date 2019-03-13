@@ -22,18 +22,22 @@ extern int yylineno;
 	#include <iostream>
 	#include <vector>
 	extern stack < table_ptr > table_stack;
+	extern stack < int > offset_stack;
+	extern table_ptr struct_namespace;
 	extern int code_line;
 	extern vector < code_ptr > V;
 }
 
 %union{
+	char charval;
 	int intval;
+	float floatval;
 	char *stringval;
 	type_ptr type;
 	table_entry_ptr entry;
 }
 
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
+%token IDENTIFIER INTEGER_CONSTANT CHAR_CONSTANT FLOAT_CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -53,7 +57,9 @@ extern int yylineno;
 
 primary_expression
 	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
-	| CONSTANT    
+	| INTEGER_CONSTANT		{ cout << $<intval>1 << endl; }    
+	| CHAR_CONSTANT 		{ cout << (int)$<charval>1 << endl; }
+	| FLOAT_CONSTANT		{ cout << $<floatval>1 << endl; }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
@@ -125,18 +131,18 @@ additive_expression
 
 shift_expression
 	: additive_expression       { $<entry>$ = $<entry>1; }
-	| shift_expression LEFT_OP additive_expression 		
-	| shift_expression RIGHT_OP additive_expression 	
+	| shift_expression LEFT_OP additive_expression 		{ if(char* s = type_check("<<",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| shift_expression RIGHT_OP additive_expression 	{ if(char* s = type_check(">>",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error LEFT_OP {yyerror2("expecting expression");} additive_expression
 	| error RIGHT_OP {yyerror2("expecting expression");} additive_expression
 	;
 
 relational_expression
 	: shift_expression        { $<entry>$ = $<entry>1; }
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	| relational_expression '<' shift_expression		{ if(char* s = type_check("<",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression '>' shift_expression		{ if(char* s = type_check(">",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression LE_OP shift_expression 		{ if(char* s = type_check("<=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression GE_OP shift_expression 		{ if(char* s = type_check(">=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '<' {yyerror2("expecting expression");} shift_expression
 	| error '>' {yyerror2("expecting expression");} shift_expression
 	| error LE_OP {yyerror2("expecting expression");} shift_expression
@@ -145,27 +151,27 @@ relational_expression
 
 equality_expression
 	: relational_expression     { $<entry>$ = $<entry>1; }
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	| equality_expression EQ_OP relational_expression 	{ if(char* s = type_check("==",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| equality_expression NE_OP relational_expression 	{ if(char* s = type_check("!=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error EQ_OP {yyerror2("expecting expression");} relational_expression
 	| error NE_OP {yyerror2("expecting expression");} relational_expression
 	;
 
 and_expression
 	: equality_expression       { $<entry>$ = $<entry>1; }
-	| and_expression '&' equality_expression
+	| and_expression '&' equality_expression    { if(char* s = type_check("&",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '&' {yyerror2("expecting expression");} equality_expression
 	;
 
 exclusive_or_expression
 	: and_expression            { $<entry>$ = $<entry>1; }
-	| exclusive_or_expression '^' and_expression
+	| exclusive_or_expression '^' and_expression    { if(char* s = type_check("^",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '^' {yyerror2("expecting expression");} and_expression
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression    { $<entry>$ = $<entry>1; }
-	| inclusive_or_expression '|' exclusive_or_expression
+	| inclusive_or_expression '|' exclusive_or_expression   { if(char* s = type_check("|",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '|' {yyerror2("expecting expression");} exclusive_or_expression
 	;
 
@@ -188,21 +194,21 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression 
+	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	;
 
 assignment_operator
 	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	| MUL_ASSIGN    { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "*="); }
+	| DIV_ASSIGN { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "/="); }
+	| MOD_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "%="); }
+	| ADD_ASSIGN { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+="); }
+	| SUB_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-="); }
+	| LEFT_ASSIGN  { $<stringval>$ = (char*)malloc(4*sizeof(char)); sprintf($<stringval>$, "<<="); }
+	| RIGHT_ASSIGN  { $<stringval>$ = (char*)malloc(4*sizeof(char)); sprintf($<stringval>$, ">>="); }
+	| AND_ASSIGN  { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "&="); }
+	| XOR_ASSIGN   { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "^="); }
+	| OR_ASSIGN   { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "|="); }
 	;
 
 expression
@@ -260,16 +266,26 @@ type_specifier
 	| DOUBLE  { $<type>$ = new_basic_type(DBL); }
 	| SIGNED   { $<type>$ = new_basic_type(SIGN); }
 	| UNSIGNED  { $<type>$ = new_basic_type(UNSIGN); }
-	| struct_or_union_specifier
+	| struct_or_union_specifier { $<type>$ = $<type>1; }
 	| enum_specifier
 	| TYPE_NAME
 	;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
+	: struct_or_union IDENTIFIER '{' mk_tbl2 struct_declaration_list '}'   
+									{
+										table_ptr t1 = table_stack.top();
+										table_stack.pop();
+										$<type>$ = new_struct_type($<type>5) ;
+										enter_proc(struct_namespace, $<stringval>2, $<type>$, t1);
+										t1->scope = table_stack.top()->name;
+									}
+
 	| struct_or_union '{' struct_declaration_list '}'
 	| struct_or_union IDENTIFIER
 	;
+mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); } ;
+
 
 struct_or_union
 	: STRUCT
@@ -286,20 +302,20 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list     { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_specifier    { $<type>$ = $<type>1;}
+	| type_qualifier specifier_qualifier_list     { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_qualifier    { $<type>$ = $<type>1;}
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	: struct_declarator                                 {$<type>$ = $<type>1;}
+	| struct_declarator_list ',' struct_declarator    {$<type>$ = new_cartesian_type($<type>1,$<type>3); }
 	| error ',' {yyerror2("expecting struct declarator");} struct_declarator
 	;
 
 struct_declarator
-	: declarator
+	: declarator        {$<type>$ = $<type>1;}
 	| ':' constant_expression
 	| declarator ':' constant_expression
 	;
@@ -335,8 +351,14 @@ direct_declarator
 	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
 					$<type>$ = $<type>0; } 
 	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
+	| IDENTIFIER '[' constant_expression ']'    {
+														$<type>$ = new_array_type($<type>0, $<type>3->value);
+														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+													}
+	| IDENTIFIER '[' ']'   {
+								$<type>$ = new_pointer_type($<type>0);
+								enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+							}
 
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
 							{ 
@@ -344,6 +366,8 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
 								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								t1->name.append($<stringval>1);
+								t1->scope = t1->name;
 								table_stack.push(t1);
 							}
 
@@ -354,6 +378,8 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
 								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								t1->name.append($<stringval>1);
+								t1->scope = t1->name;
 								table_stack.push(t1);
 							}
 	| error '[' {yyerror2("expecting declarator");} ']'
@@ -531,7 +557,7 @@ void yyerror2(const char *s)
 void yyerror3(char *s)
 {
 	fflush(stdout);
-	printf("Semantic Error in line no : %d \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
+	printf("Semantic Error in line no : %d \n \t%s\n", yylineno, s);
 }
 
 void warning(const char *s)
