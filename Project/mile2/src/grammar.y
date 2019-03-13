@@ -70,9 +70,22 @@ primary_expression
 							$<entry>$ = lookup(table_stack.top(), $<stringval>1);
 						} 
 					}
-	| INTEGER_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(INTEGER); $<entry>$->type->value = $<intval>1; }    
-	| CHAR_CONSTANT 		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(CHR); $<entry>$->type->value = (int)$<charval>1; }
-	| FLOAT_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(FLT); $<entry>$->type->value = (int)$<floatval>1; }
+	| INTEGER_CONSTANT		{ 		$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(INTEGER);
+									$<entry>$->type->value = $<intval>1; 
+									$<entry>$->type->constnt = 1;
+									$<entry>$->name = to_string($<intval>1); }    
+	| CHAR_CONSTANT 		{ 		$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(CHR); 
+									$<entry>$->type->value = (int)$<charval>1; 
+									$<entry>$->type->constnt = 1; 
+									string s(1, $<charval>1); 
+									$<entry>$->name = s; }
+	| FLOAT_CONSTANT		{ 		$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(FLT); 
+									$<entry>$->type->value = (int)$<floatval>1; 
+									$<entry>$->type->constnt = 1; 
+									$<entry>$->name = to_string($<floatval>1); }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
@@ -231,7 +244,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression
+	: conditional_expression 	{cout << $<entry>1->type->value << endl; }
 	;
 
 declaration
