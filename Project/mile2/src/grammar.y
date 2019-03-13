@@ -58,7 +58,7 @@ extern int yylineno;
 primary_expression
 	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
 	| INTEGER_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(INTEGER); $<entry>$->type->value = $<intval>1; }    
-	| CHAR_CONSTANT 		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(CHAR); $<entry>$->type->value = (int)$<charval>1; }
+	| CHAR_CONSTANT 		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(CHR); $<entry>$->type->value = (int)$<charval>1; }
 	| FLOAT_CONSTANT		{ $<entry>$ = new table_entry; $<entry>$->type = new_basic_type(FLT); $<entry>$->type->value = (int)$<floatval>1; }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
