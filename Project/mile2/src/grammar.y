@@ -580,7 +580,7 @@ selection_statement
 	| SWITCH '(' expression ')' statement
 	;
 
-mark : $<intval>$ = code_line; 
+mark : {$<intval>$ = code_line;} ; 
 
 iteration_statement
 	: WHILE '(' expression ')' statement

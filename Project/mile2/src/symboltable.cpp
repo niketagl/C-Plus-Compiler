@@ -400,7 +400,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -423,7 +423,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -443,7 +443,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -463,7 +463,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -490,7 +490,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -516,7 +516,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -542,7 +542,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -568,7 +568,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -594,7 +594,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -620,7 +620,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '+': entry_out->type->value = t1->value + t2->value; break;
 					case '-': entry_out->type->value = t1->value - t2->value; break;
@@ -659,7 +659,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '%': entry_out->type->value = t1->value % t2->value; break;
 					case '<': entry_out->type->value = t1->value << t2->value; break;
@@ -684,7 +684,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->constnt = t1->constnt & t2->constnt;
 			if(t1->constnt && t2->constnt)
 			{
-				switch(op.front())
+				switch(op[0])
 				{
 					case '%': entry_out->type->value = t1->value % t2->value; break;
 					case '<': entry_out->type->value = t1->value << t2->value; break;
