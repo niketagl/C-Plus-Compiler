@@ -11,6 +11,7 @@ using namespace std;
 int count = 0;
 extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
+extern stack <int> offset_stack;
 extern void warning(const char*);
 
 table_ptr mktable( table_ptr parent)
@@ -128,7 +129,7 @@ int type_width(type_ptr type)
 	if(type->info == STRCT) width = type_width(type->p1);
 	if(type->info == CARTESIAN) width = type_width(type->p1) + type_width(type->p2);
 	if(type->info == NOTYPE || type->info == VOD || type->info == ERROR) width = 0;
-	return width;
+	return width/8;
 }
 
 table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
@@ -140,10 +141,13 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 	t_entry->name = name;
 
 	t_entry->type = type;
-	t_entry->offset = offset;
+	t_entry->offset = offset_stack.top();
 
-	// will have to write code for infering width using type,
+
+
 	t_entry->width = type_width(type);
+
+	offset_stack.top() += t_entry->width;
 
 	string nam = name;
 
