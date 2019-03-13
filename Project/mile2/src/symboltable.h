@@ -14,6 +14,7 @@ typedef enum {
 	CARTESIAN,
 	FUNCTION,
 	NOTYPE,
+	VOD,
 	ERROR,
 	LONGER,
 	SHORTER,

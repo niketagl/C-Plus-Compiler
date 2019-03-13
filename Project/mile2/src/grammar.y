@@ -270,7 +270,7 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID    { $<type>$ = new_basic_type(NOTYPE); }
+	: VOID    { $<type>$ = new_basic_type(VOD); }
 	| CHAR    { $<type>$ = new_basic_type(CHR); }
 	| SHORT   { $<type>$ = new_basic_type(SHORTER); }
 	| INT     { $<type>$ = new_basic_type(INTEGER); }
