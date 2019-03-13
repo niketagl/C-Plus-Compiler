@@ -22,6 +22,8 @@ extern int yylineno;
 	#include <iostream>
 	#include <vector>
 	extern stack < table_ptr > table_stack;
+	extern stack < int > offset_stack;
+	extern table_ptr struct_namespace;
 	extern int code_line;
 	extern vector < code_ptr > V;
 }
@@ -260,16 +262,26 @@ type_specifier
 	| DOUBLE  { $<type>$ = new_basic_type(DBL); }
 	| SIGNED   { $<type>$ = new_basic_type(SIGN); }
 	| UNSIGNED  { $<type>$ = new_basic_type(UNSIGN); }
-	| struct_or_union_specifier
+	| struct_or_union_specifier { $<type>$ = $<type>1; }
 	| enum_specifier
 	| TYPE_NAME
 	;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
+	: struct_or_union IDENTIFIER '{' mk_tbl2 struct_declaration_list '}'   
+									{
+										table_ptr t1 = table_stack.top();
+										table_stack.pop();
+										$<type>$ = new_struct_type($<type>5) ;
+										enter_proc(struct_namespace, $<stringval>2, $<type>$, t1);
+										t1->scope = table_stack.top()->name;
+									}
+
 	| struct_or_union '{' struct_declaration_list '}'
 	| struct_or_union IDENTIFIER
 	;
+mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); } ;
+
 
 struct_or_union
 	: STRUCT
@@ -286,20 +298,20 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list     { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_specifier    { $<type>$ = $<type>1;}
+	| type_qualifier specifier_qualifier_list     { $<type>$ = merge_type($<type>1 , $<type>2);}
+	| type_qualifier    { $<type>$ = $<type>1;}
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	: struct_declarator                                 {$<type>$ = $<type>1;}
+	| struct_declarator_list ',' struct_declarator    {$<type>$ = new_cartesian_type($<type>1,$<type>3); }
 	| error ',' {yyerror2("expecting struct declarator");} struct_declarator
 	;
 
 struct_declarator
-	: declarator
+	: declarator        {$<type>$ = $<type>1;}
 	| ':' constant_expression
 	| declarator ':' constant_expression
 	;
@@ -335,8 +347,14 @@ direct_declarator
 	: IDENTIFIER  { enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
 					$<type>$ = $<type>0; } 
 	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
+	| IDENTIFIER '[' constant_expression ']'    {
+														$<type>$ = new_array_type($<type>0, $<type>3->value);
+														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+													}
+	| IDENTIFIER '[' ']'   {
+								$<type>$ = new_pointer_type($<type>0);
+								enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+							}
 
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
 							{ 
@@ -344,6 +362,8 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
 								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								t1->name.append($<stringval>1);
+								t1->scope = t1->name;
 								table_stack.push(t1);
 							}
 
@@ -354,6 +374,8 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop();
 								enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+								t1->name.append($<stringval>1);
+								t1->scope = t1->name;
 								table_stack.push(t1);
 							}
 	| error '[' {yyerror2("expecting declarator");} ']'

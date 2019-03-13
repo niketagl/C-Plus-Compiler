@@ -1,6 +1,14 @@
-int swap( int *tt ) 
+struct apple
+{
+	int a;
+};
+
+int a;
+
+int swap( int tt ) 
 {
 	int a,b,d,e,f; 
+	float x[9];
 	int c;
 	c <<= b;
 	d >>= e;

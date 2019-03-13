@@ -9,6 +9,8 @@ typedef enum {
 	CHR,
 	INTEGER,
 	POINTER,
+	ARRAY,
+	STRCT,
 	CARTESIAN,
 	FUNCTION,
 	NOTYPE,
@@ -38,6 +40,8 @@ typedef struct typenode{
 	bool unsign;   // set to 1 for unsigned.
 	bool longer;   // set to 1 for long. 
 	bool shorter;	// set to 1 for short.
+	int array_size;   // will be used for array type
+	int value;
 }type_node, *type_ptr;
 
 
@@ -45,7 +49,7 @@ typedef struct typenode{
 
 typedef struct table_entry{
 	string name;
-	bool proc;   // will be 1 for procedure
+	bool proc;   // will be 1 for procedures and structures.
 	struct table *t;
 	type_ptr type;
 	int width;
@@ -55,6 +59,8 @@ typedef struct table_entry{
 
 typedef struct table{	
 	struct table *parent;
+	string name;
+	string scope;
 	int width;
 	map < string , table_entry_ptr > entries;
 }table, *table_ptr;
@@ -66,7 +72,7 @@ typedef struct table{
 //table interface
 void savetable( table_ptr , char* filename);
 
-table_ptr mktable( table_ptr );
+table_ptr mktable( table_ptr parent = NULL);
 
 table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset);
 
@@ -90,5 +96,9 @@ type_ptr new_function_type(type_ptr, type_ptr);
 type_ptr new_cartesian_type(type_ptr, type_ptr);
 
 type_ptr new_pointer_type(type_ptr);
+
+type_ptr new_struct_type(type_ptr);
+
+type_ptr new_array_type(type_ptr, int size);
 
 char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);

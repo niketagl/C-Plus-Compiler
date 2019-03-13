@@ -4,7 +4,8 @@
 #include <fstream>
 #include "symboltable.h"
 #include "tac.h"
-#include<string.h>
+#include <string.h>
+#include <stdlib.h>
 using namespace std;
 
 int count = 0;
@@ -12,7 +13,7 @@ extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
 extern void warning(const char*);
 
-table_ptr mktable( table_ptr parent = NULL)
+table_ptr mktable( table_ptr parent)
 {
 	table_ptr t = new table;
 	t->parent = parent;
@@ -58,12 +59,15 @@ string print_type(type_ptr t)
 		case CHR : s.append("CHAR"); break;
 		case FLT : s.append("FLOAT"); break;
 		case DBL : s.append("DOUBLE"); break;
+		case ARRAY : 
 		case POINTER : s.append("*"); s.append(print_type(t->p1)); break;
+
 		case CARTESIAN : s.append(print_type(t->p1)); s.append(" ^ "); 
 				s.append(print_type(t->p2)); break;
 		case FUNCTION : s.append("FUNCTION : "); s.append(print_type(t->p1));
 				s.append(" -> "); s.append(print_type(t->p2)); break;
 		case NOTYPE : s.append("VOID"); break;
+		case STRCT : s.append("STRUCT"); break;
 	}
 	return s;
 }
@@ -73,8 +77,15 @@ void print_table(table_ptr t, ofstream &f1, string scope)
 	map < string , table_entry_ptr > ::iterator i;
 	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
 	{
-		f1<<scope<<", "<<i->first;
+		
 		table_entry_ptr e = i->second;
+
+		if(e->proc==1)
+		f1<<t->scope<<", "<<i->first;
+		else
+		f1<<scope<<", "<<i->first;
+
+
 		f1<<", "<<print_type(e->type)<<", "<< e->offset <<", "<<e->width<<"\n";
 
 		if(e->proc==1)
@@ -154,6 +165,7 @@ type_ptr new_basic_type (type_inf info)
 	t->volat=0;
 	t->constnt=0;
 	t->regis=0;
+	t->stat=0;
 	t->p1 = NULL; 
 	t->p2 = NULL;
 
@@ -214,6 +226,7 @@ type_ptr new_function_type(type_ptr t1, type_ptr t2)
 	t->volat=0;
 	t->constnt=0;
 	t->regis=0;
+	t->stat=0;
 	return t;
 }
 
@@ -232,6 +245,7 @@ type_ptr new_cartesian_type(type_ptr a, type_ptr t1)
 	t->volat=0;
 	t->constnt=0;
 	t->regis=0;
+	t->stat=0;
 	return t;
 }
 
@@ -250,6 +264,44 @@ type_ptr new_pointer_type(type_ptr t1)
 	t->volat=0;		
 	t->constnt=0;	
 	t->regis=0;
+	t->stat=0;
+	return t;
+}
+type_ptr new_struct_type(type_ptr t1)
+{
+	// returns type pointer(t)
+	type_ptr t = new type_node;
+	t->info = STRCT;
+	t->p1 = t1;
+	t->p2 = NULL;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;		
+	t->constnt=0;	
+	t->regis=0;
+	t->stat=0;
+	return t;
+}
+type_ptr new_array_type(type_ptr t1, int size)
+{
+	// returns type pointer(t)
+	type_ptr t = new type_node;
+	t->info = ARRAY;
+	t->array_size = size;
+	t->p1 = t1;
+	t->p2 = NULL;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;		
+	t->constnt=0;	
+	t->regis=0;
+	t->stat=0;
 	return t;
 }
 
@@ -610,7 +662,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=" || op=="&=" || op == "|=" || op == "^=" || op=="%=" || op=="<<=" || op==">>=")
 	{
 		table_entry_ptr temp;
-		string oper1;
+		string oper;
 		oper = op.substr(0, op.size()-1);
 		if(char *s = type_check(oper, temp, entry_in1, entry_in2)) return s;
 	    return type_check("=", entry_out, entry_in1, temp);
