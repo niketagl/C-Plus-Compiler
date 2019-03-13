@@ -1,4 +1,5 @@
-D			[0-9]
+F			[1-9]
+D 			[0-9]
 O 			[0-7]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]
@@ -8,6 +9,7 @@ IS			(u|U|l|L)*
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "y.tab.h"
 
 #include <iostream>
@@ -20,6 +22,7 @@ void setvalh();
 void setvalo();
 void setvali();
 void setvalc();
+void setvalf();
 void comment();
 int check_type();
 extern void preprocess();
@@ -67,13 +70,13 @@ extern void preprocess();
 {L}({L}|{D})*		{ count(); return(check_type()); }
 
 0[xX]{H}+{IS}?		{ count(); setvalh(); return(INTEGER_CONSTANT); }
-0{O}+{IS}?		{ count(); setvalo(); return(INTEGER_CONSTANT); }
-{D}+{IS}?		{ count(); setvali(); return(INTEGER_CONSTANT); }
+0{O}*{IS}?		{ count(); setvalo(); return(INTEGER_CONSTANT); }
+{F}{D}*{IS}?		{ count(); setvali(); return(INTEGER_CONSTANT); }
 L?'(\\.|[^\\'])+'	{ count(); setvalc(); return(CHAR_CONSTANT); }
 
-{D}+{E}{FS}?		{ count(); return(FLOAT_CONSTANT); }
-{D}*"."{D}+({E})?{FS}?	{ count(); return(FLOAT_CONSTANT); }
-{D}+"."{D}*({E})?{FS}?	{ count(); return(FLOAT_CONSTANT); }
+{D}+{E}{FS}?		{ count(); setvalf(); return(FLOAT_CONSTANT); }
+{D}*"."{D}+({E})?{FS}?	{ count(); setvalf(); return(FLOAT_CONSTANT); }
+{D}+"."{D}*({E})?{FS}?	{ count(); setvalf(); return(FLOAT_CONSTANT); }
 
 L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 
@@ -224,6 +227,11 @@ void setvalc()
 			else if(yytext[3]=='v')	yylval.charval = '\v';
 		}
 	}
+}
+
+void setvalf()
+{
+	yylval.floatval = atof(yytext);
 }
 
 int check_type()

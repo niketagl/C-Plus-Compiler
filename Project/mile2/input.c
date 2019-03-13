@@ -1,10 +1,3 @@
-struct apple
-{
-	int a;
-};
-
-int a;
-
 int swap( int tt ) 
 {
 	int a,b,d,e,f; 
@@ -13,13 +6,13 @@ int swap( int tt )
 	c <<= b;
 	d >>= e;
 	a+b+c+d+e+f;
-	5;
-	012;
-	0x32;
-	'a';
-	'\n';
-	L'a';
-	L'\'';
+	// 5;
+	// 012;
+	// 0x32;
+	// 'a';
+	// '\n';
+	// L'a';
+	// L'\'';
 	float g = 345e+4;
     float h = 12e-1;
     float i = .23e2;
