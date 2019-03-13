@@ -125,18 +125,18 @@ additive_expression
 
 shift_expression
 	: additive_expression       { $<entry>$ = $<entry>1; }
-	| shift_expression LEFT_OP additive_expression 		
-	| shift_expression RIGHT_OP additive_expression 	
+	| shift_expression LEFT_OP additive_expression 		{ if(char* s = type_check("<<",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| shift_expression RIGHT_OP additive_expression 	{ if(char* s = type_check(">>",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error LEFT_OP {yyerror2("expecting expression");} additive_expression
 	| error RIGHT_OP {yyerror2("expecting expression");} additive_expression
 	;
 
 relational_expression
 	: shift_expression        { $<entry>$ = $<entry>1; }
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	| relational_expression '<' shift_expression		{ if(char* s = type_check("<",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression '>' shift_expression		{ if(char* s = type_check(">",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression LE_OP shift_expression 		{ if(char* s = type_check("<=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| relational_expression GE_OP shift_expression 		{ if(char* s = type_check(">=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error '<' {yyerror2("expecting expression");} shift_expression
 	| error '>' {yyerror2("expecting expression");} shift_expression
 	| error LE_OP {yyerror2("expecting expression");} shift_expression
@@ -145,8 +145,8 @@ relational_expression
 
 equality_expression
 	: relational_expression     { $<entry>$ = $<entry>1; }
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	| equality_expression EQ_OP relational_expression 	{ if(char* s = type_check("==",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| equality_expression NE_OP relational_expression 	{ if(char* s = type_check("!=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| error EQ_OP {yyerror2("expecting expression");} relational_expression
 	| error NE_OP {yyerror2("expecting expression");} relational_expression
 	;
@@ -531,7 +531,7 @@ void yyerror2(const char *s)
 void yyerror3(char *s)
 {
 	fflush(stdout);
-	printf("Semantic Error in line no : %d \n \t%s before token ( %s )\n", yylineno, s, yylval.stringval);
+	printf("Semantic Error in line no : %d \n \t%s\n", yylineno, s);
 }
 
 void warning(const char *s)
