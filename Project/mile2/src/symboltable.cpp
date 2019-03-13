@@ -299,7 +299,7 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 	type_ptr t2 = entry_in2->type;
 	char name[8];
 	sprintf(name, "%s%d", "t-", count); 
-	if(op=="*" || op=="/" || op=="+" || op=="-")
+	if(op=="*" || op=="/" || op=="+" || op=="-" )
 	{
 		if(t1->info==INTEGER && t2->info==INTEGER)
 		{
@@ -492,6 +492,38 @@ char* type_check(string op, table_entry_ptr entry_out, table_entry_ptr entry_in1
 			f_op = "real" + op;
 			emit(V,name,"=",temp->name,f_op,entry_in2->name);
 		}
+	}
+	else if(op=="%")
+	{
+
+	}
+	else if(op=="<<" || op==">>")
+	{
+
+	}
+	else if(op=="<" || op == ">" || op == ">=" || op == "<=" || op == "==" || op == "!=")
+	{
+
+	}
+	else if(op=="&" || op == "|" || op == "^")
+	{
+
+	}
+	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="%=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="&=" || op == "|=" || op == "^=")
+	{
+		// entry_in2 will be null in this case
+	}
+	else if(op=="=")
+	{
+		// entry_in2 will be null in this case
 	}
 	return NULL;
 }
