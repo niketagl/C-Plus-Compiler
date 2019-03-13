@@ -27,13 +27,15 @@ extern int yylineno;
 }
 
 %union{
+	char charval;
 	int intval;
+	float floatval;
 	char *stringval;
 	type_ptr type;
 	table_entry_ptr entry;
 }
 
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
+%token IDENTIFIER INTEGER_CONSTANT CHAR_CONSTANT FLOAT_CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
@@ -53,7 +55,9 @@ extern int yylineno;
 
 primary_expression
 	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
-	| CONSTANT    
+	| INTEGER_CONSTANT		{ cout << $<intval>1 << endl; }    
+	| CHAR_CONSTANT 		{ cout << (int)$<charval>1 << endl; }
+	| FLOAT_CONSTANT		{ cout << $<floatval>1 << endl; }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;

@@ -5,6 +5,17 @@ int swap( int *tt )
 	c <<= b;
 	d >>= e;
 	a+b+c+d+e+f;
+	5;
+	012;
+	0x32;
+	'a';
+	'\n';
+	L'a';
+	L'\'';
+	float g = 345e+4;
+    float h = 12e-1;
+    float i = .23e2;
+    float j = 32.e-2;
 } 
 
 // #define el 0

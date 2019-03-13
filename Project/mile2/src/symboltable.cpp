@@ -610,7 +610,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=" || op=="&=" || op == "|=" || op == "^=" || op=="%=" || op=="<<=" || op==">>=")
 	{
 		table_entry_ptr temp;
-		string oper1;
+		string oper;
 		oper = op.substr(0, op.size()-1);
 		if(char *s = type_check(oper, temp, entry_in1, entry_in2)) return s;
 	    return type_check("=", entry_out, entry_in1, temp);
