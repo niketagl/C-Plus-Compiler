@@ -301,7 +301,7 @@ struct_or_union_specifier
 	: struct_or_union IDENTIFIER '{' mk_tbl2 struct_declaration_list '}'   
 									{
 										table_ptr t1 = table_stack.top();
-										table_stack.pop();
+										table_stack.pop(); offset_stack.pop();
 										if(same_lookup(table_stack.top(),$<stringval>1))
 										{
 											char* error = (char *) malloc (100 * sizeof(char));
@@ -320,7 +320,7 @@ struct_or_union_specifier
 	| struct_or_union '{' struct_declaration_list '}'
 	| struct_or_union IDENTIFIER
 	;
-mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); } ;
+mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); offset_stack.push(0);} ;
 
 
 struct_or_union
@@ -431,7 +431,7 @@ direct_declarator
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
 							{
 								table_ptr t1 = table_stack.top();
-								table_stack.pop();
+								table_stack.pop(); offset_stack.pop();
 								if(same_lookup(table_stack.top(),$<stringval>1))
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
@@ -439,7 +439,7 @@ direct_declarator
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
-									table_stack.push(temp); 
+									table_stack.push(temp); offset_stack.push(0);
 								}
 								else
 								{
@@ -447,7 +447,7 @@ direct_declarator
 									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
-									table_stack.push(t1);
+									table_stack.push(t1); offset_stack.push(0);
 								}
 							}
 
@@ -455,7 +455,7 @@ direct_declarator
 	| IDENTIFIER '(' mk_tbl ')'  
 							{ 
 								table_ptr t1 = table_stack.top();
-								table_stack.pop();
+								table_stack.pop(); offset_stack.pop();
 								if(same_lookup(table_stack.top(),$<stringval>1))
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
@@ -463,7 +463,7 @@ direct_declarator
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
-									table_stack.push(temp); 
+									table_stack.push(temp); offset_stack.push(0);
 								}
 								else
 								{
@@ -471,7 +471,7 @@ direct_declarator
 									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
-									table_stack.push(t1);
+									table_stack.push(t1); offset_stack.push(0);
 								}
 							}
 	| error '[' {yyerror2("expecting declarator");} ']'
@@ -556,7 +556,7 @@ statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement
-	| declaration    { if($<type>1->info==FUNCTION)table_stack.pop(); }
+	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} }
 	;
 
 labeled_statement
@@ -618,19 +618,19 @@ translation_unit
 
 external_declaration
 	: function_definition
-	| declaration   {if($<type>1->info==FUNCTION)table_stack.pop();}
+	| declaration   { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} }
 	;
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-															{table_stack.pop();}
-	| declaration_specifiers declarator compound_statement  {table_stack.pop();}
-	| declarator declaration_list compound_statement  		{table_stack.pop();}
-	| declarator compound_statement 						{table_stack.pop();}   
+															{table_stack.pop();offset_stack.pop();}
+	| declaration_specifiers declarator compound_statement  {table_stack.pop();offset_stack.pop();}
+	| declarator declaration_list compound_statement  		{table_stack.pop();offset_stack.pop();}
+	| declarator compound_statement 						{table_stack.pop();offset_stack.pop();}   
 	;
 
 
-mk_tbl : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); } ;
+mk_tbl : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); offset_stack.push(0);} ;
 	
 
 %%
