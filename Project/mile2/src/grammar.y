@@ -58,7 +58,7 @@ extern int yylineno;
 primary_expression
 	: IDENTIFIER     { $<entry>$ = lookup(table_stack.top(), $<stringval>1); }
 	| INTEGER_CONSTANT		{ cout << $<intval>1 << endl; }    
-	| CHAR_CONSTANT 		{ cout << (int)$<charval>1 << endl; }
+	| CHAR_CONSTANT 		{ cout << $<charval>1 << endl; }
 	| FLOAT_CONSTANT		{ cout << $<floatval>1 << endl; }
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
