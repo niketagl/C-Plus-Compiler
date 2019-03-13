@@ -395,6 +395,18 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 
 }
 
+table_entry_ptr same_lookup ( table_ptr t, char* name)
+{
+	if(t==NULL) return NULL;
+
+	string nam = name;
+	if ( t->entries.find(nam) == t->entries.end() )
+		return NULL;
+
+	return t->entries.find(nam)->second;
+
+}
+
 
 char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
@@ -410,6 +422,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			entry_out->type->longer = t1->longer | t2->longer;
 			entry_out->type->shorter = t1->shorter & t2->shorter;
@@ -422,6 +445,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -431,6 +465,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -440,6 +485,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
@@ -456,6 +512,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
@@ -471,6 +538,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
@@ -486,6 +564,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
@@ -501,6 +590,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
@@ -516,6 +616,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
@@ -531,6 +642,17 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '+': entry_out->type->value = t1->value + t2->value; break;
+					case '-': entry_out->type->value = t1->value - t2->value; break;
+					case '*': entry_out->type->value = t1->value * t2->value; break;
+					case '/': entry_out->type->value = t1->value / t2->value; break;
+					default: break;
+				}
+			}
 			f_op = "real" + op;
 			emit(V,name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
@@ -559,6 +681,19 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '%': entry_out->type->value = t1->value % t2->value; break;
+					case '<': entry_out->type->value = t1->value << t2->value; break;
+					case '>': entry_out->type->value = t1->value >> t2->value; break;
+					case '&': entry_out->type->value = t1->value & t2->value; break;
+					case '|': entry_out->type->value = t1->value | t2->value; break;
+					case '^': entry_out->type->value = t1->value ^ t2->value; break;
+					default: break;
+				}
+			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			entry_out->type->longer = t1->longer | t2->longer;
 			entry_out->type->shorter = t1->shorter & t2->shorter;
@@ -571,6 +706,19 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
 			count++;
 			entry_out->type->constnt = t1->constnt & t2->constnt;
+			if(t1->constnt && t2->constnt)
+			{
+				switch(op.front())
+				{
+					case '%': entry_out->type->value = t1->value % t2->value; break;
+					case '<': entry_out->type->value = t1->value << t2->value; break;
+					case '>': entry_out->type->value = t1->value >> t2->value; break;
+					case '&': entry_out->type->value = t1->value & t2->value; break;
+					case '|': entry_out->type->value = t1->value | t2->value; break;
+					case '^': entry_out->type->value = t1->value ^ t2->value; break;
+					default: break;
+				}
+			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
