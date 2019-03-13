@@ -11,3 +11,6 @@ typedef struct code{
 
 void emit(vector < code_ptr > &V, string s1 = "", string s2 = "", string s3 = "", string s4 = "", string s5 = "" );
 void print_code ( vector < code_ptr > &V);
+
+vector <int> mklist (int i);
+vector <int> merge_list (vector <int> , vector <int>);

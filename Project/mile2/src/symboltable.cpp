@@ -722,6 +722,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			}
 		}
 	}
+	
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 
     char* type_error;
     type_error = (char *)malloc((terror.length()+1)*sizeof(char));  

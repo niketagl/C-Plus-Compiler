@@ -40,3 +40,32 @@ void print_code( vector <code_ptr> &V )
 	}
 	f.close();
 }
+
+vector <int> mklist (int i)
+{
+	vector <int> list;
+	list.push_back(i);
+	return list;
+}
+
+vector <int> merge_list (vector <int> l1, vector <int> l2)
+{
+	vector <int> list;
+	for(int i=0; i<l1.size(); i++)
+		list.push_back(l1[i]);
+
+	for(int i=0; i<l2.size(); i++)
+		list.push_back(l2[i]);
+
+	return list;
+}
+
+void backpatch (vector <code_ptr> &V , vector <int> l, int label)
+{
+	// code_line is assumed to start from 100.
+
+	for(int i=0; i<l.size(); i++)
+	{
+		V[l[i]-100]->goto_line = label;
+	}
+}

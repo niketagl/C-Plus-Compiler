@@ -54,7 +54,9 @@ typedef struct table_entry{
 	type_ptr type;
 	int width;
 	int offset;
-
+	vector <int> nextlist;      // will be used for backpatching.
+	vector <int> truelist;
+	vector <int> falselist;
 }table_entry, *table_entry_ptr;
 
 typedef struct table{	

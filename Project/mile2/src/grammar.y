@@ -497,10 +497,12 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
+	: IF '(' expression ')' mark statement
+	| IF '(' expression ')' mark statement ELSE mark statement
 	| SWITCH '(' expression ')' statement
 	;
+
+mark : $<intval>$ = code_line; 
 
 iteration_statement
 	: WHILE '(' expression ')' statement
