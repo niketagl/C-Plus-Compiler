@@ -1,17 +1,20 @@
-
-<<<<<<< HEAD
-int swap(  )
-=======
-int sp( int x , char b )
->>>>>>> 7b45f093e614aad84d5d4755d254aa9ab6fa68b2
+int kim()
 {
-	int p;
-	int a,b,c,d,x;
-	
-	a = b && c;
-
+	int a,c,b,d,e;
+	if(a+10&&b*33-2||e)
+	{
+		d=3;
+	}
+	else
+	{
+		d=7;
+	}
+	e=5;
+	while(e>3)
+	{
+		e=e-1;
+	}
 }
-
 
 
 
