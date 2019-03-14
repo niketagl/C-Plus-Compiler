@@ -29,6 +29,7 @@ extern int yylineno;
 	extern stack < int > offset_stack;
 	extern table_ptr struct_namespace;
 	extern int code_line;
+	extern int count;
 	extern vector < code_ptr > V;
 }
 
@@ -105,7 +106,10 @@ primary_expression
 
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
-	| postfix_expression '[' expression ']'	{ if ( $<entry>3->type->info != INTEGER ) yyerror3("expecting integer expression");  }
+	| postfix_expression '[' expression ']'	
+									{  
+										if ( $<entry>3->type->info != INTEGER ) yyerror3("expecting integer expression"); 
+									}
 	| postfix_expression '(' ')'
 	| postfix_expression '(' argument_expression_list ')'
 	| postfix_expression '.' IDENTIFIER
@@ -215,14 +219,36 @@ inclusive_or_expression
 	;
 
 logical_and_expression
-	: inclusive_or_expression      { $<entry>$ = $<entry>1; }
-	| logical_and_expression AND_OP inclusive_or_expression
+	: inclusive_or_expression      { $<entry>$ = $<entry>1;  }
+	| logical_and_expression AND_OP logical_and_expressionM inclusive_or_expression
+	  						{
+	  							$<entry>$ = $<entry>4;
+	  							$<entry>$->falselist.insert($<entry>$->falselist.end(), $<entry>1->falselist.begin(),$<entry>1->falselist.end() );
+	  						}
 	| error AND_OP {yyerror2("expecting logical expression");} inclusive_or_expression
+	;
+logical_and_expressionM	: {
+								table_entry_ptr e1 = $<entry>-1;
+								e1->falselist.push_back(code_line);
+								emit(V, "if(", e1->name, "== 0) goto");
+								backpatch(V,e1->truelist,code_line);
+						} 
 	;
 
 logical_or_expression
-	: logical_and_expression        { $<entry>$ = $<entry>1; }
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression        { $<entry>$ = $<entry>1; for(int i=0; i<$<entry>$->falselist.size(); i++)cout<<$<entry>$->falselist[i]<<endl; }
+	| logical_or_expression OR_OP 
+							{
+								table_entry_ptr e1 = $<entry>1;
+								e1->truelist.push_back(code_line);
+								emit(V, "if(", e1->name, "!= 0) goto");
+								backpatch(V,e1->falselist,code_line);
+							} 
+	  logical_and_expression
+	  						{
+	  							$<entry>$ = $<entry>4;
+	  							$<entry>$->truelist.insert($<entry>$->truelist.end(), $<entry>1->truelist.begin(),$<entry>1->truelist.end() );
+	  						}
 	| error OR_OP {yyerror2("expecting logical expression");} logical_and_expression
 	;
 
@@ -233,7 +259,7 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);}
 	;
 
 assignment_operator
@@ -251,7 +277,7 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression
+	: assignment_expression        { $<entry>$ = $<entry>1;}
 	| expression ',' assignment_expression
 	| error ',' {yyerror2("expecting expression");} assignment_expression
 	;
@@ -521,10 +547,11 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator     {$<type>$ = $<type>2;}
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers     {$<type>$ = $<type>1;}
+	: declaration_specifiers parameter_declaration_M declarator     {$<type>$ = $<type>2;}
+	| declaration_specifiers parameter_declaration_M abstract_declarator
+	| declaration_specifiers parameter_declaration_M    {$<type>$ = $<type>1;}
 	;
+parameter_declaration_M : {$<type>$ = $<type>0; $<type>$->param=1;} ;
 
 identifier_list
 	: IDENTIFIER
@@ -567,13 +594,13 @@ initializer_list
 	;
 
 statement
-	: labeled_statement
-	| compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
-	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} }
+	: labeled_statement     {$<entry>$ = $<entry>1;}
+	| compound_statement    {$<entry>$ = $<entry>1;}
+	| expression_statement  {$<entry>$ = $<entry>1;}
+	| selection_statement   {$<entry>$ = $<entry>1;}
+	| iteration_statement   {$<entry>$ = $<entry>1;}
+	| jump_statement        {$<entry>$ = $<entry>1;}
+	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = $<entry>1;}
 	;
 
 labeled_statement
@@ -583,34 +610,50 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
+	: '{' '}' {$<entry>$ = new table_entry;}
+	| '{' statement_list '}' {$<entry>$ = $<entry>2;}
 	| '{' statement_list error '}' {yyerror2("expecting semicolon ;");}
 	| '{' error '}' {yyerror2("expecting semicolon ;");}
 	;
 
 declaration_list
-	: declaration
-	| declaration_list declaration
+	: declaration   { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = $<entry>1;}
+	| declaration_list declaration   { if($<type>2->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = $<entry>2;}
 	;
 
 statement_list
-	: statement
-	| statement_list statement
+	: statement    {$<entry>$ = $<entry>1;}
+	| statement_list statement   {$<entry>$ = $<entry>2;}
 	;
 
 expression_statement
 	: ';'
-	| expression ';'
+	| expression ';'  {$<entry>$ = $<entry>1; }
 	;
 
 selection_statement
-	: IF '(' expression ')' mark statement
-	| IF '(' expression ')' mark statement ELSE mark statement
+	: IF '(' expression ')' mark1 statement       {$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>3->falselist, $<entry>6->nextlist);}  
+	| IF '(' expression ')' mark1 statement ELSE mark2 statement  
+						{$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>9->falselist, $<entry>6->nextlist);}
 	| SWITCH '(' expression ')' statement
 	;
 
-mark : {$<intval>$ = code_line;} ; 
+mark1 : { 
+			table_entry_ptr exp = $<entry>-1;
+			backpatch(V, exp->truelist, code_line);
+			exp->falselist.push_back(code_line);
+			emit(V, "if(", exp->name, "== 0 ) goto");	
+		} 
+	 ; 
+mark2 : 
+		{ 
+			table_entry_ptr exp = $<entry>-4;
+			table_entry_ptr s1 = $<entry>-1;
+			s1->nextlist.push_back(code_line);
+			emit(V, "goto");	
+			backpatch(V, exp->falselist, code_line);
+		}
+	  ;
 
 iteration_statement
 	: WHILE '(' expression ')' statement
@@ -661,28 +704,33 @@ function_definition
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+
+																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																if(e)e->proc_decl=0;
 															}
 	| declaration_specifiers declarator compound_statement  
 															{
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																if(e)e->proc_decl=0;
 															}
 	| declarator declaration_list compound_statement  		
 															{
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																if(e)e->proc_decl=0;
 															}
 	| declarator compound_statement 						
 															{
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																if(e)e->proc_decl=0;
 															}
 	;
 

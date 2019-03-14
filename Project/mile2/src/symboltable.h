@@ -42,6 +42,7 @@ typedef struct typenode{
 	bool unsign;   // set to 1 for unsigned.
 	bool longer;   // set to 1 for long. 
 	bool shorter;	// set to 1 for short.
+	bool param;     // set to 1 for parameter variables.
 	int array_size;   // will be used for array type
 	int value;
 }type_node, *type_ptr;

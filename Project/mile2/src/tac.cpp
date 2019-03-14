@@ -9,15 +9,26 @@ void emit(vector < code_ptr > &V, string s1, string s2 , string s3 , string s4, 
 {
 	code_ptr c = new code;
 	c->s.append(s1);
+	if(s2!="")
+	{
 	c->s.append(" ");
 	c->s.append(s2);
+	}	
+	if(s3!="")
+	{
 	c->s.append(" ");
 	c->s.append(s3);
+	}	
+	if(s4!="")
+	{
 	c->s.append(" ");
 	c->s.append(s4);
+	}	
+	if(s5!="")
+	{
 	c->s.append(" ");
 	c->s.append(s5);
-	c->s.append(" ");
+	}	
 	c -> line = code_line++;
 	c -> goto_line = 0;
 

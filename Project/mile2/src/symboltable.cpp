@@ -13,6 +13,7 @@ extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
 extern stack <int> offset_stack;
 extern void warning(const char*);
+extern int code_line;
 
 table_ptr mktable( table_ptr parent)
 {
@@ -141,9 +142,12 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 	t_entry->name = name;
 
 	t_entry->type = type;
+
+
+	if (!type->param)
 	t_entry->offset = offset_stack.top();
-
-
+	else
+	t_entry->offset = - offset_stack.top();
 
 	t_entry->width = type_width(type);
 
@@ -419,6 +423,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	type_ptr t2 = entry_in2->type;
 	char name[8];
 	sprintf(name, "%s%d", "t-", count); 
+
 	if(op=="*" || op=="/" || op=="+" || op=="-" )
 	{
 		if(t1->info==INTEGER && t2->info==INTEGER)
@@ -440,6 +445,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			entry_out->type->longer = t1->longer | t2->longer;
 			entry_out->type->shorter = t1->shorter & t2->shorter;
+
 			f_op = "int" + op;
 			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
@@ -982,6 +988,12 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	}
 	else if(op=="=")
 	{
+		if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		{
+			backpatch(V,entry_in2->truelist,code_line);
+			backpatch(V,entry_in2->falselist,code_line);
+			entry_in2->name.append("!=0");
+		}
 		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL )
 		{
 			if(t1->info == t2->info)

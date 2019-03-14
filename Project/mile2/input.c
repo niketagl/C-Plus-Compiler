@@ -1,12 +1,14 @@
-int a;
-int swap( char bhot, int x , char z  );
 
-int swap( int x , char b )
+int swap(  )
 {
-	float jj;
+	int p;
+	int a,b,c,d,x;
+	
+	a = b && c;
+
 }
 
-float run();
+
 
 
 // #define el 0
