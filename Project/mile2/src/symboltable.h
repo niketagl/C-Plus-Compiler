@@ -44,6 +44,7 @@ typedef struct typenode{
 	bool shorter;	// set to 1 for short.
 	int array_size;   // will be used for array type
 	int value;
+	string type_name;
 }type_node, *type_ptr;
 
 
@@ -104,7 +105,7 @@ type_ptr new_cartesian_type(type_ptr, type_ptr);
 
 type_ptr new_pointer_type(type_ptr);
 
-type_ptr new_struct_type(type_ptr);
+type_ptr new_struct_type(type_ptr, char*);
 
 type_ptr new_array_type(type_ptr, int size);
 

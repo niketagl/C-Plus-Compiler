@@ -40,20 +40,22 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 18 "src/grammar.y" /* yacc.c:1909  */
+#line 20 "src/grammar.y" /* yacc.c:1909  */
 
 	#include "src/symboltable.h"
 	#include "src/tac.h"
 	#include <stack>
 	#include <iostream>
 	#include <vector>
+	#include <string>
+	using namespace std;
 	extern stack < table_ptr > table_stack;
 	extern stack < int > offset_stack;
 	extern table_ptr struct_namespace;
 	extern int code_line;
 	extern vector < code_ptr > V;
 
-#line 57 "y.tab.h" /* yacc.c:1909  */
+#line 59 "y.tab.h" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -189,7 +191,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 31 "src/grammar.y" /* yacc.c:1909  */
+#line 35 "src/grammar.y" /* yacc.c:1909  */
 
 	char charval;
 	int intval;
@@ -198,7 +200,7 @@ union YYSTYPE
 	type_ptr type;
 	table_entry_ptr entry;
 
-#line 202 "y.tab.h" /* yacc.c:1909  */
+#line 204 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

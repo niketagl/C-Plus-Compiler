@@ -234,6 +234,7 @@ conditional_expression
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
 	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| error assignment_operator {yyerror2("lvalue required as left operand of assignment");} assignment_expression
 	;
 
 assignment_operator
@@ -315,7 +316,7 @@ struct_or_union_specifier
 									{
 										table_ptr t1 = table_stack.top();
 										table_stack.pop(); offset_stack.pop();
-										if(same_lookup(table_stack.top(),$<stringval>1))
+										if(same_lookup(struct_namespace,$<stringval>1))
 										{
 											char* error = (char *) malloc (100 * sizeof(char));
 											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>1, "\"");
@@ -324,7 +325,7 @@ struct_or_union_specifier
 										}
 										else
 										{
-											$<type>$ = new_struct_type($<type>5) ;
+											$<type>$ = new_struct_type($<type>5, $<stringval>2) ;
 											enter_proc(struct_namespace, $<stringval>2, $<type>$, t1);
 											t1->scope = table_stack.top()->name;
 										}

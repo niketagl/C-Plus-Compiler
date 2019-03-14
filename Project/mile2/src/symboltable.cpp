@@ -322,7 +322,7 @@ type_ptr new_pointer_type(type_ptr t1)
 	t->stat=0;
 	return t;
 }
-type_ptr new_struct_type(type_ptr t1)
+type_ptr new_struct_type(type_ptr t1, char* type_name)
 {
 	// returns type pointer(t)
 	type_ptr t = new type_node;
@@ -338,6 +338,7 @@ type_ptr new_struct_type(type_ptr t1)
 	t->constnt=0;	
 	t->regis=0;
 	t->stat=0;
+	t->type_name=type_name;
 	return t;
 }
 type_ptr new_array_type(type_ptr t1, int size)
@@ -411,6 +412,69 @@ table_entry_ptr same_lookup ( table_ptr t, char* name)
 
 }
 
+
+char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
+{
+	if(op==".")
+	{
+		if(t1->INFO==STRCT)
+		{
+			
+		}
+		else
+		{
+			{
+				//ERROR
+				;
+			}
+		}
+		
+	}
+}
+
+char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
+{
+	type_ptr t1 = entry_in1->type;
+	type_ptr t2 = entry_in2->type;
+	char name[8];
+	string f_op;
+	sprintf(name, "%s%d", "t-", count);
+	if(op=="[]")
+	{
+		if(t2->info==INTEGER)
+		{
+			if(t1->info==ARRAY || t1->info==POINTER)
+			{
+				entry_out = enter(table_stack.top(), name, t1->p1, 0);
+				count++;
+				f_op = "[" + entry_in2->name + "]";
+				emit(V, name, "=", entry_in1->name, f_op);
+				return NULL;
+			}
+		}
+		else
+		{
+			//ERROR
+			;
+		}
+	}
+	else if(op=="()")
+	{
+		if(t1->info==FUNCTION)
+		{
+			entry_out = enter(table_stack.top(), name, t1->p2, 0);
+			count++;
+			f_op = "(" + entry_in2->name + ")";
+			emit(V, name, "=" entry_in1->name, f_op);
+			return NULL;
+		}
+		else
+		{
+			//ERROR
+			;
+		}
+	}
+}
 
 char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
