@@ -13,6 +13,7 @@ extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
 extern stack <int> offset_stack;
 extern void warning(const char*);
+extern table_ptr struct_namespace;
 
 table_ptr mktable( table_ptr parent)
 {
@@ -197,6 +198,7 @@ type_ptr new_basic_type (type_inf info)
 	t->stat=0;
 	t->p1 = NULL; 
 	t->p2 = NULL;
+	t->type_name = NULL;
 
 	switch(info){
 		case LONGER : t->longer = 1; t->info = INTEGER; break;
@@ -252,6 +254,7 @@ type_ptr merge_type (type_ptr t1, type_ptr t2)
 		if(t1->stat && t2->stat) t1->info = ERROR;
 		if(t1->volat && t2->volat) t1->info = ERROR;
 		if(t1->constnt && t2->constnt) t1->info = ERROR;
+		if(t1->type_name && t2->type_name) t1->info = ERROR;
 	}
 
 	t1->longer = t1->longer || t2->longer;
@@ -261,7 +264,7 @@ type_ptr merge_type (type_ptr t1, type_ptr t2)
 	t1->extrn = t1->extrn || t2->extrn;
 	t1->volat = t1->volat || t2->volat;
 	t1->regis = t1->regis || t2->regis;
-	t1->constnt = t1->constnt || t1->constnt;
+	t1->constnt = t1->constnt || t2->constnt;
 
 	return t1;
 }
@@ -282,6 +285,7 @@ type_ptr new_function_type(type_ptr t1, type_ptr t2)
 	t->constnt=0;
 	t->regis=0;
 	t->stat=0;
+	t->type_name = NULL;
 	return t;
 }
 
@@ -301,6 +305,7 @@ type_ptr new_cartesian_type(type_ptr a, type_ptr t1)
 	t->constnt=0;
 	t->regis=0;
 	t->stat=0;
+	t->type_name = NULL;
 	return t;
 }
 
@@ -320,6 +325,7 @@ type_ptr new_pointer_type(type_ptr t1)
 	t->constnt=0;	
 	t->regis=0;
 	t->stat=0;
+	t->type_name = NULL;
 	return t;
 }
 type_ptr new_struct_type(type_ptr t1, char* type_name)
@@ -358,6 +364,7 @@ type_ptr new_array_type(type_ptr t1, int size)
 	t->constnt=0;	
 	t->regis=0;
 	t->stat=0;
+	t->type_name = NULL;
 	return t;
 }
 
@@ -415,20 +422,56 @@ table_entry_ptr same_lookup ( table_ptr t, char* name)
 
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
+	type_ptr t1 = entry_in1->type;
+	char name[8];
+	string f_op;
+	sprintf(name, "%s%d", "t-", count);
 	if(op==".")
 	{
-		if(t1->INFO==STRCT)
+		if(t1->info==STRCT)
 		{
-			
-		}
-		else
-		{
+			if(!(lookup(entry_in1->t, id)))
 			{
 				//ERROR
 				;
 			}
+			else
+			{
+				entry_out = enter(table_stack.top(), name, lookup(entry_in1->t, id)->type, 0);
+				count++;
+				emit(V, name, "=", entry_in1->name, ".", std::string(id));
+				return NULL;
+			}
+		}
+		else
+		{
+			//ERROR
+			;
 		}
 		
+	}
+	else if(op=="->")
+	{
+		if(t1->info==POINTER && t1->p1->info==STRCT)
+		{
+			if(!(lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)))
+			{
+				//ERROR
+				;
+			}
+			else
+			{
+				entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
+				count++;
+				emit(V, name, "=", entry_in1->name, "->", std::string(id));
+				return NULL;
+			}
+		}
+		else
+		{
+			//ERROR
+			;
+		}
 	}
 }
 
