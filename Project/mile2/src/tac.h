@@ -14,3 +14,4 @@ void print_code ( vector < code_ptr > &V);
 
 vector <int> mklist (int i);
 vector <int> merge_list (vector <int> , vector <int>);
+void backpatch (vector <code_ptr> &V , vector <int> l, int label);

@@ -1,26 +1,13 @@
 int a;
+int swap( char bhot, int x , char z  );
 
-int swap( int tt ) 
+int swap( int x , char b )
 {
-	// int a,b,d,e,f;
-	// float x[9];
-	// int c;
-	// c <<= b;
-	// d >>= e;
-	// a+b+c+d+e+f;
-	// // 5;
-	// // 012;
-	// // 0x32;
-	// // 'a';
-	// // '\n';
-	// // L'a';
-	// // L'\'';
-	// float g = 345e+4;
- //    float h = 12e-1;
- //    float i = .23e2;
- //    float j = 32.e-2;
-    char asiodj['a'<<3];
-} 
+	float jj;
+}
+
+float run();
+
 
 // #define el 0
 

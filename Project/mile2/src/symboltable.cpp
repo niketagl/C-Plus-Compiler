@@ -383,7 +383,7 @@ int type_match (type_ptr t1, type_ptr t2)
 				return 1;
 		}
 	}
-
+	else return 0;
 }
 
 

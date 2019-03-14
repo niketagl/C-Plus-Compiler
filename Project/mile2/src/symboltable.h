@@ -52,6 +52,7 @@ typedef struct typenode{
 typedef struct table_entry{
 	string name;
 	bool proc;   // will be 1 for procedures and structures.
+	bool proc_decl;    // will be 1 if proc is declared but not defined.
 	struct table *t;
 	type_ptr type;
 	int width;
