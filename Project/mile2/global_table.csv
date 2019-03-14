@@ -1,0 +1,4 @@
+Scope, Name, Type, Offset, Width
+GLOBAL, fun, FUNCTION : INT ^ CHAR -> INT, 0, 0
+fun, a, INT, 0, 4
+fun, b, CHAR, 4, 1
