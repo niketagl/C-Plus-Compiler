@@ -1,7 +1,7 @@
 int a;
 int swap( char bhot, int x , char z  );
 
-int swap( int x , char b )
+int sp( int x , char b )
 {
 	float jj;
 }

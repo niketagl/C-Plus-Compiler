@@ -105,11 +105,11 @@ primary_expression
 
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
-	| postfix_expression '[' expression ']'	{ if ( $<entry>3->type->info != INTEGER ) yyerror3("expecting integer expression");  }
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
+	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
+	| postfix_expression '(' ')'							{ if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s); }
+	| postfix_expression '(' argument_expression_list ')' 	{ if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| postfix_expression '.' IDENTIFIER 					{ if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
+	| postfix_expression PTR_OP IDENTIFIER 					{ if(char* s = type_check4("->",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression INC_OP
 	| postfix_expression DEC_OP
 	| error '[' {yyerror2("expecting expression");} expression ']'

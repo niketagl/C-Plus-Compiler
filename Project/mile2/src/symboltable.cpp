@@ -432,23 +432,20 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		{
 			if(!(lookup(entry_in1->t, id)))
 			{
-				//ERROR
-				;
+				string terror = string(id) + " is not an attribute of the STRUCTURE";
+				char* type_error;
+				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+				strcpy(type_error, terror.c_str());
+				return type_error;
 			}
 			else
 			{
 				entry_out = enter(table_stack.top(), name, lookup(entry_in1->t, id)->type, 0);
 				count++;
-				emit(V, name, "=", entry_in1->name, ".", std::string(id));
+				emit(V, name, "=", entry_in1->name, ".", string(id));
 				return NULL;
 			}
-		}
-		else
-		{
-			//ERROR
-			;
-		}
-		
+		}	
 	}
 	else if(op=="->")
 	{
@@ -456,23 +453,26 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		{
 			if(!(lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)))
 			{
-				//ERROR
-				;
+				string terror = string(id) + " is not an attribute of the STRUCTURE";
+				char* type_error;
+				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+				strcpy(type_error, terror.c_str());
+				return type_error;
 			}
 			else
 			{
 				entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
 				count++;
-				emit(V, name, "=", entry_in1->name, "->", std::string(id));
+				emit(V, name, "=", entry_in1->name, "->", string(id));
 				return NULL;
 			}
 		}
-		else
-		{
-			//ERROR
-			;
-		}
 	}
+	string terror = "Unable to perform \"" + op + "\" operation on Data type: \"" + print_type(t1) + "\" and Identifier: \"" + string(id) + "\""; 
+    char* type_error;
+    type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+    strcpy(type_error, terror.c_str());
+	return type_error;
 }
 
 bool type_compare(type_ptr t1, type_ptr t2)
@@ -516,10 +516,11 @@ bool type_compare(type_ptr t1, type_ptr t2)
 char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
 	type_ptr t1 = entry_in1->type;
+	type_ptr t2;
 	if(entry_in2)
-		type_ptr t2 = entry_in2->type;
+		t2 = entry_in2->type;
 	else
-		type_ptr t2 = NULL;
+		t2 = NULL;
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
@@ -547,25 +548,37 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				{
 					entry_out = enter(table_stack.top(), name, t1->p2, 0);
 					count++;
-					f_op = "(" + entry_in2->name + ")";
-					// emit(V, name, "=" entry_in1->name, f_op);
+					//f_op = "(" + entry_in2->name + ")";
+					// emit(V, name, "=", entry_in1->name, f_op);
 					return NULL;
+				}
+				else
+				{
+					string terror = "Type mismatch between expected arguments and passed arguments of the FUNCTION";
+					char* type_error;
+    				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+    				strcpy(type_error, terror.c_str());
+					return type_error;
 				}
 			}
 			else
 			{
 				entry_out = enter(table_stack.top(), name, t1->p2, 0);
 				count++;
-				emit(V, name, "=" entry_in1->name, op);
+				emit(V, name, "=", entry_in1->name, op);
 				return NULL;
 			}
 		}
 	}
+	string terror;
 	if(!t2)
 	{
-		t2 = new_basic_type(ERROR);
+		terror = "Unable to perform \"" + op + "\" operation on Data type: \"" + print_type(t1) + "\"";
 	}
-	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 
+	else
+	{
+		terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\"";
+	}	 
     char* type_error;
     type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
     strcpy(type_error, terror.c_str());
