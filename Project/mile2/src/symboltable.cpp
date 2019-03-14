@@ -1154,6 +1154,23 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	}
 	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=" || op=="&=" || op == "|=" || op == "^=" || op=="%=" || op=="<<=" || op==">>=")
 	{
+		if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		{
+			sprintf(name, "%s%d", "t-", count);
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+			count++;
+			entry_in2->falselist.push_back(code_line);
+			emit(V, "if(", entry_in2->name, "== 0) goto");
+			backpatch(V, entry_in2->truelist, code_line);
+			emit(V, name, "= 1");
+			temp->truelist.push_back(code_line);
+			emit(V, "goto");
+			backpatch(V, entry_in2->falselist, code_line);
+			emit(V, name, "= 0");
+			backpatch(V, temp->truelist, code_line);
+			temp->truelist.resize(0);
+			entry_in2 = temp;
+		}
 		table_entry_ptr temp;
 		string oper;
 		oper = op.substr(0, op.size()-1);
@@ -1164,9 +1181,19 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	{
 		if(entry_in2->truelist.size() || entry_in2->falselist.size())
 		{
-			backpatch(V,entry_in2->truelist,code_line);
-			backpatch(V,entry_in2->falselist,code_line);
-			entry_in2->name.append("!=0");
+			sprintf(name, "%s%d", "t-", count);
+			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+			count++;
+			entry_in2->falselist.push_back(code_line);
+			emit(V, "if(", entry_in2->name, "== 0) goto");
+			backpatch(V, entry_in2->truelist, code_line);
+			emit(V, name, "= 1");
+			temp->truelist.push_back(code_line);
+			emit(V, "goto");
+			backpatch(V, entry_in2->falselist, code_line);
+			emit(V, name, "= 0");
+			backpatch(V, temp->truelist, code_line);
+			entry_in2 = temp;
 		}
 		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL )
 		{
