@@ -273,7 +273,7 @@ type_ptr new_function_type(type_ptr t1, type_ptr t2)
 	t->info = FUNCTION;
 	t->p1 = t1;
 	t->p2 = t2;
-	t->longer =0;
+	t->longer=0;
 	t->shorter=0;
 	t->unsign=0;
 	t->sign=0;
@@ -349,7 +349,7 @@ type_ptr new_array_type(type_ptr t1, int size)
 	t->array_size = size;
 	t->p1 = t1;
 	t->p2 = NULL;
-	t->longer =0;
+	t->longer=0;
 	t->shorter=0;
 	t->unsign=0;
 	t->sign=0;
@@ -432,16 +432,57 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	}
 }
 
+bool type_compare(type_ptr t1, type_ptr t2)
+{
+	if(t1 && t2)
+	{
+		if(t1->info==t2->info)
+		{
+			bool val = (t1->extrn^t2->extrn)|(t1->regis^t2->regis)|(t1->stat^t2->stat)|(t1->volat^t2->volat)|(t1->constnt^t2->constnt)|(t1->sign^t2->sign)|(t1->unsign^t2->unsign)|(t1->longer^t2->longer)|(t1->shorter^t2->shorter);
+			if((!val) && t1->array_size == t2->array_size && t1->value == t2->value && t1->type_name == t2->type_name)
+			{
+				if(t1->p1==NULL && t2->p1==NULL)
+				{
+					if(t1->p2==NULL && t2->p2==NULL)
+					{
+						return true;
+					}
+					else
+					{
+						return type_compare(t1->p2,t2->p2);
+					}
+				}
+				else
+				{
+					if(t1->p2==NULL && t2->p2==NULL)
+					{
+						return type_compare(t1->p1,t2->p1);
+					}
+					else
+					{
+						return (type_compare(t1->p1,t2->p1) & type_compare(t1->p2,t2->p2));
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
 char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
 	type_ptr t1 = entry_in1->type;
-	type_ptr t2 = entry_in2->type;
+	if(entry_in2)
+		type_ptr t2 = entry_in2->type;
+	else
+		type_ptr t2 = NULL;
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
 	if(op=="[]")
 	{
-		if(t2->info==INTEGER)
+		if(t2->info==INTEGER || t2->info==CHR)
 		{
 			if(t1->info==ARRAY || t1->info==POINTER)
 			{
@@ -452,28 +493,40 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				return NULL;
 			}
 		}
-		else
-		{
-			//ERROR
-			;
-		}
 	}
 	else if(op=="()")
 	{
 		if(t1->info==FUNCTION)
 		{
-			entry_out = enter(table_stack.top(), name, t1->p2, 0);
-			count++;
-			f_op = "(" + entry_in2->name + ")";
-			emit(V, name, "=" entry_in1->name, f_op);
-			return NULL;
-		}
-		else
-		{
-			//ERROR
-			;
+			if(t2)
+			{
+				if(type_compare(t1->p1,t2))
+				{
+					entry_out = enter(table_stack.top(), name, t1->p2, 0);
+					count++;
+					f_op = "(" + entry_in2->name + ")";
+					// emit(V, name, "=" entry_in1->name, f_op);
+					return NULL;
+				}
+			}
+			else
+			{
+				entry_out = enter(table_stack.top(), name, t1->p2, 0);
+				count++;
+				emit(V, name, "=" entry_in1->name, op);
+				return NULL;
+			}
 		}
 	}
+	if(!t2)
+	{
+		t2 = new_basic_type(ERROR);
+	}
+	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 
+    char* type_error;
+    type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+    strcpy(type_error, terror.c_str());
+	return type_error;
 }
 
 char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)

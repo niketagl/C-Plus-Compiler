@@ -110,3 +110,8 @@ type_ptr new_struct_type(type_ptr, char*);
 type_ptr new_array_type(type_ptr, int size);
 
 char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+char* type_check2(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+char* type_check4(string, table_entry_ptr &entry_out, table_entry_ptr, char*);
+
