@@ -45,6 +45,7 @@ typedef struct typenode{
 	bool param;     // set to 1 for parameter variables.
 	int array_size;   // will be used for array type
 	int value;
+	char* type_name;
 }type_node, *type_ptr;
 
 
@@ -105,8 +106,15 @@ type_ptr new_cartesian_type(type_ptr, type_ptr);
 
 type_ptr new_pointer_type(type_ptr);
 
-type_ptr new_struct_type(type_ptr);
+type_ptr new_struct_type(type_ptr, char*);
 
 type_ptr new_array_type(type_ptr, int size);
 
 char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+bool type_compare(type_ptr, type_ptr);
+
+char* type_check2(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+char* type_check4(string, table_entry_ptr &entry_out, table_entry_ptr, char*);
+

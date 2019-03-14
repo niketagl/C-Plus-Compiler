@@ -1,5 +1,9 @@
 
+<<<<<<< HEAD
 int swap(  )
+=======
+int sp( int x , char b )
+>>>>>>> 7b45f093e614aad84d5d4755d254aa9ab6fa68b2
 {
 	int p;
 	int a,b,c,d,x;
