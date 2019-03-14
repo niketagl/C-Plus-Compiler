@@ -233,7 +233,7 @@ logical_and_expressionM	: {
 	;
 
 logical_or_expression
-	: logical_and_expression        { $<entry>$ = $<entry>1; for(int i=0; i<$<entry>$->falselist.size(); i++)cout<<$<entry>$->falselist[i]<<endl; }
+	: logical_and_expression        { $<entry>$ = $<entry>1;  }
 	| logical_or_expression OR_OP 
 							{
 								table_entry_ptr e1 = $<entry>1;
@@ -640,8 +640,8 @@ selection_statement
 mark1 : { 
 			table_entry_ptr exp = $<entry>-1;
 			exp->falselist.push_back(code_line);
-			emit(V, "if(", exp->name, "== 0 ) goto");
-			backpatch(V, exp->truelist, code_line);	
+			emit(V, "if(", exp->name, "== 0 ) goto");	
+			backpatch(V, exp->truelist, code_line);
 		} 
 	 ; 
 mark2 : 

@@ -16,8 +16,6 @@ int kim()
 	}
 }
 
-
-
 // #define el 0
 
 // /* This function takes last element as pivot, places 
