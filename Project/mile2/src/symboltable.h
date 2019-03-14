@@ -44,7 +44,7 @@ typedef struct typenode{
 	bool shorter;	// set to 1 for short.
 	int array_size;   // will be used for array type
 	int value;
-	string type_name;
+	char* type_name;
 }type_node, *type_ptr;
 
 
@@ -110,3 +110,7 @@ type_ptr new_struct_type(type_ptr, char*);
 type_ptr new_array_type(type_ptr, int size);
 
 char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2);
+
+char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id);
