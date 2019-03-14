@@ -7,6 +7,8 @@ void yyerror3(char*);
 void warning(const char *s);
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 extern char yytext[];
 extern int column;
@@ -21,6 +23,8 @@ extern int yylineno;
 	#include <stack>
 	#include <iostream>
 	#include <vector>
+	#include <string>
+	using namespace std;
 	extern stack < table_ptr > table_stack;
 	extern stack < int > offset_stack;
 	extern table_ptr struct_namespace;
@@ -74,18 +78,27 @@ primary_expression
 									$<entry>$->type = new_basic_type(INTEGER);
 									$<entry>$->type->value = $<intval>1; 
 									$<entry>$->type->constnt = 1;
-									$<entry>$->name = to_string($<intval>1); }    
+									char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%d",$<intval>1); 
+									$<entry>$->name = s;  
+							}  
+
 	| CHAR_CONSTANT 		{ 		$<entry>$ = new table_entry; 
 									$<entry>$->type = new_basic_type(CHR); 
 									$<entry>$->type->value = (int)$<charval>1; 
 									$<entry>$->type->constnt = 1; 
-									string s(1, $<charval>1); 
-									$<entry>$->name = s; }
+									string s1(1, $<charval>1); 
+									string s = "'" + s1 + "'";
+									$<entry>$->name = s; 
+							}
+
 	| FLOAT_CONSTANT		{ 		$<entry>$ = new table_entry; 
 									$<entry>$->type = new_basic_type(FLT); 
 									$<entry>$->type->value = (int)$<floatval>1; 
-									$<entry>$->type->constnt = 1; 
-									$<entry>$->name = to_string($<floatval>1); }
+									$<entry>$->type->constnt = 1;
+									char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%f",$<floatval>1); 
+									$<entry>$->name = s; 
+							}
+
 	| STRING_LITERAL
 	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
@@ -249,7 +262,7 @@ constant_expression
 
 declaration
 	: declaration_specifiers ';' { $<type>$ = $<type>1;}
-	| declaration_specifiers init_declarator_list ';' { $<type>$ = $<type>1;}
+	| declaration_specifiers init_declarator_list ';' { $<type>$ = $<type>2;}
 	;
 
 
@@ -263,14 +276,14 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator    
-	| init_declarator_list ',' init_declarator_listM init_declarator   
+	: init_declarator      { $<type>$ = $<type>1; }
+	| init_declarator_list ',' init_declarator_listM init_declarator    { $<type>$ = $<type>1;}
 	| error ',' {yyerror2("expecting declarator");} init_declarator
 	;
 init_declarator_listM : {$<type>$ = $<type>-2;};
 
 init_declarator
-	: declarator
+	: declarator      { $<type>$ = $<type>1;}
 	| declarator '=' initializer
 	;
 
@@ -429,10 +442,11 @@ direct_declarator
 							}
 
 	| IDENTIFIER '(' mk_tbl parameter_type_list ')'  
-							{
+							{ 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
-								if(same_lookup(table_stack.top(),$<stringval>1))
+								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
+								if( e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
@@ -444,7 +458,8 @@ direct_declarator
 								else
 								{
 									$<type>$ = new_function_type($<type>4,$<type>0);
-									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									if(e==NULL)ne->proc_decl=0;
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
 									table_stack.push(t1); offset_stack.push(0);
@@ -456,7 +471,8 @@ direct_declarator
 							{ 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
-								if(same_lookup(table_stack.top(),$<stringval>1))
+								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
+								if( (e != NULL)? !e->proc_decl : 0 )
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
@@ -468,7 +484,8 @@ direct_declarator
 								else
 								{
 									$<type>$ = new_function_type(NULL,$<type>0);
-									enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									if(e==NULL)ne->proc_decl=0;
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
 									table_stack.push(t1); offset_stack.push(0);
@@ -618,15 +635,55 @@ translation_unit
 
 external_declaration
 	: function_definition
-	| declaration   { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} }
+	| declaration   { 
+						if($<type>1->info==FUNCTION)
+						{
+							table_ptr t1 = table_stack.top();
+							table_stack.pop();offset_stack.pop();
+							char *nam = strdup(t1->name.c_str());
+							table_entry_ptr e = same_lookup(table_stack.top(),nam);
+							
+							if(e->proc_decl)
+							{
+								char* error = (char *) malloc (100 * sizeof(char));
+								sprintf(error, "%s%s%s","Multiple declarations for identifier \"", nam, "\"");
+								yyerror3(error);
+							}
+							else e->proc_decl=1;
+
+						} 
+					}
 	;
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-															{table_stack.pop();offset_stack.pop();}
-	| declaration_specifiers declarator compound_statement  {table_stack.pop();offset_stack.pop();}
-	| declarator declaration_list compound_statement  		{table_stack.pop();offset_stack.pop();}
-	| declarator compound_statement 						{table_stack.pop();offset_stack.pop();}   
+															{
+																table_ptr t1 = table_stack.top();
+																table_stack.pop();offset_stack.pop();
+																char *nam = strdup(t1->name.c_str());
+																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+															}
+	| declaration_specifiers declarator compound_statement  
+															{
+																table_ptr t1 = table_stack.top();
+																table_stack.pop();offset_stack.pop();
+																char *nam = strdup(t1->name.c_str());
+																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+															}
+	| declarator declaration_list compound_statement  		
+															{
+																table_ptr t1 = table_stack.top();
+																table_stack.pop();offset_stack.pop();
+																char *nam = strdup(t1->name.c_str());
+																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+															}
+	| declarator compound_statement 						
+															{
+																table_ptr t1 = table_stack.top();
+																table_stack.pop();offset_stack.pop();
+																char *nam = strdup(t1->name.c_str());
+																same_lookup(table_stack.top(),nam)->proc_decl = 0;
+															}
 	;
 
 
