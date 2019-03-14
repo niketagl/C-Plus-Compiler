@@ -1,9 +1,0 @@
-Scope, Name, Type, Offset, Width
-GLOBAL, fun, FUNCTION : INT ^ CHAR -> INT, 0, 0
-fun, a, INT, 0, 4
-fun, b, CHAR, 4, 1
-GLOBAL, main, FUNCTION : NIL -> INT, 0, 0
-main, a, INT, 0, 4
-main, arr, *INT, 12, 0
-main, b, INT, 4, 4
-main, c, INT, 8, 4
