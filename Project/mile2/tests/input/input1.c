@@ -27,7 +27,7 @@ int main(float p)
 {
     int a, b, c;
     a = 10;
-    b = !a;
+    b = a--;
     // // a + b = c;
     // int arr[10];
     // a = arr[9];

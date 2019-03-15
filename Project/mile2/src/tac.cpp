@@ -31,7 +31,6 @@ void emit(vector < code_ptr > &V, string s1, string s2 , string s3 , string s4, 
 	}	
 	c -> line = code_line++;
 	c -> goto_line = 0;
-	c->label = "";
 
 	V.push_back(c);
 	return;
@@ -45,14 +44,11 @@ void print_code( vector <code_ptr> &V )
 
 	for(int i=0; i < V.size() ; i++ )
 	{
-		if(V[i]->label != "")
-		f<<V[i]->label<<":"<<endl;
 		f<<V[i]->line<<" : "<<V[i]->s ;
 		if(V[i]->goto_line)
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
-	f<<V[V.size()-1]->line+1<<" : end"<<endl;
 	f.close();
 }
 
