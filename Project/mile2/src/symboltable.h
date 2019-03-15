@@ -62,6 +62,8 @@ typedef struct table_entry{
 	vector <int> nextlist;      // will be used for backpatching.
 	vector <int> truelist;
 	vector <int> falselist;
+	vector <int> breaklist;
+	vector <int> contlist;
 }table_entry, *table_entry_ptr;
 
 typedef struct table{	

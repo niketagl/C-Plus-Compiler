@@ -610,7 +610,7 @@ labeled_statement
 
 compound_statement
 	: '{' '}' {$<entry>$ = new table_entry;}
-	| '{' statement_list '}' {$<entry>$ = $<entry>2;}
+	| '{' statement_list '}' {$<entry>$ = $<entry>2; }
 	| '{' statement_list error '}' {yyerror2("expecting semicolon ;");}
 	| '{' error '}' {yyerror2("expecting semicolon ;");}
 	;
@@ -621,8 +621,10 @@ declaration_list
 	;
 
 statement_list
-	: statement    {$<entry>$ = $<entry>1;}
-	| statement_list statement   {$<entry>$ = $<entry>2;}
+	: statement    {$<entry>$ = $<entry>1; }
+	| statement_list statement   	{
+											$<entry>$ = $<entry>2;
+									}
 	;
 
 expression_statement
@@ -657,39 +659,44 @@ mark2 :
 iteration_statement
 	: WHILE  mark3 '(' expression ')' mark4 statement 	{ 	
 															$<entry>$ = new table_entry;  
-															$<entry>$->nextlist = $<entry>4->falselist; 
+															$<entry>$->nextlist = merge_list($<entry>4->falselist,$<entry>7->breaklist); 
 															$<entry>7->nextlist.push_back(code_line);
 															emit(V, "goto");
 															backpatch(V, $<entry>7->nextlist, $<intval>2);
+															backpatch(V, $<entry>7->contlist, $<intval>2);
 														}
 	| DO mark3 statement WHILE  mark5 '(' expression ')' ';' 	{
 																	$<entry>$ = new table_entry;
-																	$<entry>$->nextlist = $<entry>7->falselist;
+																	$<entry>$->nextlist = merge_list($<entry>7->falselist,$<entry>3->breaklist);
 																	$<entry>7->truelist.push_back(code_line);
 																	emit(V, "if(", $<entry>7->name, "!= 0) goto");
 																	backpatch(V, $<entry>7->truelist, $<intval>2);
 																}
 	| FOR '(' expression_statement mark3 expression_statement ')' mark4 statement 	{ 	
 																						$<entry>$ = new table_entry;  
-																						$<entry>$->nextlist = $<entry>5->falselist; 
+																						$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>8->breaklist); 
 																						$<entry>8->nextlist.push_back(code_line);
 																						emit(V, "goto");
 																						backpatch(V, $<entry>8->nextlist, $<intval>4);
+																						backpatch(V, $<entry>8->contlist, $<intval>4);
+
 																					}
 	| FOR '(' expression_statement mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	{
 																												$<entry>$ = new table_entry;
-																												$<entry>$->nextlist = $<entry>5->falselist;
+																												$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>11->breaklist);
 																												$<entry>11->nextlist.push_back(code_line);
 																												emit(V, "goto");
 																												backpatch(V, $<entry>11->nextlist, $<intval>6);
+																												backpatch(V, $<entry>11->contlist, $<intval>6);
 																											}
-	| FOR '(' declaration  mark3 expression_statement mark6 expression mark7 ')' mark8 statement 		{
-																											$<entry>$ = new table_entry;
-																											$<entry>$->nextlist = $<entry>5->falselist;
-																											$<entry>11->nextlist.push_back(code_line);
-																											emit(V, "goto");
-																											backpatch(V, $<entry>11->nextlist, $<intval>6);
-																										}
+	| FOR '(' declaration mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	{
+																										$<entry>$ = new table_entry;
+																										$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>11->breaklist);
+																										$<entry>11->nextlist.push_back(code_line);
+																										emit(V, "goto");
+																										backpatch(V, $<entry>11->nextlist, $<intval>6);
+																										backpatch(V, $<entry>11->contlist, $<intval>6);
+																									}
 	;
 
 mark3 : { 
@@ -707,7 +714,8 @@ mark4 : {
 
 mark5 : {
 			table_entry_ptr s = $<entry>-1;
-			backpatch(V, s->nextlist, code_line);	
+			backpatch(V, s->nextlist, code_line);
+			backpatch(V, s->contlist, code_line);	
 		}
 	;  
 
@@ -738,8 +746,16 @@ mark8 : {
 
 jump_statement
 	: GOTO IDENTIFIER ';'
-	| CONTINUE ';'
-	| BREAK ';'
+	| CONTINUE ';'				{
+									$<entry>$ = new table_entry; 
+									$<entry>$->contlist.push_back(code_line);
+									emit(V, "goto");
+								}
+	| BREAK ';'					{
+									$<entry>$ = new table_entry; 
+									$<entry>$->breaklist.push_back(code_line);
+									emit(V, "goto");
+								}
 	| RETURN ';'
 	| RETURN expression ';'
 	;

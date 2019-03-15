@@ -1,10 +1,13 @@
+int e;
 int kim()
 {
-	int a,c,b,d,e;
-	e=5+2;
-	for(int i=0+e;i<5;i=i+1)
+	// int a,c,b,d,e;
+	while(e>5)
 	{
-		e=e+1;
+		e=2;
+		
+		continue;
+		e=1;
 	}
 	// if(a+10&&b*33-2||e)
 	// {
