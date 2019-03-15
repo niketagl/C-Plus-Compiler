@@ -456,20 +456,23 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	{
 		if(t1->info==POINTER && t1->p1->info==STRCT)
 		{
-			if(!(lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)))
+			if(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t)
 			{
-				string terror = string(id) + " is not an attribute of the STRUCTURE";
-				char* type_error;
-				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
-				strcpy(type_error, terror.c_str());
-				return type_error;
-			}
-			else
-			{
-				entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
-				count++;
-				emit(V, name, "=", entry_in1->name, "->", string(id));
-				return NULL;
+				if(!(lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)))
+				{
+					string terror = string(id) + " is not an attribute of the STRUCTURE";
+					char* type_error;
+					type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+					strcpy(type_error, terror.c_str());
+					return type_error;
+				}
+				else
+				{
+					entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
+					count++;
+					emit(V, name, "=", entry_in1->name, "->", string(id));
+					return NULL;
+				}
 			}
 		}
 	}
