@@ -9,5 +9,5 @@ int main()
     
     g = e + f;
 
-    i = h + c
+    i = h + c;
 }

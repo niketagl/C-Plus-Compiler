@@ -713,7 +713,7 @@ statement
 	| selection_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
 	| iteration_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
 	| jump_statement        {$<entry>$ = $<entry>1;}
-	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = $<entry>1;}
+	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = new table_entry;}
 	;
 
 labeled_statement
@@ -761,13 +761,13 @@ statement_list
 	| statement_list statement   	{
 										$<entry>$ = new table_entry;
 										$<entry>$->breaklist.resize(0);
-										if($<entry>2)
+										if($<entry>2 && $<entry>2->breaklist.size()<10)
 										{
 											$<entry>$->breaklist.insert($<entry>$->breaklist.end(),$<entry>2->breaklist.begin(), $<entry>2->breaklist.end());
 											$<entry>$->contlist.insert($<entry>$->contlist.end(),$<entry>2->contlist.begin(), $<entry>2->contlist.end());
 										}
 
-										if($<entry>1)
+										if($<entry>1 && $<entry>2->breaklist.size()<10)
 										{
 											$<entry>$->breaklist.insert($<entry>$->breaklist.end(),$<entry>1->breaklist.begin(), $<entry>1->breaklist.end());
 											$<entry>$->contlist.insert($<entry>$->contlist.end(),$<entry>2->contlist.begin(), $<entry>2->contlist.end());
