@@ -8,6 +8,6 @@ int forloop()
 		if(d && c)
 			e = 10;
 		else
-			e = d+1;
+			break;
 	}
 }

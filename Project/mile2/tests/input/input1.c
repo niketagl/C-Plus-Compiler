@@ -4,7 +4,9 @@ int switches()
 	switch(a)
 	{
 		case 1 : c = 9;
+			break;
 		case 3 : c = d && e;
+			break;
 		default : c = b;
 	}
 }

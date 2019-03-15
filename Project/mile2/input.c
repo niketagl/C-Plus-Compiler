@@ -1,12 +1,10 @@
-int a,b,c,d,e;
+
+
 int kim()
 {
 
-	switch(a)
-	{
-		case 1 : b = 9;
-		case 2 : c = 10;
-	}
+	int a,b;
+	a++;
 	// if(a+10&&b*33-2||e)
 	// {
 	// 	d=3;

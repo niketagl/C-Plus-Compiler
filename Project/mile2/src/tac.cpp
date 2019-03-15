@@ -49,6 +49,7 @@ void print_code( vector <code_ptr> &V )
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
+	f << V[V.size()-1]->line + 1 << " : end"<<endl;
 	f.close();
 }
 
