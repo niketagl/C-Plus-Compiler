@@ -15,6 +15,7 @@ extern int column;
 extern int yylineno;
 
 
+	int lab_count=1;
 %}
 
 %code requires {
@@ -256,11 +257,12 @@ inclusive_or_expression
 	;
 
 logical_and_expression
-	: inclusive_or_expression      { $<entry>$ = $<entry>1;  }
+	: inclusive_or_expression      { $<entry>$ = $<entry>1; $<entry>$->isbool=0; }
 	| logical_and_expression AND_OP logical_and_expressionM inclusive_or_expression
 	  						{
 	  							$<entry>$ = $<entry>4;
 	  							$<entry>$->falselist.insert($<entry>$->falselist.end(), $<entry>1->falselist.begin(),$<entry>1->falselist.end() );
+	  							$<entry>$->isbool=1;
 	  						}
 	| error AND_OP {yyerror2("expecting logical expression");} inclusive_or_expression
 	;
@@ -285,14 +287,53 @@ logical_or_expression
 	  						{
 	  							$<entry>$ = $<entry>4;
 	  							$<entry>$->truelist.insert($<entry>$->truelist.end(), $<entry>1->truelist.begin(),$<entry>1->truelist.end() );
+	  							$<entry>$->isbool=1;
 	  						}
 	| error OR_OP {yyerror2("expecting logical expression");} logical_and_expression
 	;
 
 conditional_expression  
 	: logical_or_expression      { $<entry>$ = $<entry>1; }
-	| logical_or_expression '?' expression ':' conditional_expression
+	| logical_or_expression '?' conditional_expression_mark1 expression ':' conditional_expression_mark2 conditional_expression 
+								 {
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									$<entry>$ = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+									count++;
+
+									$<entry>$->truelist = merge_list($<entry>4->truelist, $<entry>7->truelist);
+									$<entry>$->falselist = merge_list($<entry>4->falselist, $<entry>7->falselist);
+
+									emit(V,name,"=",$<entry>7->name);
+
+								 }
 	;
+conditional_expression_mark1 :	{
+									table_entry_ptr exp = $<entry>-1;
+									exp->falselist.push_back(code_line);
+									emit(V, "if(", exp->name, "== 0) goto");	
+									backpatch(V, exp->truelist, code_line);
+								}
+							 ;
+
+conditional_expression_mark2 : {
+									table_entry_ptr exp = $<entry>-4;
+									table_entry_ptr s1 = $<entry>-1;
+
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									emit(V,name,"=",s1->name);
+
+									s1->truelist.push_back(code_line);
+									emit(V, "if(", name, "== 0) goto");	
+
+									s1->falselist.push_back(code_line);
+									emit(V, "if(", name, "!= 0) goto");
+
+									backpatch(V, exp->falselist, code_line);	
+							   }
+							 ; 
+
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
@@ -322,7 +363,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression 	{cout << $<entry>1->type->value << endl; }
+	: conditional_expression 	
 	;
 
 declaration
@@ -349,7 +390,7 @@ init_declarator_listM : {$<type>$ = $<type>-2;};
 
 init_declarator
 	: declarator      { $<type>$ = $<type>1;}
-	| declarator '=' initializer
+	| declarator '=' initializer    { if(char* s = type_check("=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	;
 
 storage_class_specifier
@@ -672,14 +713,14 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
+	: assignment_expression  {$<entry>$ = $<entry>1;}
 	| '{' initializer_list '}'
 	| '{' initializer_list ',' '}'
 	;
 
 initializer_list
-	: initializer
-	| initializer_list ',' initializer
+	: initializer    {$<entry>$ = $<entry>1;}
+	| initializer_list ',' initializer    {$<entry>$ = $<entry>3;}
 	;
 
 statement
@@ -694,8 +735,26 @@ statement
 
 labeled_statement
 	: IDENTIFIER ':' statement
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
+	| CASE constant_expression ':' labeled_statement_m statement 
+										{
+											$<entry>$ = $<entry>5;
+											int l = $<intval>4;
+											$<entry>5->labellist.push_back(l);
+											char *name = (char*)malloc(15*sizeof(char));
+
+											sprintf(name, "%d",$<entry>2->type->value);
+											
+											V[l-100]->label = name;
+										}
+	| DEFAULT ':' labeled_statement_m statement 
+										{
+											$<entry>$ = $<entry>4;
+											int l = $<intval>3;
+											$<entry>4->labellist.push_back(l);
+											V[l-100]->label = "default";
+										}
+	;
+labeled_statement_m : { $<intval>$ = code_line;}
 	;
 
 compound_statement
@@ -711,9 +770,14 @@ declaration_list
 	;
 
 statement_list
-	: statement    {$<entry>$ = $<entry>1; }
+	: statement    {$<entry>$ = $<entry>1; if($<entry>1)backpatch(V,$<entry>1->nextlist,code_line);  }
 	| statement_list statement   	{
+											if($<entry>1) backpatch(V,$<entry>1->nextlist,code_line);
 											$<entry>$ = $<entry>2;
+											if($<entry>$ != $<entry>1 && $<entry>$ && $<entry>$)
+											{
+												$<entry>$->breaklist.insert($<entry>$->breaklist.end(),$<entry>1->breaklist.begin(),$<entry>1->breaklist.end());
+											}
 									}
 	;
 
@@ -726,7 +790,37 @@ selection_statement
 	: IF '(' expression ')' mark1 statement       {$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>3->falselist, $<entry>6->nextlist);}  
 	| IF '(' expression ')' mark1 statement ELSE mark2 statement  
 						{$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>9->falselist, $<entry>6->nextlist);}
-	| SWITCH '(' expression ')' statement
+	| SWITCH '(' expression ')' smark statement 
+						{
+
+							$<entry>$ = new table_entry;
+							$<entry>$->nextlist.push_back(code_line);
+							emit(V, "goto");
+
+
+
+							backpatch(V, $<entry>5->nextlist, code_line);
+
+							table_entry_ptr s = $<entry>6;
+							table_entry_ptr e = $<entry>3;
+							for(int i=0; i < s->labellist.size(); i++)
+							{
+								if(V[s->labellist[i]-100]->label == "default")
+								emit(V, "goto");
+								else
+								emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
+								V[code_line-101]->goto_line = s->labellist[i];
+								V[s->labellist[i]-100]->label = "";
+							}
+
+							$<entry>$->nextlist.insert($<entry>$->nextlist.end(), s->breaklist.begin(), s->breaklist.end());
+						}
+	;
+smark : {
+			$<entry>$ = new table_entry;
+			$<entry>$->nextlist.push_back(code_line);
+			emit(V, "goto");
+		}
 	;
 
 mark1 : { 
@@ -846,8 +940,8 @@ jump_statement
 									$<entry>$->breaklist.push_back(code_line);
 									emit(V, "goto");
 								}
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';'				{ emit(V,"return");$<entry>$ = new table_entry;}
+	| RETURN expression ';'     { emit(V,"return", $<entry>$->name); $<entry>$ = $<entry>2;}
 	;
 
 translation_unit

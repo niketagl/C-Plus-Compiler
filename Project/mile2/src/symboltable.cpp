@@ -1171,7 +1171,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	}
 	else if(op=="*=" || op=="/=" || op == "+=" || op == "-=" || op=="&=" || op == "|=" || op == "^=" || op=="%=" || op=="<<=" || op==">>=")
 	{
-		if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		if( (entry_in2->truelist.size() || entry_in2->falselist.size()) && entry_in2->isbool )
 		{
 			sprintf(name, "%s%d", "t-", count);
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1188,6 +1188,13 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			temp->truelist.resize(0);
 			entry_in2 = temp;
 		}
+		else if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		{
+			backpatch(V, entry_in2->truelist, code_line);
+			backpatch(V, entry_in2->falselist, code_line);
+			entry_in2->truelist.resize(0);
+			entry_in2->falselist.resize(0);
+		}
 		table_entry_ptr temp;
 		string oper;
 		oper = op.substr(0, op.size()-1);
@@ -1196,7 +1203,8 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	}
 	else if(op=="=")
 	{
-		if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		
+		if((entry_in2->truelist.size() || entry_in2->falselist.size()) && entry_in2->isbool )
 		{
 			sprintf(name, "%s%d", "t-", count);
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1211,6 +1219,11 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			emit(V, name, "= 0");
 			backpatch(V, temp->truelist, code_line);
 			entry_in2 = temp;
+		}
+		else if(entry_in2->truelist.size() || entry_in2->falselist.size())
+		{
+			backpatch(V, entry_in2->truelist, code_line);
+			backpatch(V, entry_in2->falselist, code_line);
 		}
 		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL )
 		{

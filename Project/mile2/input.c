@@ -1,22 +1,11 @@
 int e;
 int kim()
 {
-	// int a,c,b,d,e;
-	while(e>5)
+	int a,b,c,d,e;
+	a = 10;
+	while ( a )
 	{
-		e=2;
-		
-		continue;
-		e=1;
 	}
-	// if(a+10&&b*33-2||e)
-	// {
-	// 	d=3;
-	// }
-	// else
-	// {
-	// 	d=7;
-	// }
 }
 
 // #define el 0
