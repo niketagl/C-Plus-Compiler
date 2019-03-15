@@ -1,9 +1,0 @@
-Scope, Name, Type, Offset, Width
-GLOBAL, main, FUNCTION : NIL -> INT, 0, 0
-main, a, INT, 0, 4
-main, b, INT, 4, 4
-main, c, INT, 8, 4
-main, strct1, STRUCT, 0, 0
-main, strct2, STRUCT, 0, 0
-main, strct3, ERROR, 0, 0
-main, t-0, INT, 12, 4
