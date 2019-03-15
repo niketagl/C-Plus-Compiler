@@ -1,0 +1,13 @@
+Steps to build and run:
+
+$ cd <project-top>
+$ make
+$ ./compile <input file path>
+
+
+Example :
+
+./compile tests/input/input1.c
+
+
+
