@@ -65,6 +65,7 @@ typedef struct table_entry{
 	vector <int> falselist;
 	vector <int> breaklist;
 	vector <int> contlist;
+	vector <int> labellist;
 }table_entry, *table_entry_ptr;
 
 typedef struct table{	

@@ -1,7 +1,11 @@
 int e;
 int kim()
 {
-
+	int a,b,c,d,e;
+	a = 10;
+	while ( a )
+	{
+	}
 }
 
 // #define el 0

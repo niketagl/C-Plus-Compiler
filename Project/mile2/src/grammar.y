@@ -15,6 +15,7 @@ extern int column;
 extern int yylineno;
 
 
+	int lab_count=1;
 %}
 
 %code requires {
@@ -322,7 +323,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression 	{cout << $<entry>1->type->value << endl; }
+	: conditional_expression 	
 	;
 
 declaration
@@ -644,8 +645,26 @@ statement
 
 labeled_statement
 	: IDENTIFIER ':' statement
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
+	| CASE constant_expression ':' labeled_statement_m statement 
+										{
+											$<entry>$ = $<entry>5;
+											int l = $<intval>4;
+											$<entry>5->labellist.push_back(l);
+											char *name = (char*)malloc(15*sizeof(char));
+
+											sprintf(name, "%d",$<entry>2->type->value);
+											
+											V[l-100]->label = name;
+										}
+	| DEFAULT ':' labeled_statement_m statement 
+										{
+											$<entry>$ = $<entry>4;
+											int l = $<intval>3;
+											$<entry>4->labellist.push_back(l);
+											V[l-100]->label = "default";
+										}
+	;
+labeled_statement_m : { $<intval>$ = code_line;}
 	;
 
 compound_statement
@@ -661,9 +680,14 @@ declaration_list
 	;
 
 statement_list
-	: statement    {$<entry>$ = $<entry>1; }
+	: statement    {$<entry>$ = $<entry>1; if($<entry>1)backpatch(V,$<entry>1->nextlist,code_line);  }
 	| statement_list statement   	{
+											if($<entry>1) backpatch(V,$<entry>1->nextlist,code_line);
 											$<entry>$ = $<entry>2;
+											if($<entry>$ != $<entry>1 && $<entry>$ && $<entry>$)
+											{
+												$<entry>$->breaklist.insert($<entry>$->breaklist.end(),$<entry>1->breaklist.begin(),$<entry>1->breaklist.end());
+											}
 									}
 	;
 
@@ -676,7 +700,37 @@ selection_statement
 	: IF '(' expression ')' mark1 statement       {$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>3->falselist, $<entry>6->nextlist);}  
 	| IF '(' expression ')' mark1 statement ELSE mark2 statement  
 						{$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>9->falselist, $<entry>6->nextlist);}
-	| SWITCH '(' expression ')' statement
+	| SWITCH '(' expression ')' smark statement 
+						{
+
+							$<entry>$ = new table_entry;
+							$<entry>$->nextlist.push_back(code_line);
+							emit(V, "goto");
+
+
+
+							backpatch(V, $<entry>5->nextlist, code_line);
+
+							table_entry_ptr s = $<entry>6;
+							table_entry_ptr e = $<entry>3;
+							for(int i=0; i < s->labellist.size(); i++)
+							{
+								if(V[s->labellist[i]-100]->label == "default")
+								emit(V, "goto");
+								else
+								emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
+								V[code_line-101]->goto_line = s->labellist[i];
+								V[s->labellist[i]-100]->label = "";
+							}
+
+							$<entry>$->nextlist.insert($<entry>$->nextlist.end(), s->breaklist.begin(), s->breaklist.end());
+						}
+	;
+smark : {
+			$<entry>$ = new table_entry;
+			$<entry>$->nextlist.push_back(code_line);
+			emit(V, "goto");
+		}
 	;
 
 mark1 : { 
@@ -796,8 +850,8 @@ jump_statement
 									$<entry>$->breaklist.push_back(code_line);
 									emit(V, "goto");
 								}
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';'				{ emit(V,"return");$<entry>$ = new table_entry;}
+	| RETURN expression ';'     { emit(V,"return", $<entry>$->name); $<entry>$ = $<entry>2;}
 	;
 
 translation_unit
