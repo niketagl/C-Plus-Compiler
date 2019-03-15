@@ -1,7 +1,7 @@
+int e;
 int kim()
 {
-	int a,c,b,d,e;
-	a = b ? c : d ;
+
 }
 
 // #define el 0
