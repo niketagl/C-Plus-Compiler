@@ -1,20 +1,37 @@
-int fun(int a, char b)
-{
-    //do nothing
-    return 0;
-}
+// int fun(int a, int b);
+
 
 // int fun(int a, char b)
 // {
-//     //do nothing
-//     return 1;
+//     a + 2;
+// }
+// int fun(int a, char b);
+// int dom(int a, char* b);
+
+// int fun(int a, int b)
+// {
+//     a = b + 2;
 // }
 
-int main()
+// int dom( int x)
+// {
+//     x =2;
+// }
+// struct abcd
+// {
+//     int alpha;
+//     float beta;
+// }
+
+int main(float p)
 {
     int a, b, c;
-    // a + b = c;
-    int arr[10];
-    a = arr[9];
-    return 0;
+    a = 10;
+    b = !a;
+    // // a + b = c;
+    // int arr[10];
+    // a = arr[9];
+    // struct abcd kuch;
+    // kuch.alpha;
+    // return 0;
 }

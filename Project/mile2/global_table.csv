@@ -1,0 +1,7 @@
+Scope, Name, Type, Offset, Width
+GLOBAL, main, FUNCTION : FLOAT -> INT, 0, 0
+main, a, INT, 0, 4
+main, b, INT, 4, 4
+main, c, INT, 8, 4
+main, p, FLOAT, 0, 4
+main, t-0, INT, 12, 4

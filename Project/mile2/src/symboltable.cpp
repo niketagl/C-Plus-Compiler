@@ -428,6 +428,20 @@ table_entry_ptr same_lookup ( table_ptr t, char* name)
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
 	type_ptr t1 = entry_in1->type;
+	table_ptr t2 = new table;
+	if(!(lookup(struct_namespace, t1->type_name)))
+	{
+		string terror = string(t1->type_name) + " is not a STRUCTURE";
+		char* type_error;
+		type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+		strcpy(type_error, terror.c_str());
+		return type_error;
+	}
+	else
+	{
+		t2 = lookup(struct_namespace, t1->type_name)->t;
+	}
+	
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
@@ -435,7 +449,7 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	{
 		if(t1->info==STRCT)
 		{
-			if(!(lookup(entry_in1->t, id)))
+			if(!(lookup(t2, id)))
 			{
 				string terror = string(id) + " is not an attribute of the STRUCTURE";
 				char* type_error;
@@ -445,7 +459,7 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			}
 			else
 			{
-				entry_out = enter(table_stack.top(), name, lookup(entry_in1->t, id)->type, 0);
+				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, 0);
 				count++;
 				emit(V, name, "=", entry_in1->name, ".", string(id));
 				return NULL;

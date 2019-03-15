@@ -130,20 +130,60 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression   { $<entry>$ = $<entry>1; }
-	| INC_OP unary_expression
+	| INC_OP unary_expression 
+							{ 
+								table_entry_ptr temp = new table_entry; 
+								temp->type = new_basic_type(INTEGER); 
+								temp->type->constnt = 1;
+								temp->type->value = 1;
+								temp->name = "1";
+								if(char* s = type_check("+=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+							}
 	| DEC_OP unary_expression
+							{
+								table_entry_ptr temp = new table_entry; 
+								temp->type = new_basic_type(INTEGER);
+								temp->type->constnt = 1;
+								temp->type->value = 1;
+								temp->name = "1";
+								if(char* s = type_check("-=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+							}
 	| unary_operator cast_expression
+							{
+								if(!strcmp($<stringval>1, "!"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = 0;
+									temp->name = "0";
+									if(char* s = type_check("==",$<entry>$,$<entry>2, temp)) yyerror3(s);								
+								}
+								else if(!strcmp($<stringval>1, "-"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = -1;
+									temp->name = "-1";
+									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+								}
+								else
+								{
+									$<entry>$ = $<entry>2;
+								}
+							}
 	| SIZEOF unary_expression
 	| SIZEOF '(' type_name ')'
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "&"); }
+	| '*'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "*"); }
+	| '+'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+"); }
+	| '-'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-"); }
+	| '~'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "~"); }
+	| '!'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "!"); }
 	;
 
 cast_expression
@@ -356,7 +396,19 @@ struct_or_union_specifier
 									}
 
 	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
+	| struct_or_union IDENTIFIER	{
+										if(lookup(struct_namespace, $<stringval>2))
+										{
+											$<type>$ = new_struct_type(lookup(struct_namespace, $<stringval>2)->type, $<stringval>2) ;
+										}
+										else
+										{
+											char* error = (char *) malloc (100 * sizeof(char));
+											sprintf(error, "%s%s%s","Undeclared structure \"", $<stringval>2, "\"");
+											yyerror3(error);
+											$<type>$ = new_basic_type(ERROR);
+										}
+									}
 	;
 mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); offset_stack.push(0);} ;
 
@@ -471,14 +523,33 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
 								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
-								if( e != NULL && !e->proc_decl)
+								if(e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
-									table_ptr temp = new table;
-									table_stack.push(temp); offset_stack.push(0);
+									table_stack.push(t1); offset_stack.push(0);
+								}
+								else if( e != NULL && e->proc_decl)
+								{
+									$<type>$ = new_function_type($<type>4,$<type>0);
+									if(type_compare(e->type, $<type>$))
+									{
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										if(e==NULL)ne->proc_decl=0;
+										t1->name.append($<stringval>1);
+										t1->scope = t1->name;
+										table_stack.push(t1); offset_stack.push(0);
+									}
+									else
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+										table_stack.push(t1); offset_stack.push(0);
+									}
 								}
 								else
 								{
@@ -505,6 +576,25 @@ direct_declarator
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
 									table_stack.push(temp); offset_stack.push(0);
+								}
+								else if( e != NULL && e->proc_decl)
+								{
+									$<type>$ = new_function_type(NULL,$<type>0);
+									if(type_compare(e->type, $<type>$))
+									{
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										if(e==NULL)ne->proc_decl=0;
+										t1->name.append($<stringval>1);
+										t1->scope = t1->name;
+										table_stack.push(t1); offset_stack.push(0);
+									}
+									else
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+									}
 								}
 								else
 								{
