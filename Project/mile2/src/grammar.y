@@ -640,7 +640,7 @@ selection_statement
 mark1 : { 
 			table_entry_ptr exp = $<entry>-1;
 			exp->falselist.push_back(code_line);
-			emit(V, "if(", exp->name, "== 0 ) goto");	
+			emit(V, "if(", exp->name, "== 0) goto");	
 			backpatch(V, exp->truelist, code_line);
 		} 
 	 ; 
@@ -662,7 +662,13 @@ iteration_statement
 															emit(V, "goto");
 															backpatch(V, $<entry>7->nextlist, $<intval>2);
 														}
-	| DO statement WHILE '(' expression ')' ';'
+	| DO mark3 statement WHILE  mark5 '(' expression ')' ';' 	{
+																	$<entry>$ = new table_entry;
+																	$<entry>$->nextlist = $<entry>7->falselist;
+																	$<entry>7->truelist.push_back(code_line);
+																	emit(V, "if(", $<entry>7->name, "!= 0) goto");
+																	backpatch(V, $<entry>7->truelist, $<intval>2);
+																}
 	| FOR '(' expression_statement expression_statement ')' statement
 	| FOR '(' expression_statement expression_statement expression ')' statement
 	| FOR '(' declaration expression_statement expression ')' statement
@@ -679,7 +685,13 @@ mark4 : {
 			emit(V, "if(", exp->name, "== 0 ) goto");
 			backpatch(V, exp->truelist, code_line);	
 		}
-	; 
+	;
+
+mark5 : {
+			table_entry_ptr s = $<entry>-1;
+			backpatch(V, s->nextlist, code_line);	
+		}
+	;  
 
 jump_statement
 	: GOTO IDENTIFIER ';'

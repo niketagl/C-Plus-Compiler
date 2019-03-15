@@ -1,6 +1,11 @@
 int kim()
 {
 	int a,c,b,d,e;
+	e=5;
+	do
+	{
+		e=e-1;
+	}while(e>3);
 	if(a+10&&b*33-2||e)
 	{
 		d=3;
@@ -8,11 +13,6 @@ int kim()
 	else
 	{
 		d=7;
-	}
-	e=5;
-	while(e>3)
-	{
-		e=e-1;
 	}
 }
 
