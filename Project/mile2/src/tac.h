@@ -6,6 +6,7 @@ typedef struct code{
 	int line;
 	string s;
 	int goto_line;
+	string label;
 } code , *code_ptr;
 
 

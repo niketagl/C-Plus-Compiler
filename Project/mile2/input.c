@@ -1,13 +1,11 @@
-int e;
+int a,b,c,d,e;
 int kim()
 {
-	// int a,c,b,d,e;
-	while(e>5)
+
+	switch(a)
 	{
-		e=2;
-		
-		continue;
-		e=1;
+		case 1 : b = 9;
+		case 2 : c = 10;
 	}
 	// if(a+10&&b*33-2||e)
 	// {
