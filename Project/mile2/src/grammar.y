@@ -15,7 +15,6 @@ extern int column;
 extern int yylineno;
 
 
-	int lab_count=1;
 %}
 
 %code requires {
@@ -112,8 +111,22 @@ postfix_expression
 	| postfix_expression '(' argument_expression_list ')' 	{ if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	| postfix_expression '.' IDENTIFIER 					{ if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression PTR_OP IDENTIFIER 					{ if(char* s = type_check4("->",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
+	| postfix_expression INC_OP								{
+																table_entry_ptr temp = new table_entry; 
+																temp->type = new_basic_type(INTEGER); 
+																temp->type->constnt = 1;
+																temp->type->value = 1;
+																temp->name = "1";
+																if(char* s = type_check("+=",$<entry>$,$<entry>1, temp)) yyerror3(s);
+															}
+	| postfix_expression DEC_OP								{
+																table_entry_ptr temp = new table_entry; 
+																temp->type = new_basic_type(INTEGER); 
+																temp->type->constnt = 1;
+																temp->type->value = 1;
+																temp->name = "1";
+																if(char* s = type_check("-=",$<entry>$,$<entry>1, temp)) yyerror3(s);
+															}
 	| error '[' {yyerror2("expecting expression");} expression ']'
 	| error '(' {yyerror2("expecting expression");} ')'
 	| error '(' {yyerror2("expecting expression");} argument_expression_list ')'
@@ -131,20 +144,60 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression   { $<entry>$ = $<entry>1; }
-	| INC_OP unary_expression
+	| INC_OP unary_expression 
+							{ 
+								table_entry_ptr temp = new table_entry; 
+								temp->type = new_basic_type(INTEGER); 
+								temp->type->constnt = 1;
+								temp->type->value = 1;
+								temp->name = "1";
+								if(char* s = type_check("+=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+							}
 	| DEC_OP unary_expression
+							{
+								table_entry_ptr temp = new table_entry; 
+								temp->type = new_basic_type(INTEGER);
+								temp->type->constnt = 1;
+								temp->type->value = 1;
+								temp->name = "1";
+								if(char* s = type_check("-=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+							}
 	| unary_operator cast_expression
+							{
+								if(!strcmp($<stringval>1, "!"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = 0;
+									temp->name = "0";
+									if(char* s = type_check("==",$<entry>$,$<entry>2, temp)) yyerror3(s);								
+								}
+								else if(!strcmp($<stringval>1, "-"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = -1;
+									temp->name = "-1";
+									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+								}
+								else
+								{
+									$<entry>$ = $<entry>2;
+								}
+							}
 	| SIZEOF unary_expression
 	| SIZEOF '(' type_name ')'
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "&"); }
+	| '*'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "*"); }
+	| '+'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+"); }
+	| '-'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-"); }
+	| '~'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "~"); }
+	| '!'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "!"); }
 	;
 
 cast_expression
@@ -227,11 +280,11 @@ logical_and_expression
 									$<entry>$->truelist.resize(0);
 									$<entry>$->falselist.resize(0); 
 								}
+
 	| logical_and_expression AND_OP logical_and_expressionM inclusive_or_expression
 	  						{
 	  							$<entry>$ = $<entry>4;
 	  							$<entry>$->falselist.insert($<entry>$->falselist.end(), $<entry>1->falselist.begin(),$<entry>1->falselist.end() );
-	  							$<entry>$->isbool=1;
 	  						}
 	| error AND_OP {yyerror2("expecting logical expression");} inclusive_or_expression
 	;
@@ -256,53 +309,14 @@ logical_or_expression
 	  						{
 	  							$<entry>$ = $<entry>4;
 	  							$<entry>$->truelist.insert($<entry>$->truelist.end(), $<entry>1->truelist.begin(),$<entry>1->truelist.end() );
-	  							$<entry>$->isbool=1;
 	  						}
 	| error OR_OP {yyerror2("expecting logical expression");} logical_and_expression
 	;
 
 conditional_expression  
 	: logical_or_expression      { $<entry>$ = $<entry>1; }
-	| logical_or_expression '?' conditional_expression_mark1 expression ':' conditional_expression_mark2 conditional_expression 
-								 {
-								 	char *name = (char*)malloc(10*sizeof(char));
-									sprintf(name, "%s%d", "t-", count);
-									$<entry>$ = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
-									count++;
-
-									$<entry>$->truelist = merge_list($<entry>4->truelist, $<entry>7->truelist);
-									$<entry>$->falselist = merge_list($<entry>4->falselist, $<entry>7->falselist);
-
-									emit(V,name,"=",$<entry>7->name);
-
-								 }
+	| logical_or_expression '?' expression ':' conditional_expression
 	;
-conditional_expression_mark1 :	{
-									table_entry_ptr exp = $<entry>-1;
-									exp->falselist.push_back(code_line);
-									emit(V, "if(", exp->name, "== 0) goto");	
-									backpatch(V, exp->truelist, code_line);
-								}
-							 ;
-
-conditional_expression_mark2 : {
-									table_entry_ptr exp = $<entry>-4;
-									table_entry_ptr s1 = $<entry>-1;
-
-								 	char *name = (char*)malloc(10*sizeof(char));
-									sprintf(name, "%s%d", "t-", count);
-									emit(V,name,"=",s1->name);
-
-									s1->truelist.push_back(code_line);
-									emit(V, "if(", name, "== 0) goto");	
-
-									s1->falselist.push_back(code_line);
-									emit(V, "if(", name, "!= 0) goto");
-
-									backpatch(V, exp->falselist, code_line);	
-							   }
-							 ; 
-
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
@@ -359,7 +373,7 @@ init_declarator_listM : {$<type>$ = $<type>-2;};
 
 init_declarator
 	: declarator      { $<type>$ = $<type>1;}
-	| declarator '=' initializer    { if(char* s = type_check("=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| declarator '=' initializer
 	;
 
 storage_class_specifier
@@ -406,7 +420,19 @@ struct_or_union_specifier
 									}
 
 	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
+	| struct_or_union IDENTIFIER	{
+										if(lookup(struct_namespace, $<stringval>2))
+										{
+											$<type>$ = new_struct_type(lookup(struct_namespace, $<stringval>2)->type, $<stringval>2) ;
+										}
+										else
+										{
+											char* error = (char *) malloc (100 * sizeof(char));
+											sprintf(error, "%s%s%s","Undeclared structure \"", $<stringval>2, "\"");
+											yyerror3(error);
+											$<type>$ = new_basic_type(ERROR);
+										}
+									}
 	;
 mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); offset_stack.push(0);} ;
 
@@ -521,14 +547,33 @@ direct_declarator
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
 								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
-								if( e != NULL && !e->proc_decl)
+								if(e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
-									table_ptr temp = new table;
-									table_stack.push(temp); offset_stack.push(0);
+									table_stack.push(t1); offset_stack.push(0);
+								}
+								else if( e != NULL && e->proc_decl)
+								{
+									$<type>$ = new_function_type($<type>4,$<type>0);
+									if(type_compare(e->type, $<type>$))
+									{
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										if(e==NULL)ne->proc_decl=0;
+										t1->name.append($<stringval>1);
+										t1->scope = t1->name;
+										table_stack.push(t1); offset_stack.push(0);
+									}
+									else
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+										table_stack.push(t1); offset_stack.push(0);
+									}
 								}
 								else
 								{
@@ -555,6 +600,25 @@ direct_declarator
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
 									table_stack.push(temp); offset_stack.push(0);
+								}
+								else if( e != NULL && e->proc_decl)
+								{
+									$<type>$ = new_function_type(NULL,$<type>0);
+									if(type_compare(e->type, $<type>$))
+									{
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										if(e==NULL)ne->proc_decl=0;
+										t1->name.append($<stringval>1);
+										t1->scope = t1->name;
+										table_stack.push(t1); offset_stack.push(0);
+									}
+									else
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+									}
 								}
 								else
 								{
@@ -632,14 +696,14 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression  {$<entry>$ = $<entry>1;}
+	: assignment_expression
 	| '{' initializer_list '}'
 	| '{' initializer_list ',' '}'
 	;
 
 initializer_list
-	: initializer    {$<entry>$ = $<entry>1;}
-	| initializer_list ',' initializer    {$<entry>$ = $<entry>3;}
+	: initializer
+	| initializer_list ',' initializer
 	;
 
 statement
@@ -695,7 +759,7 @@ statement_list
 									}
 
 	| statement_list statement   	{
-											$<entry>$ = $<entry>2;
+										$<entry>$ = $<entry>2;
 									}
 	;
 
@@ -821,7 +885,6 @@ iteration_statement
 	| FOR '(' expression_statement mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	
 					{
 								$<entry>$ = new table_entry; 
-								cout<<"here";  
 								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>5->falselist.begin(), $<entry>5->falselist.end() );
 								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>11->breaklist.begin(), $<entry>11->breaklist.end() );
 								$<entry>11->nextlist.push_back(code_line);
@@ -897,8 +960,8 @@ jump_statement
 									$<entry>$->breaklist.push_back(code_line);
 									emit(V, "goto");
 								}
-	| RETURN ';'				{ emit(V,"return");$<entry>$ = new table_entry;}
-	| RETURN expression ';'     { emit(V,"return", $<entry>$->name); $<entry>$ = $<entry>2;}
+	| RETURN ';'
+	| RETURN expression ';'
 	;
 
 translation_unit

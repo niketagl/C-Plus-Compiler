@@ -1,15 +1,20 @@
 int a,b,c,d,e;
 int kim()
 {
-	for(int b;c>10;b+=1)
+
+	switch(a)
 	{
-		d=9;
-		continue;
-		if(c && d)
-		break;
-		else
-			d=8;
+		case 1 : b = 9;
+		case 2 : c = 10;
 	}
+	// if(a+10&&b*33-2||e)
+	// {
+	// 	d=3;
+	// }
+	// else
+	// {
+	// 	d=7;
+	// }
 }
 
 // #define el 0

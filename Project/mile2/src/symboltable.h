@@ -43,7 +43,7 @@ typedef struct typenode{
 	bool longer;   // set to 1 for long. 
 	bool shorter;	// set to 1 for short.
 	bool param;     // set to 1 for parameter variables.
-	int array_size;   // will be used for array type
+	int array_size;   // will be used for array typ
 	int value;
 	char* type_name;
 }type_node, *type_ptr;
@@ -53,9 +53,9 @@ typedef struct typenode{
 
 typedef struct table_entry{
 	string name;
-	bool isbool;     // will be 1 if logical exp is applied.
 	bool proc;   // will be 1 for procedures and structures.
 	bool proc_decl;    // will be 1 if proc is declared but not defined.
+	bool isbool;
 	struct table *t;
 	type_ptr type;
 	int width;

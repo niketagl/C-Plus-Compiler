@@ -1,8 +1,6 @@
-
 int switches()
 {
 	int a,b,c,d,e;
-
 	switch(a)
 	{
 		case 1 : c = 9;
@@ -10,3 +8,4 @@ int switches()
 		default : c = b;
 	}
 }
+
