@@ -1,10 +1,14 @@
-int e;
+int a,b,c,d,e;
 int kim()
 {
-	int a,b,c,d,e;
-	a = 10;
-	while ( a )
+	for(int b;c>10;b+=1)
 	{
+		d=9;
+		continue;
+		if(c && d)
+		break;
+		else
+			d=8;
 	}
 }
 

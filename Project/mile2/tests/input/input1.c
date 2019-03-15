@@ -1,20 +1,12 @@
-int fun(int a, char b)
-{
-    //do nothing
-    return 0;
-}
 
-// int fun(int a, char b)
-// {
-//     //do nothing
-//     return 1;
-// }
-
-int main()
+int switches()
 {
-    int a, b, c;
-    // a + b = c;
-    int arr[10];
-    a = arr[9];
-    return 0;
+	int a,b,c,d,e;
+
+	switch(a)
+	{
+		case 1 : c = 9;
+		case 3 : c = d && e;
+		default : c = b;
+	}
 }

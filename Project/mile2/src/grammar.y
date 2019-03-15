@@ -217,7 +217,16 @@ inclusive_or_expression
 	;
 
 logical_and_expression
-	: inclusive_or_expression      { $<entry>$ = $<entry>1; $<entry>$->isbool=0; }
+	: inclusive_or_expression      
+								{ 
+									$<entry>$ = $<entry>1; 
+									$<entry>$->isbool=0; 
+									$<entry>$->nextlist.resize(0);
+									$<entry>$->breaklist.resize(0);
+									$<entry>$->contlist.resize(0);
+									$<entry>$->truelist.resize(0);
+									$<entry>$->falselist.resize(0); 
+								}
 	| logical_and_expression AND_OP logical_and_expressionM inclusive_or_expression
 	  						{
 	  							$<entry>$ = $<entry>4;
@@ -680,14 +689,13 @@ declaration_list
 	;
 
 statement_list
-	: statement    {$<entry>$ = $<entry>1; if($<entry>1)backpatch(V,$<entry>1->nextlist,code_line);  }
+	: statement    
+									{
+										$<entry>$ = $<entry>1; 
+									}
+
 	| statement_list statement   	{
-											if($<entry>1) backpatch(V,$<entry>1->nextlist,code_line);
 											$<entry>$ = $<entry>2;
-											if($<entry>$ != $<entry>1 && $<entry>$ && $<entry>$)
-											{
-												$<entry>$->breaklist.insert($<entry>$->breaklist.end(),$<entry>1->breaklist.begin(),$<entry>1->breaklist.end());
-											}
 									}
 	;
 
@@ -697,9 +705,38 @@ expression_statement
 	;
 
 selection_statement
-	: IF '(' expression ')' mark1 statement       {$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>3->falselist, $<entry>6->nextlist);}  
-	| IF '(' expression ')' mark1 statement ELSE mark2 statement  
-						{$<entry>$ = new table_entry; $<entry>$->nextlist = merge_list($<entry>9->falselist, $<entry>6->nextlist);}
+	: IF '(' expression ')' mark1 statement       
+										{
+											$<entry>$ = new table_entry; 
+
+											$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>3->falselist.begin(), $<entry>3->falselist.end());
+
+											$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>6->nextlist.begin(), $<entry>6->nextlist.end());
+
+											$<entry>$->breaklist.insert($<entry>$->breaklist.end(), $<entry>6->breaklist.begin(), $<entry>6->breaklist.end());
+
+											$<entry>$->contlist.insert($<entry>$->contlist.end(), $<entry>6->contlist.begin(), $<entry>6->contlist.end());
+
+										}  
+	| IF '(' expression ')' mark1 statement ELSE mark2 statement       
+										{
+											$<entry>$ = new table_entry; 
+
+											$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>3->falselist.begin(), $<entry>3->falselist.end());
+
+											$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>6->nextlist.begin(), $<entry>6->nextlist.end());
+
+											$<entry>$->breaklist.insert($<entry>$->breaklist.end(), $<entry>6->breaklist.begin(), $<entry>6->breaklist.end());
+
+											$<entry>$->contlist.insert($<entry>$->contlist.end(), $<entry>6->contlist.begin(), $<entry>6->contlist.end());
+
+											$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>9->nextlist.begin(), $<entry>9->nextlist.end());
+
+											$<entry>$->breaklist.insert($<entry>$->breaklist.end(), $<entry>9->breaklist.begin(), $<entry>9->breaklist.end());
+
+											$<entry>$->contlist.insert($<entry>$->contlist.end(), $<entry>9->contlist.begin(), $<entry>9->contlist.end());
+
+										}
 	| SWITCH '(' expression ')' smark statement 
 						{
 
@@ -738,6 +775,7 @@ mark1 : {
 			exp->falselist.push_back(code_line);
 			emit(V, "if(", exp->name, "== 0) goto");	
 			backpatch(V, exp->truelist, code_line);
+			exp->truelist.resize(0);
 		} 
 	 ; 
 mark2 : 
@@ -747,45 +785,54 @@ mark2 :
 			s1->nextlist.push_back(code_line);
 			emit(V, "goto");	
 			backpatch(V, exp->falselist, code_line);
+			exp->falselist.resize(0);
 		}
 	  ;
 
 iteration_statement
 	: WHILE  mark3 '(' expression ')' mark4 statement 	{ 	
-															$<entry>$ = new table_entry;  
-															$<entry>$->nextlist = merge_list($<entry>4->falselist,$<entry>7->breaklist); 
+															$<entry>$ = new table_entry;   
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>4->falselist.begin(), $<entry>4->falselist.end() );
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>7->breaklist.begin(), $<entry>7->breaklist.end() );
 															$<entry>7->nextlist.push_back(code_line);
 															emit(V, "goto");
 															backpatch(V, $<entry>7->nextlist, $<intval>2);
 															backpatch(V, $<entry>7->contlist, $<intval>2);
 														}
 	| DO mark3 statement WHILE  mark5 '(' expression ')' ';' 	{
-																	$<entry>$ = new table_entry;
-																	$<entry>$->nextlist = merge_list($<entry>7->falselist,$<entry>3->breaklist);
+																	$<entry>$ = new table_entry;   
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>7->falselist.begin(), $<entry>7->falselist.end() );
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>3->breaklist.begin(), $<entry>3->breaklist.end() );
 																	$<entry>7->truelist.push_back(code_line);
 																	emit(V, "if(", $<entry>7->name, "!= 0) goto");
 																	backpatch(V, $<entry>7->truelist, $<intval>2);
 																}
 	| FOR '(' expression_statement mark3 expression_statement ')' mark4 statement 	{ 	
-																						$<entry>$ = new table_entry;  
-																						$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>8->breaklist); 
+
+																						$<entry>$ = new table_entry;   
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>5->falselist.begin(), $<entry>5->falselist.end() );
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>8->breaklist.begin(), $<entry>8->breaklist.end() );
 																						$<entry>8->nextlist.push_back(code_line);
 																						emit(V, "goto");
 																						backpatch(V, $<entry>8->nextlist, $<intval>4);
 																						backpatch(V, $<entry>8->contlist, $<intval>4);
 
 																					}
-	| FOR '(' expression_statement mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	{
-																												$<entry>$ = new table_entry;
-																												$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>11->breaklist);
-																												$<entry>11->nextlist.push_back(code_line);
-																												emit(V, "goto");
-																												backpatch(V, $<entry>11->nextlist, $<intval>6);
-																												backpatch(V, $<entry>11->contlist, $<intval>6);
-																											}
+	| FOR '(' expression_statement mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	
+					{
+								$<entry>$ = new table_entry; 
+								cout<<"here";  
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>5->falselist.begin(), $<entry>5->falselist.end() );
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>11->breaklist.begin(), $<entry>11->breaklist.end() );
+								$<entry>11->nextlist.push_back(code_line);
+								emit(V, "goto");
+								backpatch(V, $<entry>11->nextlist, $<intval>6);
+								backpatch(V, $<entry>11->contlist, $<intval>6);
+					}
 	| FOR '(' declaration mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	{
 																										$<entry>$ = new table_entry;
-																										$<entry>$->nextlist = merge_list($<entry>5->falselist,$<entry>11->breaklist);
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>5->falselist.begin(), $<entry>5->falselist.end() );
+								$<entry>$->nextlist.insert($<entry>$->nextlist.end(), $<entry>11->breaklist.begin(), $<entry>11->breaklist.end() );
 																										$<entry>11->nextlist.push_back(code_line);
 																										emit(V, "goto");
 																										backpatch(V, $<entry>11->nextlist, $<intval>6);
