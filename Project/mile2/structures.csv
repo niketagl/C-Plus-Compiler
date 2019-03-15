@@ -1,0 +1,11 @@
+Scope, Name, Type, Offset, Width
+GLOBAL, table, STRUCT, 0, 0
+table, name, *CHAR, 8, 8
+table, parent, *STRUCT, 0, 8
+table, scope, *CHAR, 16, 8
+table, width, INT, 24, 4
+GLOBAL, typenode, STRUCT, 0, 0
+typenode, array_size, INT, 8, 4
+typenode, info, *CHAR, 0, 8
+typenode, type_name, *CHAR, 16, 8
+typenode, value, INT, 12, 4
