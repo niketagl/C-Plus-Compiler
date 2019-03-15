@@ -669,9 +669,27 @@ iteration_statement
 																	emit(V, "if(", $<entry>7->name, "!= 0) goto");
 																	backpatch(V, $<entry>7->truelist, $<intval>2);
 																}
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
-	| FOR '(' declaration expression_statement expression ')' statement
+	| FOR '(' expression_statement mark3 expression_statement ')' mark4 statement 	{ 	
+																						$<entry>$ = new table_entry;  
+																						$<entry>$->nextlist = $<entry>5->falselist; 
+																						$<entry>8->nextlist.push_back(code_line);
+																						emit(V, "goto");
+																						backpatch(V, $<entry>8->nextlist, $<intval>4);
+																					}
+	| FOR '(' expression_statement mark3 expression_statement mark6 expression mark7 ')' mark8 statement 	{
+																												$<entry>$ = new table_entry;
+																												$<entry>$->nextlist = $<entry>5->falselist;
+																												$<entry>11->nextlist.push_back(code_line);
+																												emit(V, "goto");
+																												backpatch(V, $<entry>11->nextlist, $<intval>6);
+																											}
+	| FOR '(' declaration  mark3 expression_statement mark6 expression mark7 ')' mark8 statement 		{
+																											$<entry>$ = new table_entry;
+																											$<entry>$->nextlist = $<entry>5->falselist;
+																											$<entry>11->nextlist.push_back(code_line);
+																											emit(V, "goto");
+																											backpatch(V, $<entry>11->nextlist, $<intval>6);
+																										}
 	;
 
 mark3 : { 
@@ -692,6 +710,31 @@ mark5 : {
 			backpatch(V, s->nextlist, code_line);	
 		}
 	;  
+
+mark6 : {
+			table_entry_ptr exp = $<entry>0;
+			exp->falselist.push_back(code_line);
+			emit(V, "if(", exp->name, "== 0 ) goto");
+			exp->truelist.push_back(code_line);
+			emit(V, "goto");
+			$<intval>$ = code_line;	
+		}
+	;
+
+mark7 : {
+			table_entry_ptr s = $<entry>0;
+			int val = $<intval>-3;
+			s->nextlist.push_back(code_line);
+			emit(V, "goto");
+			backpatch(V, s->nextlist, val);
+		}
+	;
+
+mark8 : {
+			table_entry_ptr exp = $<entry>-4;
+			backpatch(V, exp->truelist, code_line);	
+		}
+	;
 
 jump_statement
 	: GOTO IDENTIFIER ';'

@@ -1,19 +1,19 @@
 int kim()
 {
 	int a,c,b,d,e;
-	e=5;
-	do
+	e=5+2;
+	for(int i=0+e;i<5;i=i+1)
 	{
-		e=e-1;
-	}while(e>3);
-	if(a+10&&b*33-2||e)
-	{
-		d=3;
+		e=e+1;
 	}
-	else
-	{
-		d=7;
-	}
+	// if(a+10&&b*33-2||e)
+	// {
+	// 	d=3;
+	// }
+	// else
+	// {
+	// 	d=7;
+	// }
 }
 
 // #define el 0
