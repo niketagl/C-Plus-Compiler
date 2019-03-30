@@ -95,6 +95,8 @@ table_entry_ptr lookup( table_ptr , char*);
 
 table_entry_ptr same_lookup( table_ptr , char*);
 
+void copy_table_content(table_ptr , table_ptr);
+
 //type system interface
 string print_type(type_ptr);
 

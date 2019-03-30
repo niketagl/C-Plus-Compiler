@@ -703,13 +703,36 @@ initializer_list
 
 statement
 	: labeled_statement     {$<entry>$ = $<entry>1;}
-	| compound_statement    {$<entry>$ = $<entry>1;}
+	| statementm compound_statement    { 
+											$<entry>$ = $<entry>2;
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
+
 	| expression_statement  {$<entry>$ = $<entry>1;}
-	| selection_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
-	| iteration_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
+	| statementm selection_statement   {
+											$<entry>$ = $<entry>2; 
+											backpatch(V,$<entry>$->nextlist,code_line);
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
+	| statementm iteration_statement   {
+											$<entry>$ = $<entry>2; 
+											backpatch(V,$<entry>$->nextlist,code_line);
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
 	| jump_statement        {$<entry>$ = $<entry>1;}
 	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = new table_entry;}
 	;
+
+statementm : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); offset_stack.push(0); };
 
 labeled_statement
 	: IDENTIFIER ':' statement

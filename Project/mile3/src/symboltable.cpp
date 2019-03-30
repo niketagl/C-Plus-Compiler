@@ -112,6 +112,24 @@ void savetable(table_ptr t, char* filename)
 
 }
 
+void copy_table_content(table_ptr t_in, table_ptr t_out)
+{
+	int t_offset = offset_stack.top();
+	map < string , table_entry_ptr > ::iterator i;
+	for ( i = t_in->entries.begin() ; i != t_in->entries.end(); i++ )
+	{
+		table_entry_ptr e = i->second;
+
+		e->offset += t_offset;
+		
+		string nam = i->first;
+
+		t_out->entries.insert( pair<string, table_entry_ptr >(nam, e) ) ;
+	}
+
+}
+
+
 int type_width(type_ptr type)
 {
 	int width = 0;
