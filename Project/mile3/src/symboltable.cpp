@@ -9,6 +9,7 @@
 using namespace std;
 
 int count = 0;
+int id_count = 0;
 extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
 extern stack <int> offset_stack;
@@ -159,7 +160,14 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 	t_entry->proc = 0;
 	t_entry->t = NULL;
 
-	t_entry->name = name;
+	t_entry->inp_name = name;
+
+	char temp[5];
+	sprintf(temp,"%d",id_count++);
+
+	t_entry->name += "id";
+	t_entry->name += temp;
+	
 
 	t_entry->type = type;
 
@@ -173,7 +181,7 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 
 	offset_stack.top() += t_entry->width;
 
-	string nam = name;
+	string nam = t_entry->name;
 
 	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
 	return t_entry; 
@@ -194,6 +202,8 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type,table_ptr chi
 	t_entry->t = child;
 
 	t_entry->name = name;
+
+	t_entry->inp_name = name;
 
 	t_entry->type = type;
 	
@@ -423,10 +433,16 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 	if(t==NULL) return NULL;
 
 	string nam = name;
-	if ( t->entries.find(nam) == t->entries.end() )
-		return lookup(t->parent, name);
-
-	return t->entries.find(nam)->second;
+	map < string , table_entry_ptr > ::iterator i;
+	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
+	{
+		
+		table_entry_ptr e = i->second;
+		if(e->inp_name==nam)
+			return e;
+		
+	}
+	return lookup(t->parent, name);
 
 }
 
@@ -435,10 +451,16 @@ table_entry_ptr same_lookup ( table_ptr t, char* name)
 	if(t==NULL) return NULL;
 
 	string nam = name;
-	if ( t->entries.find(nam) == t->entries.end() )
-		return NULL;
-
-	return t->entries.find(nam)->second;
+	map < string , table_entry_ptr > ::iterator i;
+	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
+	{
+		
+		table_entry_ptr e = i->second;
+		if(e->inp_name==nam)
+			return e;
+		
+	}
+	return NULL;
 
 }
 
