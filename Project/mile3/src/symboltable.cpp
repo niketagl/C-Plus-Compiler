@@ -551,7 +551,7 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			{
 				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, 0);
 				count++;
-				emit(V, name, "=", entry_in1->name, ".", string(id));
+				emit(V, entry_out->name, "=", entry_in1->name, ".", string(id));
 				return NULL;
 			}
 		}	
@@ -574,7 +574,7 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				{
 					entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
 					count++;
-					emit(V, name, "=", entry_in1->name, "->", string(id));
+					emit(V, entry_out->name, "=", entry_in1->name, "->", string(id));
 					return NULL;
 				}
 			}
@@ -645,7 +645,7 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				entry_out = enter(table_stack.top(), name, t1->p1, 0);
 				count++;
 				f_op = "[" + entry_in2->name + "]";
-				emit(V, name, "=", entry_in1->name, f_op);
+				emit(V, entry_out->name, "=", entry_in1->name, f_op);
 				return NULL;
 			}
 		}
@@ -677,7 +677,7 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			{
 				entry_out = enter(table_stack.top(), name, t1->p2, 0);
 				count++;
-				emit(V, name, "=", entry_in1->name, op);
+				emit(V, entry_out->name, "=", entry_in1->name, op);
 				return NULL;
 			}
 		}
@@ -728,7 +728,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->shorter = t1->shorter & t2->shorter;
 
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && t2->info==FLT)
@@ -748,7 +748,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && t2->info==DBL)
@@ -768,7 +768,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==CHR && t2->info==CHR || t1->info==CHR && t2->info==INTEGER || t1->info==INTEGER && t2->info==CHR)
@@ -789,7 +789,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && (t2->info==INTEGER || t2->info==CHR))
@@ -797,7 +797,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_float (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_float (",entry_in2->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to FLOAT") : warning("Implicit Typecast from CHAR to FLOAT");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
@@ -815,7 +815,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if((t1->info==INTEGER || t1->info==CHR) && t2->info==FLT)
@@ -823,7 +823,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_float (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_float (",entry_in1->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to FLOAT") : warning("Implicit Typecast from CHAR to FLOAT");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(FLT), 0);
@@ -841,7 +841,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && (t2->info==INTEGER || t2->info==CHR))
@@ -849,7 +849,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in2->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to DOUBLE") : warning("Implicit Typecast from CHAR to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
@@ -867,7 +867,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if((t1->info==INTEGER || t1->info==CHR) && t2->info==DBL)
@@ -875,7 +875,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in1->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to DOUBLE") : warning("Implicit Typecast from CHAR to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
@@ -893,7 +893,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && t2->info==FLT)
@@ -901,7 +901,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in2->name,")");
 			warning("Implicit Typecast from FLOAT to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
@@ -919,7 +919,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && t2->info==DBL)
@@ -927,7 +927,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in1->name,")");
 			warning("Implicit Typecast from FLOAT to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(DBL), 0);
@@ -945,7 +945,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==POINTER && (t2->info==INTEGER || t2->info==CHR))
@@ -953,7 +953,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_pointer_type(t1->p1), 0);
 			count++;
 			f_op = "pointer" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if((t1->info==INTEGER || t1->info==CHR) && t2->info==POINTER)
@@ -961,7 +961,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out = enter(table_stack.top(), name, new_pointer_type(t2->p1), 0);
 			count++;
 			f_op = "pointer" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 	}
@@ -989,7 +989,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->longer = t1->longer | t2->longer;
 			entry_out->type->shorter = t1->shorter & t2->shorter;
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==CHR && t2->info==CHR || t1->info==CHR && t2->info==INTEGER || t1->info==INTEGER && t2->info==CHR)
@@ -1012,7 +1012,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 	}
@@ -1038,7 +1038,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_out->type->longer = t1->longer | t2->longer;
 			entry_out->type->shorter = t1->shorter & t2->shorter;
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && t2->info==FLT)
@@ -1058,7 +1058,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && t2->info==DBL)
@@ -1078,7 +1078,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==CHR && t2->info==CHR || t1->info==CHR && t2->info==INTEGER || t1->info==INTEGER && t2->info==CHR)
@@ -1099,7 +1099,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			}
 			entry_out->type->unsign = t1->unsign & t2->unsign;
 			f_op = "int" + op;
-			emit(V,name,"=",entry_in1->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && (t2->info==INTEGER || t2->info==CHR))
@@ -1107,7 +1107,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_float (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_float (",entry_in2->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to FLOAT") : warning("Implicit Typecast from CHAR to FLOAT");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1125,7 +1125,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if((t1->info==INTEGER || t1->info==CHR) && t2->info==FLT)
@@ -1133,7 +1133,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(FLT), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_float (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_float (",entry_in1->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to FLOAT") : warning("Implicit Typecast from CHAR to FLOAT");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1151,7 +1151,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && (t2->info==INTEGER || t2->info==CHR))
@@ -1159,7 +1159,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in2->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to DOUBLE") : warning("Implicit Typecast from CHAR to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1177,7 +1177,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if((t1->info==INTEGER || t1->info==CHR) && t2->info==DBL)
@@ -1185,7 +1185,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in1->name,")");
 			t1->info==INTEGER ? warning("Implicit Typecast from INTEGER to DOUBLE") : warning("Implicit Typecast from CHAR to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1203,7 +1203,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 		else if(t1->info==DBL && t2->info==FLT)
@@ -1211,7 +1211,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t2->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in2->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in2->name,")");
 			warning("Implicit Typecast from FLOAT to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1229,7 +1229,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",entry_in1->name,f_op,temp->name);
+			emit(V,entry_out->name,"=",entry_in1->name,f_op,temp->name);
 			return NULL;
 		}
 		else if(t1->info==FLT && t2->info==DBL)
@@ -1237,7 +1237,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			table_entry_ptr temp = enter(table_stack.top(), name, new_basic_type(DBL), 0);
 			count++;
 			temp->type->constnt = t1->constnt;
-			emit(V,name,"=","cast_to_double (",entry_in1->name,")");
+			emit(V,temp->name,"=","cast_to_double (",entry_in1->name,")");
 			warning("Implicit Typecast from FLOAT to DOUBLE");
 			sprintf(name, "%s%d", "t-", count);
 			entry_out = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
@@ -1255,7 +1255,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				}
 			}
 			f_op = "real" + op;
-			emit(V,name,"=",temp->name,f_op,entry_in2->name);
+			emit(V,entry_out->name,"=",temp->name,f_op,entry_in2->name);
 			return NULL;
 		}
 	}
@@ -1269,11 +1269,11 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_in2->falselist.push_back(code_line);
 			emit(V, "if(", entry_in2->name, "== 0) goto");
 			backpatch(V, entry_in2->truelist, code_line);
-			emit(V, name, "= 1");
+			emit(V, temp->name, "= 1");
 			temp->truelist.push_back(code_line);
 			emit(V, "goto");
 			backpatch(V, entry_in2->falselist, code_line);
-			emit(V, name, "= 0");
+			emit(V, temp->name, "= 0");
 			backpatch(V, temp->truelist, code_line);
 			temp->truelist.resize(0);
 			entry_in2 = temp;
@@ -1294,11 +1294,11 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			entry_in2->falselist.push_back(code_line);
 			emit(V, "if(", entry_in2->name, "== 0) goto");
 			backpatch(V, entry_in2->truelist, code_line);
-			emit(V, name, "= 1");
+			emit(V, temp->name, "= 1");
 			temp->truelist.push_back(code_line);
 			emit(V, "goto");
 			backpatch(V, entry_in2->falselist, code_line);
-			emit(V, name, "= 0");
+			emit(V, temp->name, "= 0");
 			backpatch(V, temp->truelist, code_line);
 			entry_in2 = temp;
 		}
