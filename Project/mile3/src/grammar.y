@@ -991,8 +991,8 @@ jump_statement
 									$<entry>$->breaklist.push_back(code_line);
 									emit(V, "goto");
 								}
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';'				{	$<entry>$ = new table_entry; emit(V,"return"); }
+	| RETURN expression ';'		{	$<entry>$ = $<entry>2; emit(V,"return", $<entry>2->name);}
 	;
 
 translation_unit

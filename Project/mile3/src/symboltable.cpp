@@ -16,6 +16,7 @@ extern stack <int> offset_stack;
 extern void warning(const char*);
 extern int code_line;
 extern table_ptr struct_namespace;
+extern map < string , int > labels;
 
 
 table_ptr mktable( table_ptr parent)
@@ -210,6 +211,8 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type,table_ptr chi
 	string nam = name;
 
 	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
+
+	labels.insert( pair< string, int >(t_entry->inp_name, code_line));
 	
 	return t_entry; 
 }
