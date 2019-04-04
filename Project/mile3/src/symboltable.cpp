@@ -10,6 +10,7 @@ using namespace std;
 
 int count = 0;
 int id_count = 0;
+int proc_id_count = 0;
 extern vector < code_ptr > V;
 extern stack < table_ptr > table_stack;
 extern stack <int> offset_stack;
@@ -202,13 +203,27 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type,table_ptr chi
 	
 	t_entry->t = child;
 
-	t_entry->name = name;
-
 	t_entry->inp_name = name;
+
+	table_entry_ptr e = same_lookup(table_stack.top(), name, type->p1);
+
+	if(e==NULL)
+	{
+		char temp[5];
+		sprintf(temp,"%d",proc_id_count++);
+
+		t_entry->name += "proc_id";
+		t_entry->name += temp;
+	}
+	else
+	{
+		t_entry->name = e->name;
+	}
+
 
 	t_entry->type = type;
 	
-	string nam = name;
+	string nam = t_entry->name;
 
 	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
 
@@ -449,7 +464,32 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 
 }
 
-table_entry_ptr same_lookup ( table_ptr t, char* name)
+table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
+{
+	if(t==NULL) return NULL;
+
+	string nam = name;
+	map < string , table_entry_ptr > ::iterator i;
+	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
+	{
+		
+		table_entry_ptr e = i->second;
+		if(e->inp_name==nam && e->type->info==FUNCTION)
+		{
+			if(t1 == NULL && e->type->p1==NULL) return e;
+			else
+			{
+				if(type_compare(e->type->p1, t1)) return e;
+			}
+		}
+		
+	}
+
+	return NULL;
+
+}
+
+table_entry_ptr same_lookup1 ( table_ptr t, char* name, type_ptr t1)
 {
 	if(t==NULL) return NULL;
 
@@ -460,13 +500,20 @@ table_entry_ptr same_lookup ( table_ptr t, char* name)
 		
 		table_entry_ptr e = i->second;
 		if(e->inp_name==nam)
-			return e;
+		{
+			if(t1 == NULL) return e;
+			else
+			{
+				
+				if(type_compare(e->type->p1, t1)) return e;
+			}
+		}
 		
 	}
+
 	return NULL;
 
 }
-
 
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
