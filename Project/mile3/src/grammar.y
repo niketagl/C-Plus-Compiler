@@ -48,9 +48,9 @@ extern int yylineno;
 %token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
-%token TYPEDEF EXTERN STATIC AUTO REGISTER
+%token TYPEDEF EXTERN STATIC AUTO REGISTER 
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
-%token STRUCT UNION ENUM ELLIPSIS
+%token STRUCT UNION ENUM ELLIPSIS THIS SCOPE_RES ASM CLASS PRIVATE PROTECTED PUBLIC
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
@@ -60,8 +60,15 @@ extern int yylineno;
 
 %%
 
+class_name
+	: IDENTIFIER { $<stringval>$ = $<stringval>1; }
+	;
+
 primary_expression
-	: IDENTIFIER   	{ 
+	: literal 	{ $<entry>$ = $<entry>1; }
+	| THIS
+	| SCOPE_RES IDENTIFIER
+	| class_name 		{ 
 						if(!lookup(table_stack.top(),$<stringval>1))
 						{
 							char* error = (char *) malloc (100 * sizeof(char));
@@ -74,8 +81,12 @@ primary_expression
 						{
 							$<entry>$ = lookup(table_stack.top(), $<stringval>1);
 						} 
-					}
-	| INTEGER_CONSTANT		{ 		$<entry>$ = new table_entry; 
+				}
+	| '(' expression ')'  { $<entry>$ = $<entry>2; }
+	;
+
+literal
+	: INTEGER_CONSTANT		{ 		$<entry>$ = new table_entry; 
 									$<entry>$->type = new_basic_type(INTEGER);
 									$<entry>$->type->value = $<intval>1; 
 									$<entry>$->type->constnt = 1;
@@ -101,7 +112,6 @@ primary_expression
 							}
 
 	| STRING_LITERAL
-	| '(' expression ')'  { $<entry>$ = $<entry>2; }
 	;
 
 postfix_expression
@@ -196,7 +206,6 @@ unary_operator
 	| '*'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "*"); }
 	| '+'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+"); }
 	| '-'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-"); }
-	| '~'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "~"); }
 	| '!'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "!"); }
 	;
 
@@ -347,8 +356,13 @@ constant_expression
 declaration
 	: declaration_specifiers ';' { $<type>$ = $<type>1;}
 	| declaration_specifiers init_declarator_list ';' { $<type>$ = $<type>2;}
+	| IDENTIFIER IDENTIFIER ';'
+	| asm_declaration
 	;
 
+asm_declaration
+	: ASM '(' STRING_LITERAL ')' ';'
+	;
 
 declaration_specifiers
 	: storage_class_specifier    { $<type>$ = $<type>1;}
@@ -392,6 +406,11 @@ type_specifier
 	| struct_or_union_specifier { $<type>$ = $<type>1; }
 	| enum_specifier
 	| TYPE_NAME
+	| class_specifier
+	;
+
+class_key
+    : CLASS
 	;
 
 struct_or_union_specifier
@@ -430,7 +449,6 @@ struct_or_union_specifier
 									}
 	;
 mk_tbl2 : { table_ptr t1 = mktable(); table_stack.push(t1); offset_stack.push(0);} ;
-
 
 struct_or_union
 	: STRUCT
@@ -1017,27 +1035,69 @@ function_definition
 																table_entry_ptr e=same_lookup(table_stack.top(),nam);
 																if(e)e->proc_decl=0;
 															}
-	| declarator declaration_list compound_statement  		
-															{
-																table_ptr t1 = table_stack.top();
-																table_stack.pop();offset_stack.pop();
-																char *nam = strdup(t1->name.c_str());
-																table_entry_ptr e=same_lookup(table_stack.top(),nam);
-																if(e)e->proc_decl=0;
-															}
-	| declarator compound_statement 						
-															{
-																table_ptr t1 = table_stack.top();
-																table_stack.pop();offset_stack.pop();
-																char *nam = strdup(t1->name.c_str());
-																table_entry_ptr e=same_lookup(table_stack.top(),nam);
-																if(e)e->proc_decl=0;
-															}
 	;
 
 
 mk_tbl : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); offset_stack.push(0);} ;
-	
+
+class_specifier
+	: class_head '{' member_list '}'
+    | class_head '{' '}'
+    ;
+
+class_head
+    : class_key base_spec
+    | class_key class_name base_spec
+    | class_key class_name
+    ;
+
+member_list
+    : member_declaration member_list
+    | member_declaration
+    | access_specifier ':' member_list
+    | access_specifier ':'
+
+member_declaration
+    : declaration_specifiers member_declarator_list ';'
+    | member_declarator_list ';'
+    | declaration_specifiers ';'
+    | ';'
+    | function_definition
+    ;
+
+member_declarator_list
+    : member_declarator
+    | member_declarator_list ',' member_declarator
+    ;
+
+member_declarator
+    : declarator pure_specifier
+    | declarator
+    ;
+
+pure_specifier
+    : '=' INTEGER_CONSTANT
+    ;
+
+base_spec
+    : ':' base_list
+    ;
+
+base_list
+    : base_specifier
+    | base_list ',' base_specifier
+    ;
+
+base_specifier
+    : class_name
+    | access_specifier class_name
+    ;
+
+access_specifier
+    : PRIVATE
+    | PROTECTED
+    | PUBLIC
+    ;
 
 %%
 

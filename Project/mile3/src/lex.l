@@ -34,10 +34,12 @@ extern void preprocess();
 "//".*		{counts();}
 "/*"([^*]|\*+[^/])*"*/"		{counts();}
 
+"asm"			{ counts(); return(ASM); }
 "auto"			{ counts(); return(AUTO); }
 "break"			{ counts(); return(BREAK); }
 "case"			{ counts(); return(CASE); }
 "char"			{ counts(); return(CHAR); }
+"class"			{ counts(); return(CLASS); }
 "const"			{ counts(); return(CONST); }
 "continue"		{ counts(); return(CONTINUE); }
 "default"		{ counts(); return(DEFAULT); }
@@ -52,6 +54,9 @@ extern void preprocess();
 "if"			{ counts(); return(IF); }
 "int"			{ counts(); return(INT); }
 "long"			{ counts(); return(LONG); }
+"private"		{ counts(); return(PRIVATE); }
+"protected"		{ counts(); return(PROTECTED); }
+"public"		{ counts(); return(PUBLIC); }
 "register"		{ counts(); return(REGISTER); }
 "return"		{ counts(); return(RETURN); }
 "short"			{ counts(); return(SHORT); }
@@ -60,6 +65,7 @@ extern void preprocess();
 "static"		{ counts(); return(STATIC); }
 "struct"		{ counts(); return(STRUCT); }
 "switch"		{ counts(); return(SWITCH); }
+"this"			{ counts(); return(THIS); }
 "typedef"		{ counts(); return(TYPEDEF); }
 "union"			{ counts(); return(UNION); }
 "unsigned"		{ counts(); return(UNSIGNED); }
@@ -102,6 +108,7 @@ L?\"(\\.|[^\\"])*\"	{ counts(); return(STRING_LITERAL); }
 ">="			{ counts(); return(GE_OP); }
 "=="			{ counts(); return(EQ_OP); }
 "!="			{ counts(); return(NE_OP); }
+"::"			{ counts(); return(SCOPE_RES); }
 ";"			{ counts(); return(';'); }
 ("{"|"<%")		{ counts(); return('{'); }
 ("}"|"%>")		{ counts(); return('}'); }
