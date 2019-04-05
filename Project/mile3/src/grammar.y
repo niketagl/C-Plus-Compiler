@@ -107,8 +107,22 @@ primary_expression
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
 	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
-	| postfix_expression '(' ')'							{ if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s); }
-	| postfix_expression '(' argument_expression_list ')' 	{ if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| postfix_expression '(' ')'							{ 
+																if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s);
+																else
+																{
+																	//generate three adr code
+																} 
+															}
+
+	| postfix_expression '(' argument_expression_list ')' 	{ 
+																if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);
+																else
+																{
+																	//generate three adr code
+																}
+															}
+
 	| postfix_expression '.' IDENTIFIER 					{ if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression PTR_OP IDENTIFIER 					{ if(char* s = type_check4("->",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression INC_OP								{
@@ -137,8 +151,8 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression			{$<entry>$ = $<entry>1;}
+	| argument_expression_list ',' assignment_expression  {$<entry>$ = new table_entry; $<entry>$->type = new_cartesian_type($<entry>1->type, $<entry>3->type); }
 	| error ',' {yyerror2("expecting expression");} assignment_expression
 	;
 
@@ -310,8 +324,46 @@ logical_or_expression
 
 conditional_expression  
 	: logical_or_expression      { $<entry>$ = $<entry>1; }
-	| logical_or_expression '?' expression ':' conditional_expression
+	| logical_or_expression '?' conditional_expression_mark1 expression ':' conditional_expression_mark2 conditional_expression 
+								 {
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									$<entry>$ = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+									count++;
+
+									$<entry>$->truelist = merge_list($<entry>4->truelist, $<entry>7->truelist);
+									$<entry>$->falselist = merge_list($<entry>4->falselist, $<entry>7->falselist);
+
+									emit(V,name,"=",$<entry>7->name);
+
+								 }
 	;
+conditional_expression_mark1 :	{
+									table_entry_ptr exp = $<entry>-1;
+									exp->falselist.push_back(code_line);
+									emit(V, "if(", exp->name, "== 0) goto");	
+									backpatch(V, exp->truelist, code_line);
+								}
+							 ;
+
+conditional_expression_mark2 : {
+									table_entry_ptr exp = $<entry>-4;
+									table_entry_ptr s1 = $<entry>-1;
+
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									emit(V,name,"=",s1->name);
+
+									s1->truelist.push_back(code_line);
+									emit(V, "if(", name, "== 0) goto");	
+
+									s1->falselist.push_back(code_line);
+									emit(V, "if(", name, "!= 0) goto");
+
+									backpatch(V, exp->falselist, code_line);	
+							   }
+							 ; 
+
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }

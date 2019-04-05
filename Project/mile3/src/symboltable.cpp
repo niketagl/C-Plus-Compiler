@@ -549,9 +549,10 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			}
 			else
 			{
+				table_entry_ptr temp = lookup(t2, id);
 				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, 0);
 				count++;
-				emit(V, entry_out->name, "=", entry_in1->name, ".", string(id));
+				emit(V, entry_out->name, "=", entry_in1->name, ".", temp->name);
 				return NULL;
 			}
 		}	
@@ -572,9 +573,10 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				}
 				else
 				{
+					table_entry_ptr temp = (lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id));
 					entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
 					count++;
-					emit(V, entry_out->name, "=", entry_in1->name, "->", string(id));
+					emit(V, entry_out->name, "=", entry_in1->name, "->", temp->name);
 					return NULL;
 				}
 			}
@@ -670,6 +672,8 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 					char* type_error;
     				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
     				strcpy(type_error, terror.c_str());
+    				entry_out = new table_entry;
+    				entry_out->type = new_basic_type(ERROR);
 					return type_error;
 				}
 			}
@@ -694,6 +698,8 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
     char* type_error;
     type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
     strcpy(type_error, terror.c_str());
+	entry_out = new table_entry;
+	entry_out->type = new_basic_type(ERROR);
 	return type_error;
 }
 
@@ -1345,5 +1351,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
     char* type_error;
     type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
     strcpy(type_error, terror.c_str());
+	entry_out = new table_entry;
+	entry_out->type = new_basic_type(ERROR);
 	return type_error;
 }
