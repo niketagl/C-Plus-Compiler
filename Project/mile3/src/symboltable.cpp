@@ -91,12 +91,16 @@ void print_table(table_ptr t, ofstream &f1, string scope)
 		table_entry_ptr e = i->second;
 
 		if(e->proc==1)
-		f1<<t->scope<<", "<<i->first;
+		f1<<t->scope;
 		else
-		f1<<scope<<", "<<i->first;
+		f1<<scope;
 
+		if(e->type->param)
+			f1<<", 1,";
+		else
+			f1<<", 0,";
 
-		f1<<", "<<print_type(e->type)<<", "<< e->offset <<", "<<e->width<<"\n";
+		f1<<i->first<<", "<<print_type(e->type)<<", "<< e->offset <<", "<<e->width<<"\n";
 
 		if(e->proc==1)
 		{
@@ -110,7 +114,7 @@ void savetable(table_ptr t, char* filename)
 {
 	ofstream f1;
 	f1.open(filename);
-	f1<<"Scope, Name, Type, Offset, Width\n";
+	f1<<"Scope, Is_Param, Name, Type, Offset, Width\n";
 	string s = "Global";
 	print_table(t,f1,s);
 	f1.close();
@@ -179,7 +183,7 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 	if (!type->param)
 	t_entry->offset = offset_stack.top();
 	else
-	t_entry->offset = - offset_stack.top();
+	t_entry->offset = offset_stack.top();
 
 	t_entry->width = type_width(type);
 
