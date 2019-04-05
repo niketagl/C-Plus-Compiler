@@ -16,3 +16,6 @@ compile: $(TRY) $(SYM) $(TAC) lex.yy.c y.tab.c
 
 clean:
 	rm compile lex.yy.c y.tab.c y.tab.h
+
+clean_output:
+	rm global_table.csv structures.csv output_code.txt 

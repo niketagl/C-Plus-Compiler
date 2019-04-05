@@ -53,6 +53,7 @@ typedef struct typenode{
 
 typedef struct table_entry{
 	string name;
+	string inp_name;
 	bool proc;   // will be 1 for procedures and structures.
 	bool proc_decl;    // will be 1 if proc is declared but not defined.
 	bool isbool;
@@ -93,7 +94,11 @@ void addwidth(table_ptr t, int width);
 
 table_entry_ptr lookup( table_ptr , char*);
 
-table_entry_ptr same_lookup( table_ptr , char*);
+table_entry_ptr same_lookup( table_ptr , char*, type_ptr t1 = NULL);
+
+table_entry_ptr same_lookup1( table_ptr , char*, type_ptr t1 = NULL);
+
+void copy_table_content(table_ptr , table_ptr);
 
 //type system interface
 string print_type(type_ptr);

@@ -117,8 +117,22 @@ literal
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
 	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
-	| postfix_expression '(' ')'							{ if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s); }
-	| postfix_expression '(' argument_expression_list ')' 	{ if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| postfix_expression '(' ')'							{ 
+																if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s);
+																else
+																{
+																	//generate three adr code
+																} 
+															}
+
+	| postfix_expression '(' argument_expression_list ')' 	{ 
+																if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);
+																else
+																{
+																	//generate three adr code
+																}
+															}
+
 	| postfix_expression '.' IDENTIFIER 					{ if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression PTR_OP IDENTIFIER 					{ if(char* s = type_check4("->",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression INC_OP								{
@@ -147,8 +161,8 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression			{$<entry>$ = $<entry>1;}
+	| argument_expression_list ',' assignment_expression  {$<entry>$ = new table_entry; $<entry>$->type = new_cartesian_type($<entry>1->type, $<entry>3->type); }
 	| error ',' {yyerror2("expecting expression");} assignment_expression
 	;
 
@@ -319,8 +333,46 @@ logical_or_expression
 
 conditional_expression  
 	: logical_or_expression      { $<entry>$ = $<entry>1; }
-	| logical_or_expression '?' expression ':' conditional_expression
+	| logical_or_expression '?' conditional_expression_mark1 expression ':' conditional_expression_mark2 conditional_expression 
+								 {
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									$<entry>$ = enter(table_stack.top(), name, new_basic_type(INTEGER), 0);
+									count++;
+
+									$<entry>$->truelist = merge_list($<entry>4->truelist, $<entry>7->truelist);
+									$<entry>$->falselist = merge_list($<entry>4->falselist, $<entry>7->falselist);
+
+									emit(V,name,"=",$<entry>7->name);
+
+								 }
 	;
+conditional_expression_mark1 :	{
+									table_entry_ptr exp = $<entry>-1;
+									exp->falselist.push_back(code_line);
+									emit(V, "if(", exp->name, "== 0) goto");	
+									backpatch(V, exp->truelist, code_line);
+								}
+							 ;
+
+conditional_expression_mark2 : {
+									table_entry_ptr exp = $<entry>-4;
+									table_entry_ptr s1 = $<entry>-1;
+
+								 	char *name = (char*)malloc(10*sizeof(char));
+									sprintf(name, "%s%d", "t-", count);
+									emit(V,name,"=",s1->name);
+
+									s1->truelist.push_back(code_line);
+									emit(V, "if(", name, "== 0) goto");	
+
+									s1->falselist.push_back(code_line);
+									emit(V, "if(", name, "!= 0) goto");
+
+									backpatch(V, exp->falselist, code_line);	
+							   }
+							 ; 
+
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
@@ -418,7 +470,7 @@ struct_or_union_specifier
 									{
 										table_ptr t1 = table_stack.top();
 										table_stack.pop(); offset_stack.pop();
-										if(same_lookup(struct_namespace,$<stringval>1))
+										if(same_lookup1(struct_namespace,$<stringval>1))
 										{
 											char* error = (char *) malloc (100 * sizeof(char));
 											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>1, "\"");
@@ -512,10 +564,10 @@ declarator
 
 direct_declarator
 	: IDENTIFIER  	{ 
-						if(same_lookup(table_stack.top(),$<stringval>1))
+						if(same_lookup1(table_stack.top(),$<stringval>1))
 						{
 							char* error = (char *) malloc (100 * sizeof(char));
-							sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+							sprintf(error, "%s%s%s","Multiple declarations for identifier5 \"", $<stringval>1, "\"");
 							yyerror3(error);
 							$<type>$ = new_basic_type(ERROR);
 						}
@@ -530,7 +582,7 @@ direct_declarator
 													if(same_lookup(table_stack.top(),$<stringval>1))
 													{
 														char* error = (char *) malloc (100 * sizeof(char));
-														sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+														sprintf(error, "%s%s%s","Multiple declarations for identifier6 \"", $<stringval>1, "\"");
 														yyerror3(error);
 														$<type>$ = new_basic_type(ERROR);
 													}
@@ -541,10 +593,10 @@ direct_declarator
 													}	
 												}
 	| IDENTIFIER '[' ']'  	{
-								if(same_lookup(table_stack.top(),$<stringval>1))
+								if(same_lookup1(table_stack.top(),$<stringval>1))
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier0 \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 								}
@@ -559,11 +611,11 @@ direct_declarator
 							{ 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
-								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
+								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1, $<type>4);
 								if(e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier1 \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_stack.push(t1); offset_stack.push(0);
@@ -604,11 +656,12 @@ direct_declarator
 							{ 
 								table_ptr t1 = table_stack.top();
 								table_stack.pop(); offset_stack.pop();
-								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1);
+								type_ptr t_notype = new_basic_type(NOTYPE);
+								table_entry_ptr e = same_lookup(table_stack.top(),$<stringval>1, t_notype);
 								if( (e != NULL)? !e->proc_decl : 0 )
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier2 \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
@@ -721,13 +774,36 @@ initializer_list
 
 statement
 	: labeled_statement     {$<entry>$ = $<entry>1;}
-	| compound_statement    {$<entry>$ = $<entry>1;}
+	| statementm compound_statement    { 
+											$<entry>$ = $<entry>2;
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
+
 	| expression_statement  {$<entry>$ = $<entry>1;}
-	| selection_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
-	| iteration_statement   {$<entry>$ = $<entry>1; backpatch(V,$<entry>$->nextlist,code_line); }
+	| statementm selection_statement   {
+											$<entry>$ = $<entry>2; 
+											backpatch(V,$<entry>$->nextlist,code_line);
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
+	| statementm iteration_statement   {
+											$<entry>$ = $<entry>2; 
+											backpatch(V,$<entry>$->nextlist,code_line);
+											table_ptr t = table_stack.top(); 
+											table_stack.pop();
+											offset_stack.pop(); 
+											copy_table_content(t,table_stack.top());
+										}
 	| jump_statement        {$<entry>$ = $<entry>1;}
 	| declaration    { if($<type>1->info==FUNCTION){table_stack.pop();offset_stack.pop();} $<entry>$ = new table_entry;}
 	;
+
+statementm : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); offset_stack.push(0); };
 
 labeled_statement
 	: IDENTIFIER ':' statement
@@ -986,8 +1062,8 @@ jump_statement
 									$<entry>$->breaklist.push_back(code_line);
 									emit(V, "goto");
 								}
-	| RETURN ';'
-	| RETURN expression ';'
+	| RETURN ';'				{	$<entry>$ = new table_entry; emit(V,"return"); }
+	| RETURN expression ';'		{	$<entry>$ = $<entry>2; emit(V,"return", $<entry>2->name);}
 	;
 
 translation_unit
@@ -1003,12 +1079,13 @@ external_declaration
 							table_ptr t1 = table_stack.top();
 							table_stack.pop();offset_stack.pop();
 							char *nam = strdup(t1->name.c_str());
-							table_entry_ptr e = same_lookup(table_stack.top(),nam);
 							
-							if(e->proc_decl)
+							table_entry_ptr e = same_lookup(table_stack.top(),nam, $<type>1->p1);
+							
+							if(e!=NULL && e->proc_decl)
 							{
 								char* error = (char *) malloc (100 * sizeof(char));
-								sprintf(error, "%s%s%s","Multiple declarations for identifier \"", nam, "\"");
+								sprintf(error, "%s%s%s","Multiple declarations for identifier4 \"", nam, "\"");
 								yyerror3(error);
 							}
 							else e->proc_decl=1;
@@ -1023,8 +1100,8 @@ function_definition
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-
-																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																type_ptr temp = $<type>2;
+																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
 	| declaration_specifiers declarator compound_statement  
@@ -1032,7 +1109,8 @@ function_definition
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																table_entry_ptr e=same_lookup(table_stack.top(),nam);
+																type_ptr temp = $<type>2;
+																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
 	;
