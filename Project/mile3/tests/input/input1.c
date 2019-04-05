@@ -1,14 +1,6 @@
-int fun(int a, int b);
-
-int fun(int a, int b)
-{
-
-}
-
-int fun();
-
 int switches()
 {
-
+	int a;
+	int *b;
+	&a;	
 }
-

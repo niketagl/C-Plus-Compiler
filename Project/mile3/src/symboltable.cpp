@@ -516,6 +516,76 @@ table_entry_ptr same_lookup1 ( table_ptr t, char* name, type_ptr t1)
 
 }
 
+char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1)
+{
+	if(entry_in1 == NULL || entry_in1->type == NULL)
+	{
+		string terror = "No operand for operator \"" + op + "\"";
+		char* type_error;
+		type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+		strcpy(type_error, terror.c_str());
+		entry_out = new table_entry;
+		entry_out->type = new_basic_type(ERROR);
+		return type_error;
+	}
+	type_ptr t1 = entry_in1->type;
+	char name[8];
+	string f_op;
+	sprintf(name, "%s%d", "t-", count);
+	if(op=="*")
+	{
+		if(t1->info==POINTER)
+		{
+			entry_out = enter(table_stack.top(), name, t1->p1, 0);
+			count++;
+			emit(V, entry_out->name, "=", "*", entry_in1->name);
+			return NULL;
+		}
+	}
+	else if(op=="&")
+	{
+		
+		char tempo[12];
+		strcpy(tempo, (entry_in1->inp_name).c_str());
+		cout<<tempo<<endl;
+		if(!(lookup(table_stack.top(), tempo)))
+		{
+			string terror = string(entry_in1->inp_name) + " is Undefined";
+			char* type_error;
+			type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+			strcpy(type_error, terror.c_str());
+			entry_out = new table_entry;
+			entry_out->type = new_basic_type(ERROR);
+			return type_error;
+		}
+		else
+		{
+			type_ptr temp = new_pointer_type(t1);
+			entry_out = enter(table_stack.top(), name, temp, 0);
+			count++;
+			emit(V, entry_out->name, "=", "BASE_POINTER", "+", to_string((lookup(table_stack.top(), tempo))->offset));
+			return NULL;
+		}
+	}
+	else if(op=="~")
+	{
+		if(t1->info==INTEGER)
+		{
+			entry_out = enter(table_stack.top(), name, t1, 0);
+			count++;
+			emit(V, entry_out->name, "=", "~", entry_in1->name);
+			return NULL;
+		}
+	}
+	string terror = "Unable to perform \"" + op + "\" operation on Data type: \"" + print_type(t1) + "\""; 
+    char* type_error;
+    type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+    strcpy(type_error, terror.c_str());
+	entry_out = new table_entry;
+	entry_out->type = new_basic_type(ERROR);
+	return type_error;
+}
+
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
 	type_ptr t1 = entry_in1->type;

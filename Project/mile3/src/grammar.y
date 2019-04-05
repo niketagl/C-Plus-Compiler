@@ -222,6 +222,29 @@ unary_expression
 									temp->name = "-1";
 									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
 								}
+								else if(!strcmp($<stringval>1, "*"))
+								{
+									if(char* s = type_check3("*",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "&"))
+								{
+									if(char* s = type_check3("&",$<entry>$,$<entry>2)) yyerror3(s);
+									//char temp_name[12];
+									//strcpy(temp_name, )
+								}
+								else if(!strcmp($<stringval>1, "~"))
+								{
+									if(char* s = type_check3("~",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "+"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = 1;
+									temp->name = "+1";
+									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+								}
 								else
 								{
 									$<entry>$ = $<entry>2;
@@ -584,7 +607,7 @@ direct_declarator
 						if(same_lookup1(table_stack.top(),$<stringval>1))
 						{
 							char* error = (char *) malloc (100 * sizeof(char));
-							sprintf(error, "%s%s%s","Multiple declarations for identifier5 \"", $<stringval>1, "\"");
+							sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 							yyerror3(error);
 							$<type>$ = new_basic_type(ERROR);
 						}
@@ -599,7 +622,7 @@ direct_declarator
 													if(same_lookup1(table_stack.top(),$<stringval>1))
 													{
 														char* error = (char *) malloc (100 * sizeof(char));
-														sprintf(error, "%s%s%s","Multiple declarations for identifier6 \"", $<stringval>1, "\"");
+														sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 														yyerror3(error);
 														$<type>$ = new_basic_type(ERROR);
 													}
@@ -613,7 +636,7 @@ direct_declarator
 								if(same_lookup1(table_stack.top(),$<stringval>1))
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier0 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 								}
@@ -632,7 +655,7 @@ direct_declarator
 								if(e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier1 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_stack.push(t1); offset_stack.push(0);
@@ -678,7 +701,7 @@ direct_declarator
 								if( (e != NULL)? !e->proc_decl : 0 )
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier2 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
@@ -1102,7 +1125,7 @@ external_declaration
 							if(e!=NULL && e->proc_decl)
 							{
 								char* error = (char *) malloc (100 * sizeof(char));
-								sprintf(error, "%s%s%s","Multiple declarations for identifier4 \"", nam, "\"");
+								sprintf(error, "%s%s%s","Multiple declarations for identifier \"", nam, "\"");
 								yyerror3(error);
 							}
 							else e->proc_decl=1;
