@@ -1,0 +1,4 @@
+proc_id0<main>:
+100 : id2 = BASE_POINTER + 0
+101 : return id2
+102 : end

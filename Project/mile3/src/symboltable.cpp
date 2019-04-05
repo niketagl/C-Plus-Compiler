@@ -490,7 +490,7 @@ table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 		
 	}
 
-	return NULL;
+	return same_lookup(t->parent, name, t1);
 
 }
 
@@ -551,7 +551,6 @@ char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		
 		char tempo[12];
 		strcpy(tempo, (entry_in1->inp_name).c_str());
-		cout<<tempo<<endl;
 		if(!(lookup(table_stack.top(), tempo)))
 		{
 			string terror = string(entry_in1->inp_name) + " is Undefined";

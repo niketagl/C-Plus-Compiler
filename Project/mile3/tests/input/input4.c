@@ -1,11 +1,6 @@
-
-int dowhileloop()
+int main()
 {
-	int a,b,c,d,e;
-
-	do{
-		if(a) break;
-		else
-			c+=1;
-	}while(c || d);
+	int a;
+	int *b;
+	return &a;
 }
