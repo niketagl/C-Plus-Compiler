@@ -14,6 +14,7 @@ typedef enum {
 	STRCT,
 	CARTESIAN,
 	FUNCTION,
+	CLASSS,
 	NOTYPE,
 	VOD,
 	ERROR,
@@ -116,6 +117,8 @@ type_ptr new_cartesian_type(type_ptr, type_ptr);
 type_ptr new_pointer_type(type_ptr);
 
 type_ptr new_struct_type(type_ptr, char*);
+
+type_ptr new_class_type(type_ptr, char*);
 
 type_ptr new_array_type(type_ptr, int size);
 

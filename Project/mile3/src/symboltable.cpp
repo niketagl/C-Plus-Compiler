@@ -17,6 +17,7 @@ extern stack <int> offset_stack;
 extern void warning(const char*);
 extern int code_line;
 extern table_ptr struct_namespace;
+extern table_ptr class_namespace;
 extern map < string , int > labels;
 
 
@@ -76,6 +77,7 @@ string print_type(type_ptr t)
 		case NOTYPE : s.append("VOID"); break;
 		case VOD : s.append("VOID"); break;
 		case STRCT : s.append("STRUCT"); break;
+		case CLASSS : s.append("CLASS"); break;
 	}
 	return s;
 }
@@ -399,6 +401,25 @@ type_ptr new_struct_type(type_ptr t1, char* type_name)
 	t->type_name=type_name;
 	return t;
 }
+type_ptr new_class_type(type_ptr t1, char* type_name)
+{
+	// returns type pointer(t)
+	type_ptr t = new type_node;
+	t->info = CLASSS;
+	t->p1 = t1;
+	t->p2 = NULL;
+	t->longer =0;
+	t->shorter=0;
+	t->unsign=0;
+	t->sign=0;
+	t->extrn=0;
+	t->volat=0;		
+	t->constnt=0;	
+	t->regis=0;
+	t->stat=0;
+	t->type_name=type_name;
+	return t;
+}
 type_ptr new_array_type(type_ptr t1, int size)
 {
 	// returns type pointer(t)
@@ -476,7 +497,6 @@ table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 		table_entry_ptr e = i->second;
 		if(e->inp_name==nam && e->type->info==FUNCTION)
 		{
-
 			if(t1 == NULL && e->type->p1==NULL) return e;
 			else
 			{
@@ -485,9 +505,7 @@ table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 		}
 		
 	}
-
 	return NULL;
-
 }
 
 table_entry_ptr same_lookup1 ( table_ptr t, char* name, type_ptr t1)
@@ -504,16 +522,13 @@ table_entry_ptr same_lookup1 ( table_ptr t, char* name, type_ptr t1)
 		{
 			if(t1 == NULL) return e;
 			else
-			{
-				
+			{	
 				if(type_compare(e->type->p1, t1)) return e;
 			}
 		}
 		
 	}
-
 	return NULL;
-
 }
 
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
@@ -522,11 +537,18 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	table_ptr t2 = new table;
 	if(!(lookup(struct_namespace, t1->type_name)))
 	{
-		string terror = string(t1->type_name) + " is not a STRUCTURE";
-		char* type_error;
-		type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
-		strcpy(type_error, terror.c_str());
-		return type_error;
+		if(!(lookup(class_namespace, t1->type_name)))
+		{
+			string terror = string(t1->type_name) + " is not a STRUCTURE or a CLASS";
+			char* type_error;
+			type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+			strcpy(type_error, terror.c_str());
+			return type_error;
+		}
+		else
+		{
+			t2 = lookup(class_namespace, t1->type_name)->t;
+		}
 	}
 	else
 	{
@@ -543,6 +565,25 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			if(!(lookup(t2, id)))
 			{
 				string terror = string(id) + " is not an attribute of the STRUCTURE";
+				char* type_error;
+				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+				strcpy(type_error, terror.c_str());
+				return type_error;
+			}
+			else
+			{
+				table_entry_ptr temp = lookup(t2, id);
+				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, 0);
+				count++;
+				emit(V, entry_out->name, "=", entry_in1->name, ".", temp->name);
+				return NULL;
+			}
+		}
+		if(t1->info==CLASSS)
+		{
+			if(!(lookup(t2, id)))
+			{
+				string terror = string(id) + " is not an attribute of the CLASS";
 				char* type_error;
 				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
 				strcpy(type_error, terror.c_str());
@@ -576,6 +617,28 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				{
 					table_entry_ptr temp = (lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id));
 					entry_out = enter(table_stack.top(), name, lookup(lookup(struct_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
+					count++;
+					emit(V, entry_out->name, "=", entry_in1->name, "->", temp->name);
+					return NULL;
+				}
+			}
+		}
+		if(t1->info==POINTER && t1->p1->info==CLASSS)
+		{
+			if(lookup(class_namespace, (entry_in1->type->p1->type_name))->t)
+			{
+				if(!(lookup(lookup(class_namespace, (entry_in1->type->p1->type_name))->t, id)))
+				{
+					string terror = string(id) + " is not an attribute of the CLASS";
+					char* type_error;
+					type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+					strcpy(type_error, terror.c_str());
+					return type_error;
+				}
+				else
+				{
+					table_entry_ptr temp = (lookup(lookup(class_namespace, (entry_in1->type->p1->type_name))->t, id));
+					entry_out = enter(table_stack.top(), name, lookup(lookup(class_namespace, (entry_in1->type->p1->type_name))->t, id)->type, 0);
 					count++;
 					emit(V, entry_out->name, "=", entry_in1->name, "->", temp->name);
 					return NULL;
