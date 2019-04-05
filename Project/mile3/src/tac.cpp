@@ -46,7 +46,7 @@ void print_code( vector <code_ptr> &V )
 	{
 		int l_no = i->second;
 		string lab = i->first;
-
+		if(l_no-100<V.size())
 		V[l_no-100]->label = lab;
 	}
 

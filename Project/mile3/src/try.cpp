@@ -16,6 +16,7 @@ int code_line = 100;
 stack < table_ptr > table_stack;
 stack < int > offset_stack;
 vector < code_ptr > V;
+vector < table_entry_ptr > arg_list;
 map < string , int > labels;
 table_ptr struct_namespace;
 

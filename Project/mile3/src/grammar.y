@@ -26,6 +26,7 @@ extern int yylineno;
 	#include <string>
 	using namespace std;
 	extern stack < table_ptr > table_stack;
+	extern vector < table_entry_ptr > arg_list;
 	extern stack < int > offset_stack;
 	extern table_ptr struct_namespace;
 	extern int code_line;
@@ -117,19 +118,30 @@ literal
 postfix_expression
 	: primary_expression  { $<entry>$ = $<entry>1; }
 	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
-	| postfix_expression '(' ')'							{ 
-																if(char* s = type_check2("()",$<entry>$,$<entry>1,NULL)) yyerror3(s);
+	| IDENTIFIER '(' ')'							{ 
+																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1);
+																
+																if(char* s = type_check2("()",$<entry>$,temp,NULL)) yyerror3(s);
 																else
 																{
-																	//generate three adr code
+																	emit(V, "call",temp->name);
+																	emit(V, "pop_ret_value", $<entry>$->name);
 																} 
 															}
 
-	| postfix_expression '(' argument_expression_list ')' 	{ 
-																if(char* s = type_check2("()",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);
+	| IDENTIFIER '(' argument_expression_list ')' 	{ 																
+																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1, $<entry>3->type);
+																if(char* s = type_check2("()",$<entry>$,temp,$<entry>3)) yyerror3(s);
 																else
 																{
-																	//generate three adr code
+																	for(int i=0; i<arg_list.size(); i++)
+																	{
+																		table_entry_ptr e = arg_list[i];
+																		emit(V, "push_param", e->name);
+																	}
+																	arg_list.resize(0);
+																	emit(V, "call", temp->name);
+																	emit(V, "pop_ret_value", $<entry>$->name);
 																}
 															}
 
@@ -161,8 +173,12 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression			{$<entry>$ = $<entry>1;}
-	| argument_expression_list ',' assignment_expression  {$<entry>$ = new table_entry; $<entry>$->type = new_cartesian_type($<entry>1->type, $<entry>3->type); }
+	: assignment_expression			{$<entry>$ = $<entry>1; arg_list.push_back($<entry>$);}
+	| argument_expression_list ',' assignment_expression    {
+																arg_list.push_back($<entry>3);
+																$<entry>$ = new table_entry; 
+																$<entry>$->type = new_cartesian_type($<entry>1->type, $<entry>3->type); 
+															}
 	| error ',' {yyerror2("expecting expression");} assignment_expression
 	;
 
@@ -221,6 +237,7 @@ unary_operator
 	| '+'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "+"); }
 	| '-'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "-"); }
 	| '!'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "!"); }
+	| '~'	{ $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "~"); }
 	;
 
 cast_expression
@@ -579,7 +596,7 @@ direct_declarator
 					} 
 	| '(' declarator ')'
 	| IDENTIFIER '[' constant_expression ']'    {	
-													if(same_lookup(table_stack.top(),$<stringval>1))
+													if(same_lookup1(table_stack.top(),$<stringval>1))
 													{
 														char* error = (char *) malloc (100 * sizeof(char));
 														sprintf(error, "%s%s%s","Multiple declarations for identifier6 \"", $<stringval>1, "\"");

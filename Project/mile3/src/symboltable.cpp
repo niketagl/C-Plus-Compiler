@@ -227,7 +227,8 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type,table_ptr chi
 
 	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
 
-	labels.insert( pair< string, int >(t_entry->inp_name, code_line));
+	string temp_label = t_entry->name + "<" + t_entry->inp_name + ">";
+	labels.insert( pair< string, int >(temp_label, code_line));
 	
 	return t_entry; 
 }
@@ -467,7 +468,6 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 {
 	if(t==NULL) return NULL;
-
 	string nam = name;
 	map < string , table_entry_ptr > ::iterator i;
 	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
@@ -476,6 +476,7 @@ table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 		table_entry_ptr e = i->second;
 		if(e->inp_name==nam && e->type->info==FUNCTION)
 		{
+
 			if(t1 == NULL && e->type->p1==NULL) return e;
 			else
 			{
@@ -595,7 +596,7 @@ bool type_compare(type_ptr t1, type_ptr t2)
 	{
 		if(t1->info==t2->info)
 		{
-			bool val = (t1->extrn^t2->extrn)|(t1->regis^t2->regis)|(t1->stat^t2->stat)|(t1->volat^t2->volat)|(t1->constnt^t2->constnt)|(t1->sign^t2->sign)|(t1->unsign^t2->unsign)|(t1->longer^t2->longer)|(t1->shorter^t2->shorter);
+			bool val = (t1->extrn^t2->extrn)|(t1->regis^t2->regis)|(t1->stat^t2->stat)|(t1->volat^t2->volat)|(t1->sign^t2->sign)|(t1->unsign^t2->unsign)|(t1->longer^t2->longer)|(t1->shorter^t2->shorter);
 			if((!val) && t1->array_size == t2->array_size && t1->value == t2->value && t1->type_name == t2->type_name)
 			{
 				if(t1->p1==NULL && t2->p1==NULL)
@@ -629,7 +630,11 @@ bool type_compare(type_ptr t1, type_ptr t2)
 
 char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, table_entry_ptr entry_in2)
 {
-	type_ptr t1 = entry_in1->type;
+	type_ptr t1;
+	if(entry_in1)
+		t1 = entry_in1->type;
+	else 
+		t1 = NULL;
 	type_ptr t2;
 	if(entry_in2)
 		t2 = entry_in2->type;
@@ -638,6 +643,7 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
+	if(t1)
 	if(op=="[]")
 	{
 		if(t2->info==INTEGER || t2->info==CHR)
@@ -681,7 +687,6 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			{
 				entry_out = enter(table_stack.top(), name, t1->p2, 0);
 				count++;
-				emit(V, entry_out->name, "=", entry_in1->name, op);
 				return NULL;
 			}
 		}
