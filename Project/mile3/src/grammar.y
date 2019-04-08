@@ -151,13 +151,27 @@ postfix_expression
 																if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s);
 																else
 																{ 
-																	table_entry_ptr temp_class = lookup(class_namespace, $<type>1->type_name);
-																	table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
-																	if(char* t = type_check2("()",$<entry>$,temp,NULL)) yyerror3(t);
+																	if(lookup(class_namespace, $<entry>1->type->type_name))
+																	{
+																		table_entry_ptr temp_class = lookup(class_namespace, $<entry>1->type->type_name);
+																		if(same_lookup(temp_class->t, $<stringval>3))
+																		{
+																			table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
+																			if(char* t = type_check2("()",$<entry>$,temp,NULL)) yyerror3(t);
+																			else
+																			{
+																				emit(V, "call",temp->name);
+																				emit(V, "pop_ret_value", $<entry>$->name);
+																			}
+																		}
+																		else
+																		{
+																			yyerror3("Function not defined within Class");
+																		}
+																	}
 																	else
 																	{
-																		emit(V, "call",temp->name);
-																		emit(V, "pop_ret_value", $<entry>$->name);
+																		yyerror3("Class not defined");
 																	}
 																}
 															}
@@ -165,19 +179,34 @@ postfix_expression
 																				if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s);
 																				else
 																				{
-																					table_entry_ptr temp_class = lookup(class_namespace, $<type>1->type_name);
-																					table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
-																					if(char* t = type_check2("()",$<entry>$,temp,$<entry>5)) yyerror3(t);
+																					if(lookup(class_namespace, $<entry>1->type->type_name))
+																					{	
+																						table_entry_ptr temp_class = lookup(class_namespace, $<entry>1->type->type_name);
+																						cout << temp_class->name << endl;
+																						if(same_lookup(temp_class->t, $<stringval>3))
+																						{
+																							table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
+																							if(char* t = type_check2("()",$<entry>$,temp,$<entry>5)) yyerror3(t);
+																							else
+																							{
+																								for(int i=0; i<arg_list.size(); i++)
+																								{
+																									table_entry_ptr e = arg_list[i];
+																									emit(V, "push_param", e->name);
+																								}
+																								arg_list.resize(0);
+																								emit(V, "call", temp->name);
+																								emit(V, "pop_ret_value", $<entry>$->name);
+																							}
+																						}
+																						else
+																						{
+																							yyerror3("Function not defined within Class");
+																						}
+																					}
 																					else
 																					{
-																						for(int i=0; i<arg_list.size(); i++)
-																						{
-																							table_entry_ptr e = arg_list[i];
-																							emit(V, "push_param", e->name);
-																						}
-																						arg_list.resize(0);
-																						emit(V, "call", temp->name);
-																						emit(V, "pop_ret_value", $<entry>$->name);
+																						yyerror3("Class not defined");
 																					}
 																				} 
 																			}

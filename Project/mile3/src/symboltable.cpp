@@ -201,7 +201,7 @@ void addwidth( table_ptr t, int width)
 	return;
 }
 
-table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type,table_ptr child)
+table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr child)
 {
 	table_entry_ptr t_entry = new table_entry;
 	
@@ -509,7 +509,7 @@ table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 		}
 		
 	}
-	return NULL;
+	return same_lookup(t->parent, name, t1);
 }
 
 table_entry_ptr same_lookup1 ( table_ptr t, char* name, type_ptr t1)
