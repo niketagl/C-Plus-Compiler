@@ -128,5 +128,7 @@ bool type_compare(type_ptr, type_ptr);
 
 char* type_check2(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
 
+char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1);
+
 char* type_check4(string, table_entry_ptr &entry_out, table_entry_ptr, char*);
 

@@ -121,6 +121,7 @@ postfix_expression
 	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
 	| IDENTIFIER '(' ')'							{ 
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1);
+																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1);
 																
 																if(char* s = type_check2("()",$<entry>$,temp,NULL)) yyerror3(s);
 																else
@@ -132,6 +133,7 @@ postfix_expression
 
 	| IDENTIFIER '(' argument_expression_list ')' 	{ 																
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1, $<entry>3->type);
+																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1, $<entry>3->type);
 																if(char* s = type_check2("()",$<entry>$,temp,$<entry>3)) yyerror3(s);
 																else
 																{
@@ -284,6 +286,29 @@ unary_expression
 									temp->type->constnt = 1;
 									temp->type->value = -1;
 									temp->name = "-1";
+									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "*"))
+								{
+									if(char* s = type_check3("*",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "&"))
+								{
+									if(char* s = type_check3("&",$<entry>$,$<entry>2)) yyerror3(s);
+									//char temp_name[12];
+									//strcpy(temp_name, )
+								}
+								else if(!strcmp($<stringval>1, "~"))
+								{
+									if(char* s = type_check3("~",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "+"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = 1;
+									temp->name = "+1";
 									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
 								}
 								else

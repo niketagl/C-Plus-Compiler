@@ -1,17 +1,15 @@
+int fibbonacci(int n) {
+   	if(n == 0){
+   		return 0;
+   	} else if(n == 1) {
+   		return 1;
+   	} else {
+   		return (fibbonacci(n-1) + fibbonacci(n-2));
+   	}
+}
 
-int ifelses()
-{
-	int a,b,c,d,e;
-
-	if(a && b || c)
-	{
-		d = 10;
-		e = d * d - 63;
-	}
-	else
-	{
-		e = 53;
-	}
-
-
+int main() {
+    int n = 5;
+    int i;
+	int a = fibbonacci(n);
 }
