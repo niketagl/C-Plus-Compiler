@@ -9,8 +9,8 @@ int fun(char a);
 
 int main()
 {
-	int a;
+	int* a;
 	int b;
-	b = a;
+	*a = b;
 	return 0;
 }
