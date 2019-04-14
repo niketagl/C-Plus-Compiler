@@ -599,10 +599,10 @@ struct_or_union_specifier
 									{
 										table_ptr t1 = table_stack.top();
 										table_stack.pop(); offset_stack.pop();
-										if(same_lookup1(struct_namespace,$<stringval>1))
+										if(same_lookup1(struct_namespace,$<stringval>2))
 										{
 											char* error = (char *) malloc (100 * sizeof(char));
-											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>1, "\"");
+											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>2, "\"");
 											yyerror3(error);
 											$<type>$ = new_basic_type(ERROR); 
 										}
