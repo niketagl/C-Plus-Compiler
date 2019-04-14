@@ -49,8 +49,7 @@ extern void preprocess();
 "proc_id"			{ counts(); return(PROC_ID); }
 "push_param"			{ counts(); return(PUSH_PARAM); }
 "call"			{ counts(); return(CALL); }
-
-"id"({D})+		{ counts(); return(check_type()); }
+"id"			{ counts(); return(ID); }
 
 0[xX]{H}+{IS}?		{ counts(); setvalh(); return(INTEGER_CONSTANT); }
 
@@ -226,5 +225,6 @@ int check_type()
 *	it actually will only return IDENTIFIER
 */
 
-	return(IDENTIFIER);
+	// return(IDENTIFIER);
+	return 0;
 }

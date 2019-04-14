@@ -58,13 +58,11 @@ void print_code( vector <code_ptr> &V )
 		if(V[i]->label.length())
 			f<<V[i]->label<<":"<<endl;
 
-		f<<V[i]->line<<" : "<<V[i]->s ;
+		f<<'\t'<<V[i]->s ;
 		if(V[i]->goto_line)
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
-	if(V.size())
-	f << V[V.size()-1]->line + 1 << " : end"<<endl;
 	f.close();
 }
 

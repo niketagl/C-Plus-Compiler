@@ -12,7 +12,8 @@ extern int yylineno;
 
 
 void yyerror(const char*);
-
+bool check_long(char* a, char* b);
+bool check_short(char* a, char* b);
 
 %}
 
@@ -36,7 +37,7 @@ void yyerror(const char*);
 	char *stringval;
 }
 
-%token IDENTIFIER LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP PTR_OP INC_OP DEC_OP AND_OP OR_OP
+%token ID LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP PTR_OP INC_OP DEC_OP AND_OP OR_OP
 %token INT REAL POINT
 %token INTCAST FLOATCAST DOUBLECAST
 %token END PROC_ID IF GOTO PUSH_PARAM CALL RETURN INTEGER_CONSTANT CHAR_CONSTANT FLOAT_CONSTANT
@@ -63,7 +64,7 @@ LINE_NO
     ;
 
 INTEGER
-    : INTEGER_CONSTANT
+    : INTEGER_CONSTANT      {$<intval>$ = $<intval>1 ;}
     ;
 
 PROCEDURE_LABEL
@@ -76,59 +77,126 @@ THREE_AC
     | FUNCTION
     | INDEXED_ASSIGNMENT
     ;
+IDENTIFIER
+    : ID INTEGER    {$<intval>$ = $<intval>2 ;}
+    ;
 
 ASSIGNMENT 
     : IDENTIFIER assignment_operator IDENTIFIER op IDENTIFIER
                                                     {
+                                                        
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
-                                                            emit2(V, "mov", "eax", "$<address>3");
-                                                            emit2(V, "add", "eax", "$<address>5");
-                                                            emit2(V, "mov", "$<address>1", "eax");
+                                                            char prefix[2] = "e";
+                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
+                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            {
+                                                                prefix[0] =  'r';
+                                                            }
+                                                            char reg[4];
+                                                            sprintf(reg, "%s%s", prefix, "ax");
+                                                            emit2(V, "mov", reg, "$<address>3");
+                                                            emit2(V, "add", reg, "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
 								                        {
-                                                            emit2(V, "movq", "rax", "$<address>3");
-                                                            emit2(V, "addq", "rax", "$<address>5");
-                                                            emit2(V, "movq", "$<address>1", "rax");
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "add", "rax", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
-                                                            emit2(V, "mov", "eax", "$<address>3");
-                                                            emit2(V, "sub", "eax", "$<address>5");
-                                                            emit2(V, "mov", "$<address>1", "eax");
+                                                            char prefix[2] = "e";
+                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
+                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            {
+                                                                prefix[0] =  'r';
+                                                            }
+                                                            char reg[4];
+                                                            sprintf(reg, "%s%s", prefix, "ax");
+                                                            emit2(V, "mov", reg, "$<address>3");
+                                                            emit2(V, "sub", reg, "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
 								                        {
-                                                            emit2(V, "movq", "rax", "$<address>3");
-                                                            emit2(V, "subq", "rax", "$<address>5");
-                                                            emit2(V, "movq", "$<address>1", "rax");
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "sub", "rax", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", "rax");
 								                        }
-                                                        // else if(!strcmp($<stringval>4, "int*"))
-								                        // {
-                                                        //     emit2(V, "mov", "eax", "$<address>3");
-                                                        //     emit2(V, "imul", "eax", "$<address>5");
-                                                        //     emit2(V, "mov", "$<address>1", "eax");
-								                        // }
-                                                        // else if(!strcmp($<stringval>4, "real*"))
-								                        // {
-                                                        //     emit2(V, "movq", "rax", "$<address>3");
-                                                        //     emit2(V, "imulq", "$<address>5");
-                                                        //     emit2(V, "movq", "$<address>1", "rax");
-								                        // }
-                                                        // else if(!strcmp($<stringval>4, "int/"))
-								                        // {
-                                                        //     emit2(V, "mov", "eax", "$<address>3");
-                                                        //     emit2(V, "imul", "eax", "$<address>5");
-                                                        //     emit2(V, "mov", "$<address>1", "eax");
-								                        // }
-                                                        // else if(!strcmp($<stringval>4, "real/"))
-								                        // {
-                                                        //     emit2(V, "movq", "rax", "$<address>3");
-                                                        //     emit2(V, "idivq", $<address>5");
-                                                        //     emit2(V, "movq", "$<address>1", "rdx");
-								                        // }
-
+                                                        else if(!strcmp($<stringval>4, "int*"))
+								                        {
+                                                            char prefix[2] = "e";
+                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
+                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            {
+                                                                prefix[0] =  'r';
+                                                            }
+                                                            char reg[4];
+                                                            sprintf(reg, "%s%s", prefix, "ax");
+                                                            emit2(V, "mov", reg, "$<address>3");
+                                                            emit2(V, "mul", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", reg);
+								                        }
+                                                        else if(!strcmp($<stringval>4, "real*"))
+								                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mul", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", "rax");
+								                        }
+                                                        else if(!strcmp($<stringval>4, "int/"))
+								                        {
+                                                            char prefix[2] = "e";
+                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
+                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            {
+                                                                prefix[0] =  'r';
+                                                            }
+                                                            char reg[4];
+                                                            char regd[4];
+                                                            sprintf(reg, "%s%s", prefix, "ax");
+                                                            sprintf(regd, "%s%s", prefix, "dx");
+                                                            emit2(V, "mov", reg, "$<address>3");
+                                                            emit2(V, "mov", regd, "0x0");
+                                                            emit2(V, "div", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", reg);
+								                        }
+                                                        else if(!strcmp($<stringval>4, "real/"))
+								                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mov", "rdx", "0x0");
+                                                            emit2(V, "div", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", "rax");
+								                        }
+                                                        else if(!strcmp($<stringval>4, "int%"))
+								                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mov", "rdx", "0x0");
+                                                            emit2(V, "div", "$<address>5");
+                                                            emit2(V, "mov", "$<address>1", "rdx");
+								                        }
+                                                        else if(!strcmp($<stringval>4, "int&"))
+                                                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mov", "rbx", "$<address>5");
+                                                            emit2(V, "and", "rax", "rbx");
+                                                            emit2(V, "mov", "$<address>1", "rbx");
+                                                        }
+                                                        else if(!strcmp($<stringval>4, "int|"))
+                                                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mov", "rbx", "$<address>5");
+                                                            emit2(V, "or", "rax", "rbx");
+                                                            emit2(V, "mov", "$<address>1", "rbx");
+                                                        }
+                                                        else if(!strcmp($<stringval>4, "int^"))
+                                                        {
+                                                            emit2(V, "mov", "rax", "$<address>3");
+                                                            emit2(V, "mov", "rbx", "$<address>5");
+                                                            emit2(V, "xor", "rax", "rbx");
+                                                            emit2(V, "mov", "$<address>1", "rbx");
+                                                        }
                                                         
                                                     }
     | IDENTIFIER assignment_operator op IDENTIFIER
@@ -226,6 +294,7 @@ void yyerror(const char *s)
 }
 
 // Implicitly used emit2 function
+// Implicitly used check_short, check_long function
 // Memory location for identifier implicitly used as $<address>n
 // Check op stringval calculation
 /*
@@ -235,3 +304,12 @@ POINTER
     | '*' IDENTIFIER assignment_operator IDENTIFIER
     ;
 */
+bool check_long(char* a, char* b)
+{
+    return 0;
+}
+
+bool check_short(char* a, char* b)
+{
+    return 0;
+}
