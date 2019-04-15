@@ -137,7 +137,7 @@ postfix_expression
 																if(char* s = type_check2("()",$<entry>$,temp,$<entry>3)) yyerror3(s);
 																else
 																{
-																	for(int i=0; i<arg_list.size(); i++)
+																	for(int i=arg_list.size()-1; i>=0; i--)
 																	{
 																		table_entry_ptr e = arg_list[i];
 																		emit(V, "push_param", e->name);
@@ -191,7 +191,7 @@ postfix_expression
 																							if(char* t = type_check2("()",$<entry>$,temp,$<entry>5)) yyerror3(t);
 																							else
 																							{
-																								for(int i=0; i<arg_list.size(); i++)
+																								for(int i=arg_list.size()-1; i>=0; i--)
 																								{
 																									table_entry_ptr e = arg_list[i];
 																									emit(V, "push_param", e->name);
