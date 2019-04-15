@@ -3,6 +3,7 @@
 #include <map>
 #include <fstream>
 #include "codegentac.h"
+#include <cstdlib>
 
 extern int code_line;
 extern map < string , int > labels;
@@ -63,7 +64,23 @@ void print_code( vector <code_ptr> &V )
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
+
+	// ifstream ff;
+	// ff.open("src/input_int.asm");
+	// while(ff)
+	// {
+	// 	string s;
+	// 	ff >> s;
+	// 	f << s << endl;
+	// }
+	
 	f.close();
+
+	string cmd = "cat src/input_int.asm >> assembly.asm";
+	const char *command = cmd.c_str();
+	system(command); 
+
+
 }
 
 vector <int> mklist (int i)

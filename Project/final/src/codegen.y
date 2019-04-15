@@ -104,14 +104,14 @@ ASSIGNMENT
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             char regbp[15];
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
                                                             
                                                             emit2(V, "mov", reg, ",", regbp);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
                                                             emit2(V, "add", reg, ",", regbp);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
                                                             emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
@@ -138,14 +138,14 @@ ASSIGNMENT
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             char regbp[15];
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
                                                             
                                                             emit2(V, "mov", reg, ",", regbp);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
                                                             emit2(V, "sub", reg, ",", regbp);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
                                                             emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
@@ -172,17 +172,17 @@ ASSIGNMENT
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             char regbp[15];
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
                                                             
                                                             emit2(V, "mov", reg, ",", regbp);
                                                             char regbx[4];
 
                                                             sprintf(regbx, "%s%s",prefix, "bx");
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
                                                             emit2(V, "mov", regbx,",", regbp);
                                                             emit2(V, "mul", regbx);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
                                                             emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real*"))
@@ -214,18 +214,18 @@ ASSIGNMENT
                                                             sprintf(regd, "%s%s", prefix, "dx");
                                                             
                                                             char regbp[15];
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
                                                             
                                                             emit2(V, "mov", reg, ",", regbp);
                                                             emit2(V, "mov", regd, "," , "0x0");
                                                             char regbx[4];
 
                                                             sprintf(regbx, "%s%s",prefix, "bx");
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
                                                             emit2(V, "mov", regbx,",",regbp );
                                                             emit2(V, "div", regbx);
 
-                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
                                                             emit2(V, "mov", regbp, ",", reg);
 
 								                        }
@@ -405,10 +405,10 @@ void yyerror(const char *s)
 	printf("%s at line no : %d \n", s, yylineno);
 }
 
-// Implicitly used emit2 function
+/////////////////////   REMAINING   ///////////////////////////////////////////////////////////////////////////////////
+
 // Implicitly used check_short, check_long function
-// Memory location for identifier implicitly used as $<address>n
-// Check op stringval calculation
+
 /*
 POINTER
     : IDENTIFIER assignment_operator '&' IDENTIFIER
@@ -416,6 +416,8 @@ POINTER
     | '*' IDENTIFIER assignment_operator IDENTIFIER
     ;
 */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool check_long(char* a, char* b)
 {
     return 0;
