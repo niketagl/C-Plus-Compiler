@@ -127,7 +127,6 @@ postfix_expression
 																else
 																{
 																	emit(V, "call",temp->name);
-																	emit(V, "pop_ret_value", $<entry>$->name);
 																} 
 															}
 
@@ -144,7 +143,6 @@ postfix_expression
 																	}
 																	arg_list.resize(0);
 																	emit(V, "call", temp->name);
-																	emit(V, "pop_ret_value", $<entry>$->name);
 																}
 															}
 
@@ -163,7 +161,6 @@ postfix_expression
 																			else
 																			{
 																				emit(V, "call",temp->name);
-																				emit(V, "pop_ret_value", $<entry>$->name);
 																			}
 																		}
 																		else
@@ -198,7 +195,6 @@ postfix_expression
 																								}
 																								arg_list.resize(0);
 																								emit(V, "call", temp->name);
-																								emit(V, "pop_ret_value", $<entry>$->name);
 																							}
 																						}
 																						else
@@ -1048,9 +1044,9 @@ selection_statement
 							for(int i=0; i < s->labellist.size(); i++)
 							{
 								if(V[s->labellist[i]-100]->label == "default")
-								emit(V, "goto");
+									emit(V, "goto");
 								else
-								emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
+									emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
 								V[code_line-101]->goto_line = s->labellist[i];
 								V[s->labellist[i]-100]->label = "";
 							}

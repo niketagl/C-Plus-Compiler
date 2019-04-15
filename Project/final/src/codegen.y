@@ -35,6 +35,7 @@ bool check_short(char* a, char* b);
 	extern map < string , int > labels;
     extern vector<table> proc_table;
     extern vector<table> id_table;
+    extern vector<int> fake_labels;
 }
 
 %union{
@@ -62,7 +63,10 @@ translation_unit
 
 L 
     : PROCEDURE_LABEL
-    | LINE_NO ':' THREE_AC
+    | LINE_NO ':' THREE_AC {
+    							
+
+    						}
     | LINE_NO ':' END 	{
     						if(flag_of_main)
     										{
@@ -75,7 +79,18 @@ L
     ;
 
 LINE_NO
-    : INTEGER 				 { $<intval>$ = $<intval>1; }
+    : INTEGER 				 { 
+    							$<intval>$ = $<intval>1; 
+    							for(int i=0; i<fake_labels.size(); i++)
+    							{
+    								if(fake_labels[i]==$<intval>1)
+    								{
+    									char temp_label[20];
+    									sprintf(temp_label, "_label%d", $<intval>1);
+										labels.insert ( pair< string, int >(temp_label, code_line));
+    								}
+    							}
+    						}
     ;
 
 INTEGER
@@ -403,24 +418,45 @@ cast_expression
 JUMP
     : IF '(' IDENTIFIER op INTEGER_CONSTANT ')' GOTO LABEL 	
                                                         {
-    														if(strcmp($<stringval>4, "==") && $<intval>5 ==0 )
+                                                        	char regbp[15];
+                                                        	if(id_table[$<intval>3].is_param)
+	                                                        {
+	                                                            int shift3 = abs(id_table[$<intval>3].offset) + 16;
+	                                                            sprintf(regbp, "[%s + %d]", "rbp", shift3);
+
+	                                                        }
+	                                                        else if(id_table[$<intval>3].scope != "Global")
+	                                                        {
+	                                                            int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
+	                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
+	                                                        }
+	                                                        else
+	                                                        {
+	                                                            int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
+	                                                            sprintf(regbp, "id%d", $<intval>3);
+	                                                        }
+
+    														if(strcmp($<stringval>4, "==")==0 && $<intval>5 ==0 )
     														{
                                                                 char tempoww[8];
                                                                 sprintf(tempoww, "%d", $<intval>8);
                                                                 string tempoo = tempoww;
     															string temp = "_label" + tempoo;
-    															emit2(V, "mov", "rax", "$<address>3");
-    															emit2(V, "cmp", "rax", "$0");
+
+
+    															emit2(V, "mov", "rax", ",", regbp);
+    															emit2(V, "cmp", "rax", ", $0");
     															emit2(V, "je", temp);
     														}
-    														else if(strcmp($<stringval>4, "==") && $<intval>5 ==0)
+    														else if(strcmp($<stringval>4, "==")==0 && $<intval>5 ==0)
     														{
                                                                 char tempoww[8];
                                                                 sprintf(tempoww, "%d", $<intval>8);
                                                                 string tempoo = tempoww;
                                                                 string temp = "_label" + tempoo;
-    															emit2(V, "mov", "rax", "$<address>3");
-    															emit2(V, "cmp", "rax", "$0");
+
+    															emit2(V, "mov", "rax", ",", regbp);
+    															emit2(V, "cmp", "rax", ", $0");
     															emit2(V, "jne", temp);
     														}
    														}
@@ -443,12 +479,20 @@ JUMP
     ;
 
 LABEL
-    : LINE_NO 		{$<intval>$ = $<intval>1 ;}
+    : LINE_NO 		{
+    					$<intval>$ = $<intval>1 ;
+    					fake_labels.push_back($<intval>1);
+    				}
     ;
 
 FUNCTION    
     : PUSH_PARAM IDENTIFIER
-    | CALL IDENTIFIER
+    | CALL PROC_ID INTEGER
+    			{
+    				char proc[20];
+    				sprintf(proc, "_proc_id%d", $<intval>3);
+    				emit2(V, "call", proc);
+    			}
     | RETURN IDENTIFIER
                 {
                     if(id_table[$<intval>2].is_param)
@@ -457,6 +501,7 @@ FUNCTION
                         char retval[10];
                         sprintf(retval, "[%s + %d]", "rbp", shift);
                         emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                         emit2(V, "pop", "rbp");
                         emit2(V, "ret");
                     }
@@ -466,6 +511,7 @@ FUNCTION
                         char retval[10];
                         sprintf(retval, "[%s - %d]", "rbp", shift);
                         emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                         emit2(V, "pop", "rbp");
                         emit2(V, "ret");
                     }
@@ -475,6 +521,7 @@ FUNCTION
                         char retval[10];
                         sprintf(retval, "id%d", $<intval>2);
                         emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                         emit2(V, "pop", "rbp");
                         emit2(V, "ret");
                     }
@@ -484,6 +531,7 @@ FUNCTION
                     char retval[10];
                     sprintf(retval, "%d", $<intval>2);
                     emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                     emit2(V, "pop", "rbp");
                     emit2(V, "ret");
                 }
@@ -492,6 +540,7 @@ FUNCTION
                     char retval[10];
                     sprintf(retval, "%d", $<charval>2);
                     emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                     emit2(V, "pop", "rbp");
                     emit2(V, "ret");
                 }
@@ -500,6 +549,7 @@ FUNCTION
                     char retval[10];
                     sprintf(retval, "%f", $<floatval>2);
                     emit2(V, "mov", "rax", ",", retval);
+                        emit2(V, "mov rsp, rbp");
                     emit2(V, "pop", "rbp");
                     emit2(V, "ret");
                 }

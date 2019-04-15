@@ -16,6 +16,7 @@ int code_line = 100;
 stack < int > offset_stack;
 vector < code_ptr > V;
 map < string , int > labels;
+vector<int> fake_labels;
 vector<table> proc_table;
 vector<table> id_table;
 
