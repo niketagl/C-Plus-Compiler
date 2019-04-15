@@ -515,8 +515,8 @@ JUMP
     															string temp = "_label" + tempoo;
 
 
-    															emit2(V, "mov", "rax", ",", regbp);
-    															emit2(V, "cmp", "rax", ", $0");
+    															emit2(V, "mov", "eax", ",", regbp);
+    															emit2(V, "cmp", "eax", ", $0");
     															emit2(V, "je", temp);
     														}
     														else if(strcmp($<stringval>4, "!=")==0 && $<intval>5 ==0)
@@ -526,8 +526,8 @@ JUMP
                                                                 string tempoo = tempoww;
                                                                 string temp = "_label" + tempoo;
 
-    															emit2(V, "mov", "rax", ",", regbp);
-    															emit2(V, "cmp", "rax", ", $0");
+    															emit2(V, "mov", "eax", ",", regbp);
+    															emit2(V, "cmp", "eax", ", $0");
     															emit2(V, "jne", temp);
     														}
    														}

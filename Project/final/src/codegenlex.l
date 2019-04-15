@@ -71,11 +71,7 @@ L?\"(\\.|[^\\"])*\"	{ counts(); return(STRING_LITERAL); }
 
 ">>"			{ counts(); return(RIGHT_OP); }
 "<<"			{ counts(); return(LEFT_OP); }
-"++"			{ counts(); return(INC_OP); }
-"--"			{ counts(); return(DEC_OP); }
 "->"			{ counts(); return(PTR_OP); }
-"&&"			{ counts(); return(AND_OP); }
-"||"			{ counts(); return(OR_OP); }
 "<="			{ counts(); return(LE_OP); }
 ">="			{ counts(); return(GE_OP); }
 "=="			{ counts(); return(EQ_OP); }

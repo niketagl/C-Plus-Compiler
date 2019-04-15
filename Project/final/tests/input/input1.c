@@ -15,7 +15,7 @@ int main()
 {
 
 	int a,b;
-	a = 4;
+	a = 7;
 	
 	b = fib(a);
 	_printints(b);
