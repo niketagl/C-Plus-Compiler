@@ -1,3 +1,4 @@
+
 int alpha;
 
 int fun()
@@ -12,9 +13,4 @@ int main()
 {
 	int a;
 	a = 2;
-	if(a)
-		a=7;
-	else
-		a=9;
-	fun();
 }
