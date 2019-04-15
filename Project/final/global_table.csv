@@ -1,9 +1,0 @@
-Scope, Is_Param, Name, Type, Offset, Width
-Global, 0,id0, INT, 0, 4
-GLOBAL, 0,proc_id0, FUNCTION : INT -> INT, 0, 0
-proc_id0, 1,id1, INT, 0, 4
-proc_id0, 0,id2, INT, 0, 4
-proc_id0, 0,id3, INT, 4, 4
-proc_id0, 0,id4, INT, 8, 4
-GLOBAL, 0,proc_id1, FUNCTION : NIL -> INT, 0, 0
-proc_id1, 0,id5, INT, 0, 4
