@@ -22,6 +22,7 @@ bool check_short(char* a, char* b);
 	#include <stack>
 	#include <iostream>
 	#include <vector>
+	#include <map>
 	#include <string>
     #include <cstdlib>
     #include <string.h>
@@ -31,6 +32,7 @@ bool check_short(char* a, char* b);
 	extern int code_line;
 	extern int count;
 	extern vector < code_ptr > V;
+	extern map < string , int > labels;
     extern vector<table> proc_table;
     extern vector<table> id_table;
 }
@@ -65,15 +67,29 @@ L
     ;
 
 LINE_NO
-    : INTEGER 				{$<intval>$ = $<intval>1 ;}
+    : INTEGER 				 { $<intval>$ = $<intval>1; }
     ;
 
 INTEGER
-    : INTEGER_CONSTANT      {$<intval>$ = $<intval>1 ;}
+    : INTEGER_CONSTANT      { $<intval>$ = $<intval>1 ; }
     ;
 
 PROCEDURE_LABEL
-    : PROC_ID INTEGER FUN_NAME ':'
+    : PROC_ID INTEGER FUN_NAME ':' 
+    							{
+    								if(strcmp($<stringval>3,"<main>")==0)
+    									{
+    										string temp_label = "_start";
+											labels.insert ( pair< string, int >(temp_label, code_line));
+    									}
+    								else
+    									{
+    										char num[10];
+    										sprintf(num, "%s%d", "_proc_id",$<intval>2);
+    										string temp_label = num;
+											labels.insert ( pair< string, int >(temp_label, code_line));
+    									}
+    							}
     ;
 
 THREE_AC   
