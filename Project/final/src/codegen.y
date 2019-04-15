@@ -320,42 +320,42 @@ ASSIGNMENT
                                                             emit2(V, "xor", "rax",  ",", "rbx");
                                                             emit2(V, "mov", regbp1, ",",  "rbx");
                                                         }
-                                                        else if(!strcmp($<stringval>4, ">"))
+                                                        else if(!strcmp($<stringval>4, "int>"))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp5);
                                                             emit2(V, "mov", "rbx",  ",", regbp3);
                                                             emit2(V, "cmp", "rax",  ",", "rbx");
                                                             emit2(V, "sets", regbp1);
                                                         }
-                                                        else if(!strcmp($<stringval>4, "<"))
+                                                        else if(!strcmp($<stringval>4, "int<"))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp3);
                                                             emit2(V, "mov", "rbx",  ",", regbp5);
                                                             emit2(V, "cmp", "rax",  ",", "rbx");
                                                             emit2(V, "sets", regbp1);
                                                         }
-                                                        else if(!strcmp($<stringval>4, "<="))
+                                                        else if(!strcmp($<stringval>4, "int<="))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp5);
                                                             emit2(V, "mov", "rbx",  ",", regbp3);
                                                             emit2(V, "cmp", "rax",  ",", "rbx");
                                                             emit2(V, "setns", regbp1);
                                                         }
-                                                        else if(!strcmp($<stringval>4, ">="))
+                                                        else if(!strcmp($<stringval>4, "int>="))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp3);
                                                             emit2(V, "mov", "rbx",  ",", regbp5);
                                                             emit2(V, "cmp", "rax",  ",", "rbx");
                                                             emit2(V, "setns", regbp1);
                                                         }
-                                                        else if(!strcmp($<stringval>4, "=="))
+                                                        else if(!strcmp($<stringval>4, "int=="))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp3);
                                                             emit2(V, "mov", "rbx",  ",", regbp5);
                                                             emit2(V, "cmp", "rax",  ",", "rbx");
                                                             emit2(V, "setz", regbp1);
                                                         }
-                                                        else if(!strcmp($<stringval>4, "!="))
+                                                        else if(!strcmp($<stringval>4, "int!="))
                                                         {
                                                             emit2(V, "mov", "rax",  ",", regbp3);
                                                             emit2(V, "mov", "rbx",  ",", regbp5);
