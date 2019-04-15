@@ -9,7 +9,7 @@ extern int yylex();
 extern char yytext[];
 extern int column;
 extern int yylineno;
-
+int flag_of_main = 0;
 
 void yyerror(const char*);
 bool check_long(char* a, char* b);
@@ -63,7 +63,15 @@ translation_unit
 L 
     : PROCEDURE_LABEL
     | LINE_NO ':' THREE_AC
-    | LINE_NO ':' END
+    | LINE_NO ':' END 	{
+    						if(flag_of_main)
+    										{
+    											flag_of_main = 0;
+    											emit2(V, "mov rax, 60");
+    											emit2(V, "mov rdi, 0");
+    											emit2(V, "syscall");
+    										}
+    					}
     ;
 
 LINE_NO
@@ -84,9 +92,18 @@ PROCEDURE_LABEL
     									{
     										string temp_label = "_start";
 											labels.insert ( pair< string, int >(temp_label, code_line));
+											flag_of_main = 1;
     									}
     								else
     									{
+    										if(flag_of_main)
+    										{
+    											flag_of_main = 0;
+    											emit2(V, "mov rax, 60");
+    											emit2(V, "mov rdi, 0");
+    											emit2(V, "syscall");
+    										}
+
     										char num[10];
     										sprintf(num, "%s%d", "_proc_id",$<intval>2);
     										string temp_label = num;
