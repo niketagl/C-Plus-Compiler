@@ -25,9 +25,6 @@ int main(int argc, char **argv)
 
 	yyin = fopen(argv[1], "r");
 
-	yyparse();
-
-	print_code(V);
 
 
 	ifstream ip("global_table.csv");
@@ -53,11 +50,27 @@ int main(int argc, char **argv)
 		getline(ip,offset,',');
 		getline(ip,width,'\n');
 
+		int real_count = 0;
+		if(name[0]=='i')
+		for(int i=2; i<name.length(); i++)
+		{
+			real_count *= 10;
+			real_count += name[i]-48;
+		}
+		else if(name[0]=='p')
+		for(int i=7; i<name.length(); i++)
+		{
+			real_count *= 10;
+			real_count += name[i]-48;
+		}	
+
 		if(scope!="")
 		{	
 			if(name[0]=='p')
 			{
-				proc_table.push_back(table());
+				p_cnt = real_count;
+				if(proc_table.size()<real_count+1)
+					proc_table.resize(real_count+1);
 				proc_table[p_cnt].scope = scope;
 				stringstream a(is_param);
 				a >> proc_table[p_cnt].is_param;
@@ -68,11 +81,12 @@ int main(int argc, char **argv)
 				stringstream c(width);
 				c >> proc_table[p_cnt].width;
 				// cout << "p" << p_cnt << proc_table[p_cnt].scope << proc_table[p_cnt].is_param << proc_table[p_cnt].name << proc_table[p_cnt].type << proc_table[p_cnt].offset << proc_table[p_cnt].width << endl;
-				p_cnt++;
 			}
 			else if(name[0]=='i')
 			{
-				id_table.push_back(table());
+				i_cnt = real_count;
+				if(id_table.size()<real_count+1)
+					id_table.resize(real_count+1);
 				id_table[i_cnt].scope = scope;
 				stringstream d(is_param);
 				d >> id_table[i_cnt].is_param;
@@ -83,10 +97,12 @@ int main(int argc, char **argv)
 				stringstream f(width);
 				f >> id_table[i_cnt].width;
 				// cout << "i" << i_cnt << id_table[i_cnt].scope << id_table[i_cnt].is_param << id_table[i_cnt].name << id_table[i_cnt].type << id_table[i_cnt].offset << id_table[i_cnt].width << endl;
-				i_cnt++;
+				
 			}
 		}
 	}
+	yyparse();
 
+	print_code(V);
 	ip.close();
 }

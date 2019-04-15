@@ -2,12 +2,12 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include "codegentac.h"
+#include "tac.h"
 
 extern int code_line;
 extern map < string , int > labels;
 
-void emit2(vector < code_ptr > &V, string s1, string s2 , string s3 , string s4, string s5 )
+void emit(vector < code_ptr > &V, string s1, string s2 , string s3 , string s4, string s5 )
 {
 	code_ptr c = new code;
 	c->s.append(s1);
@@ -51,18 +51,20 @@ void print_code( vector <code_ptr> &V )
 	}
 
 	ofstream f;
-	f.open("assembly.asm");
+	f.open("output_code.txt");
 
 	for(int i=0; i < V.size() ; i++ )
 	{
 		if(V[i]->label.length())
 			f<<V[i]->label<<":"<<endl;
 
-		f<<'\t'<<V[i]->s ;
+		f<<V[i]->line<<" : "<<V[i]->s ;
 		if(V[i]->goto_line)
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
+	if(V.size())
+	f << V[V.size()-1]->line + 1 << " : end"<<endl;
 	f.close();
 }
 

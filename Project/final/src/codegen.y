@@ -24,12 +24,15 @@ bool check_short(char* a, char* b);
 	#include <vector>
 	#include <string>
     #include <cstdlib>
+    #include <string.h>
 	using namespace std;
 	extern vector < table > id_table;
     extern vector < table > proc_table;
 	extern int code_line;
 	extern int count;
 	extern vector < code_ptr > V;
+    extern vector<table> proc_table;
+    extern vector<table> id_table;
 }
 
 %union{
@@ -62,7 +65,7 @@ L
     ;
 
 LINE_NO
-    : INTEGER
+    : INTEGER 				{$<intval>$ = $<intval>1 ;}
     ;
 
 INTEGER
@@ -89,12 +92,6 @@ ASSIGNMENT
                                                         int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
                                                         int shift5 = abs(id_table[$<intval>5].offset)+ abs(id_table[$<intval>5].width);
                                                         int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
-                                                        char sshift3[10];
-                                                        char sshift5[10];
-                                                        char sshift1[10];
-                                                        sprintf(sshift3, "%d", shift3);
-                                                        sprintf(sshift5, "%d", shift5);
-                                                        sprintf(sshift1, "%d", shift1);
 
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
@@ -106,36 +103,29 @@ ASSIGNMENT
                                                             }
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
-                                                            char regbx[4];
-                                                            sprintf(regbx, "%s%s", prefix, "bx");
-                                                            char regbp[4];
-                                                            sprintf(regbp, "%s%s", prefix, "bp");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
                                                             
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift3);
-                                                            emit2(V, "mov", reg, regbx);
+                                                            emit2(V, "mov", reg, ",", regbp);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift5);
-                                                            emit2(V, "add", reg, regbx);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            emit2(V, "add", reg, ",", regbp);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift1);
-                                                            emit2(V, "mov", regbx, reg);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
 								                        {
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift3);
-                                                            emit2(V, "mov", "rax", "rbx");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift5);
-                                                            emit2(V, "add", "rax", "rbx");
+                                                            emit2(V, "mov", "rax", ",", regbp);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift1);
-                                                            emit2(V, "mov", "rbx", "rax");
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
+                                                            emit2(V, "add", "rax", ",", regbp);
+                                                            
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                                            emit2(V, "mov", regbp, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
@@ -147,36 +137,29 @@ ASSIGNMENT
                                                             }
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
-                                                            char regbx[4];
-                                                            sprintf(regbx, "%s%s", prefix, "bx");
-                                                            char regbp[4];
-                                                            sprintf(regbp, "%s%s", prefix, "bp");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            
+                                                            emit2(V, "mov", reg, ",", regbp);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift3);
-                                                            emit2(V, "mov", reg, regbp);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            emit2(V, "sub", reg, ",", regbp);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift5);
-                                                            emit2(V, "sub", reg, regbx);
-
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift1);
-                                                            emit2(V, "mov", regbx, reg);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
 								                        {
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift3);
-                                                            emit2(V, "mov", "rax", "rbx");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift5);
-                                                            emit2(V, "sub", "rax", "rbx");
+                                                            emit2(V, "mov", "rax", ",", regbp);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift1);
-                                                            emit2(V, "mov", "rbx", "rax");
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
+                                                            emit2(V, "sub", "rax", ",", regbp);
+                                                            
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                                            emit2(V, "mov", regbp, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
@@ -188,36 +171,33 @@ ASSIGNMENT
                                                             }
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            
+                                                            emit2(V, "mov", reg, ",", regbp);
                                                             char regbx[4];
-                                                            sprintf(regbx, "%s%s", prefix, "bx");
-                                                            char regbp[4];
-                                                            sprintf(regbp, "%s%s", prefix, "bp");
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift3);
-                                                            emit2(V, "mov", reg, regbx);
-
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift5);
+                                                            sprintf(regbx, "%s%s",prefix, "bx");
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            emit2(V, "mov", regbx,",", regbp);
                                                             emit2(V, "mul", regbx);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift1);
-                                                            emit2(V, "mov", regbx, reg);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            emit2(V, "mov", regbp, ",", reg);
 								                        }
                                                         else if(!strcmp($<stringval>4, "real*"))
 								                        {
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift3);
-                                                            emit2(V, "mov", "rax", "rbp");
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift5);
-                                                            emit2(V, "mul", "rbp");
+                                                            emit2(V, "mov", "rax", ",", regbp);
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift1);
-                                                            emit2(V, "mov", "rbp", "rax");
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
+                                                            emit2(V, "mov", "rbx", ",", regbp);
+                                                            emit2(V, "mul", "rbx");
+                                                            
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                                            emit2(V, "mov", regbp, ",", "rax");
                                                             
 								                        }
                                                         else if(!strcmp($<stringval>4, "int/"))
@@ -232,38 +212,38 @@ ASSIGNMENT
                                                             char regd[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             sprintf(regd, "%s%s", prefix, "dx");
+                                                            
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift3);
+                                                            
+                                                            emit2(V, "mov", reg, ",", regbp);
+                                                            emit2(V, "mov", regd, "," , "0x0");
                                                             char regbx[4];
-                                                            sprintf(regbx, "%s%s", prefix, "bx");
-                                                            char regbp[4];
-                                                            sprintf(regbp, "%s%s", prefix, "bp");
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift3);
-                                                            emit2(V, "mov", reg, regbx);
-                                                            emit2(V, "mov", regd, "0x0");
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift5);
+                                                            sprintf(regbx, "%s%s",prefix, "bx");
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift5);
+                                                            emit2(V, "mov", regbx,",",regbp );
                                                             emit2(V, "div", regbx);
 
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift1);
-                                                            emit2(V, "mov", regbx, reg);
+                                                            sprintf(regbp, "[%s%s - %d]", prefix, "bp", shift1);
+                                                            emit2(V, "mov", regbp, ",", reg);
 
 								                        }
                                                         else if(!strcmp($<stringval>4, "real/"))
 								                        {
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift3);
-                                                            emit2(V, "mov", "rax", "rbx");
+                                                            
+                                                            char regbp[15];
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift3);
+
+                                                            emit2(V, "mov", "rax", ",", regbp);
                                                             emit2(V, "mov", "rdx", "0x0");
 
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift5);
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift5);
+                                                            emit2(V, "mov", "rbx", ",", regbp);
                                                             emit2(V, "div", "rbx");
-
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift1);
-                                                            emit2(V, "mov", "rbx", "rax");
+                                                            
+                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                                            emit2(V, "mov", regbp, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int%"))
 								                        {
@@ -311,13 +291,49 @@ cast_expression
     ;
 
 JUMP
-    : IF '(' IDENTIFIER op IDENTIFIER ')' GOTO LABEL
-    | IF IDENTIFIER GOTO LABEL
-    | GOTO LABEL
+    : IF '(' IDENTIFIER op INTEGER_CONSTANT ')' GOTO LABEL 	
+                                                        {
+    														if(strcmp($<stringval>4, "==") && $<intval>5 ==0 )
+    														{
+                                                                char tempoww[8];
+                                                                sprintf(tempoww, "%d", $<intval>8);
+                                                                string tempoo = tempoww;
+    															string temp = "_label" + tempoo;
+    															emit2(V, "mov", "rax", "$<address>3");
+    															emit2(V, "cmp", "rax", "$0");
+    															emit2(V, "je", temp);
+    														}
+    														else if(strcmp($<stringval>4, "==") && $<intval>5 ==0)
+    														{
+                                                                char tempoww[8];
+                                                                sprintf(tempoww, "%d", $<intval>8);
+                                                                string tempoo = tempoww;
+                                                                string temp = "_label" + tempoo;
+    															emit2(V, "mov", "rax", "$<address>3");
+    															emit2(V, "cmp", "rax", "$0");
+    															emit2(V, "jne", temp);
+    														}
+   														}
+    | IF '(' IDENTIFIER ')' GOTO LABEL 	{
+                                    char tempoww[8];
+                                    sprintf(tempoww, "%d", $<intval>5);
+                                    string tempoo = tempoww;
+                                    string temp = "_label" + tempoo;
+									emit2(V, "mov", "rax", "$<address>3");
+									emit2(V, "cmp", "rax", "$0");
+									emit2(V, "jne", temp);
+    							}
+    | GOTO LABEL 	{
+                        char tempoww[8];
+                        sprintf(tempoww, "%d", $<intval>2);
+                        string tempoo = tempoww;
+                        string temp = "_label" + tempoo;
+						emit2(V, "jmp", temp);
+    				}
     ;
 
 LABEL
-    : LINE_NO
+    : LINE_NO 		{$<intval>$ = $<intval>1 ;}
     ;
 
 FUNCTION    
