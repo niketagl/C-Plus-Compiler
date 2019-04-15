@@ -14,6 +14,7 @@ typedef enum {
 	STRCT,
 	CARTESIAN,
 	FUNCTION,
+	CLASSS,
 	NOTYPE,
 	VOD,
 	ERROR,
@@ -117,6 +118,8 @@ type_ptr new_pointer_type(type_ptr);
 
 type_ptr new_struct_type(type_ptr, char*);
 
+type_ptr new_class_type(type_ptr, char*);
+
 type_ptr new_array_type(type_ptr, int size);
 
 char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
@@ -124,6 +127,8 @@ char* type_check(string, table_entry_ptr &entry_out, table_entry_ptr, table_entr
 bool type_compare(type_ptr, type_ptr);
 
 char* type_check2(string, table_entry_ptr &entry_out, table_entry_ptr, table_entry_ptr);
+
+char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1);
 
 char* type_check4(string, table_entry_ptr &entry_out, table_entry_ptr, char*);
 

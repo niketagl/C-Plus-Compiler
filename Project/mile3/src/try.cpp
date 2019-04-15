@@ -19,6 +19,7 @@ vector < code_ptr > V;
 vector < table_entry_ptr > arg_list;
 map < string , int > labels;
 table_ptr struct_namespace;
+table_ptr class_namespace;
 
 void preprocess()
 {
@@ -36,6 +37,10 @@ int main(int argc, char **argv)
 	struct_namespace->name.append("GLOBAL");
 	struct_namespace->scope.append("GLOBAL");
 
+	class_namespace = new table;
+	class_namespace->name.append("GLOBAL");
+	class_namespace->scope.append("GLOBAL");
+
 	global_table->parent = NULL;
 	global_table->name.append("GLOBAL");
 	global_table->scope.append("GLOBAL");
@@ -47,5 +52,6 @@ int main(int argc, char **argv)
 
 	savetable(global_table, "global_table.csv");
 	savetable(struct_namespace, "structures.csv");
+	savetable(class_namespace, "classes.csv");
 	print_code(V);
 }

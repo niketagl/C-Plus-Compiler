@@ -29,6 +29,7 @@ extern int yylineno;
 	extern vector < table_entry_ptr > arg_list;
 	extern stack < int > offset_stack;
 	extern table_ptr struct_namespace;
+	extern table_ptr class_namespace;
 	extern int code_line;
 	extern int count;
 	extern vector < code_ptr > V;
@@ -120,6 +121,7 @@ postfix_expression
 	| postfix_expression '[' expression ']'					{ if(char* s = type_check2("[]",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s);  }
 	| IDENTIFIER '(' ')'							{ 
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1);
+																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1);
 																
 																if(char* s = type_check2("()",$<entry>$,temp,NULL)) yyerror3(s);
 																else
@@ -131,6 +133,7 @@ postfix_expression
 
 	| IDENTIFIER '(' argument_expression_list ')' 	{ 																
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1, $<entry>3->type);
+																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1, $<entry>3->type);
 																if(char* s = type_check2("()",$<entry>$,temp,$<entry>3)) yyerror3(s);
 																else
 																{
@@ -146,6 +149,69 @@ postfix_expression
 															}
 
 	| postfix_expression '.' IDENTIFIER 					{ if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
+	| postfix_expression '.' IDENTIFIER '(' ')' 			{ 	
+																if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s);
+																else
+																{ 
+																	if(lookup(class_namespace, $<entry>1->type->type_name))
+																	{
+																		table_entry_ptr temp_class = lookup(class_namespace, $<entry>1->type->type_name);
+																		if(same_lookup(temp_class->t, $<stringval>3))
+																		{
+																			table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
+																			if(char* t = type_check2("()",$<entry>$,temp,NULL)) yyerror3(t);
+																			else
+																			{
+																				emit(V, "call",temp->name);
+																				emit(V, "pop_ret_value", $<entry>$->name);
+																			}
+																		}
+																		else
+																		{
+																			yyerror3("Function not defined within Class");
+																		}
+																	}
+																	else
+																	{
+																		yyerror3("Class not defined");
+																	}
+																}
+															}
+	| postfix_expression '.' IDENTIFIER '(' argument_expression_list ')' 	{ 
+																				if(char* s = type_check4(".",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s);
+																				else
+																				{
+																					if(lookup(class_namespace, $<entry>1->type->type_name))
+																					{	
+																						table_entry_ptr temp_class = lookup(class_namespace, $<entry>1->type->type_name);
+																						cout << temp_class->name << endl;
+																						if(same_lookup(temp_class->t, $<stringval>3))
+																						{
+																							table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
+																							if(char* t = type_check2("()",$<entry>$,temp,$<entry>5)) yyerror3(t);
+																							else
+																							{
+																								for(int i=0; i<arg_list.size(); i++)
+																								{
+																									table_entry_ptr e = arg_list[i];
+																									emit(V, "push_param", e->name);
+																								}
+																								arg_list.resize(0);
+																								emit(V, "call", temp->name);
+																								emit(V, "pop_ret_value", $<entry>$->name);
+																							}
+																						}
+																						else
+																						{
+																							yyerror3("Function not defined within Class");
+																						}
+																					}
+																					else
+																					{
+																						yyerror3("Class not defined");
+																					}
+																				} 
+																			}
 	| postfix_expression PTR_OP IDENTIFIER 					{ if(char* s = type_check4("->",$<entry>$,$<entry>1,$<stringval>3)) yyerror3(s); }
 	| postfix_expression INC_OP								{
 																table_entry_ptr temp = new table_entry; 
@@ -220,6 +286,29 @@ unary_expression
 									temp->type->constnt = 1;
 									temp->type->value = -1;
 									temp->name = "-1";
+									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "*"))
+								{
+									if(char* s = type_check3("*",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "&"))
+								{
+									if(char* s = type_check3("&",$<entry>$,$<entry>2)) yyerror3(s);
+									//char temp_name[12];
+									//strcpy(temp_name, )
+								}
+								else if(!strcmp($<stringval>1, "~"))
+								{
+									if(char* s = type_check3("~",$<entry>$,$<entry>2)) yyerror3(s);
+								}
+								else if(!strcmp($<stringval>1, "+"))
+								{
+									table_entry_ptr temp = new table_entry; 
+									temp->type = new_basic_type(INTEGER); 
+									temp->type->constnt = 1;
+									temp->type->value = 1;
+									temp->name = "+1";
 									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
 								}
 								else
@@ -425,7 +514,30 @@ constant_expression
 declaration
 	: declaration_specifiers ';' { $<type>$ = $<type>1;}
 	| declaration_specifiers init_declarator_list ';' { $<type>$ = $<type>2;}
-	| IDENTIFIER IDENTIFIER ';'
+	| IDENTIFIER IDENTIFIER ';' { 
+									if(lookup(class_namespace, $<stringval>1))
+									{
+										$<type>$ = new_class_type(lookup(class_namespace, $<stringval>1)->type, $<stringval>1) ;
+									}
+									else
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Undeclared structure \"", $<stringval>1, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+									}
+									if(same_lookup1(table_stack.top(),$<stringval>2))
+									{
+										char* error = (char *) malloc (100 * sizeof(char));
+										sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>2, "\"");
+										yyerror3(error);
+										$<type>$ = new_basic_type(ERROR);
+									}
+									else
+									{
+										enter(table_stack.top(), $<stringval>2, $<type>$, 0 );
+									}
+								}
 	| asm_declaration
 	;
 
@@ -487,10 +599,10 @@ struct_or_union_specifier
 									{
 										table_ptr t1 = table_stack.top();
 										table_stack.pop(); offset_stack.pop();
-										if(same_lookup1(struct_namespace,$<stringval>1))
+										if(same_lookup1(struct_namespace,$<stringval>2))
 										{
 											char* error = (char *) malloc (100 * sizeof(char));
-											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>1, "\"");
+											sprintf(error, "%s%s%s","Multiple declarations for structure or union \"", $<stringval>2, "\"");
 											yyerror3(error);
 											$<type>$ = new_basic_type(ERROR); 
 										}
@@ -525,12 +637,12 @@ struct_or_union
 	;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
+	: struct_declaration 							{ $<type>$ = $<type>1; }
+	| struct_declaration_list struct_declaration 	{ $<type>$ = new_cartesian_type($<type>1,$<type>2); }
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';'
+	: specifier_qualifier_list struct_declarator_list ';' 	{ $<type>$ = $<type>2; }
 	;
 
 specifier_qualifier_list
@@ -584,7 +696,7 @@ direct_declarator
 						if(same_lookup1(table_stack.top(),$<stringval>1))
 						{
 							char* error = (char *) malloc (100 * sizeof(char));
-							sprintf(error, "%s%s%s","Multiple declarations for identifier5 \"", $<stringval>1, "\"");
+							sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 							yyerror3(error);
 							$<type>$ = new_basic_type(ERROR);
 						}
@@ -599,7 +711,7 @@ direct_declarator
 													if(same_lookup1(table_stack.top(),$<stringval>1))
 													{
 														char* error = (char *) malloc (100 * sizeof(char));
-														sprintf(error, "%s%s%s","Multiple declarations for identifier6 \"", $<stringval>1, "\"");
+														sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 														yyerror3(error);
 														$<type>$ = new_basic_type(ERROR);
 													}
@@ -613,7 +725,7 @@ direct_declarator
 								if(same_lookup1(table_stack.top(),$<stringval>1))
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier0 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 								}
@@ -632,7 +744,7 @@ direct_declarator
 								if(e != NULL && !e->proc_decl)
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier1 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_stack.push(t1); offset_stack.push(0);
@@ -678,7 +790,7 @@ direct_declarator
 								if( (e != NULL)? !e->proc_decl : 0 )
 								{
 									char* error = (char *) malloc (100 * sizeof(char));
-									sprintf(error, "%s%s%s","Multiple declarations for identifier2 \"", $<stringval>1, "\"");
+									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
 									$<type>$ = new_basic_type(ERROR);
 									table_ptr temp = new table;
@@ -1102,7 +1214,7 @@ external_declaration
 							if(e!=NULL && e->proc_decl)
 							{
 								char* error = (char *) malloc (100 * sizeof(char));
-								sprintf(error, "%s%s%s","Multiple declarations for identifier4 \"", nam, "\"");
+								sprintf(error, "%s%s%s","Multiple declarations for identifier \"", nam, "\"");
 								yyerror3(error);
 							}
 							else e->proc_decl=1;
@@ -1118,6 +1230,7 @@ function_definition
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
 																type_ptr temp = $<type>2;
+																$<type>$ = $<type>2;
 																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
@@ -1127,6 +1240,7 @@ function_definition
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
 																type_ptr temp = $<type>2;
+																$<type>$ = $<type>2;
 																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
@@ -1136,38 +1250,71 @@ function_definition
 mk_tbl : { table_ptr t1 = mktable(table_stack.top()); table_stack.push(t1); offset_stack.push(0);} ;
 
 class_specifier
-	: class_head '{' member_list '}'
-    | class_head '{' '}'
+	: class_head '{' mk_tbl3 member_list '}' 	{
+													table_ptr c1 = table_stack.top();
+													table_stack.pop(); offset_stack.pop();
+													if(same_lookup1(class_namespace,$<stringval>1))
+													{
+														char* error = (char *) malloc (100 * sizeof(char));
+														sprintf(error, "%s%s%s","Multiple declarations for class \"", $<stringval>1, "\"");
+														yyerror3(error);
+														$<type>$ = new_basic_type(ERROR); 
+													}
+													else
+													{
+														$<type>$ = new_class_type($<type>4, $<stringval>1) ;
+														enter_proc(class_namespace, $<stringval>1, $<type>$, c1);
+														c1->scope = table_stack.top()->name;
+													}
+												}
+    | class_head '{' mk_tbl3 '}'				{
+													table_ptr c1 = table_stack.top();
+													table_stack.pop(); offset_stack.pop();
+													if(same_lookup1(class_namespace,$<stringval>1))
+													{
+														char* error = (char *) malloc (100 * sizeof(char));
+														sprintf(error, "%s%s%s","Multiple declarations for class \"", $<stringval>1, "\"");
+														yyerror3(error);
+														$<type>$ = new_basic_type(ERROR); 
+													}
+													else
+													{
+														$<type>$ = new_class_type(NULL, $<stringval>1) ;
+														enter_proc(class_namespace, $<stringval>1, $<type>$, c1);
+														c1->scope = table_stack.top()->name;
+													}
+												}
     ;
+mk_tbl3 : { table_ptr c1 = mktable(); table_stack.push(c1); offset_stack.push(0);} ;
 
 class_head
     : class_key base_spec
-    | class_key class_name base_spec
-    | class_key class_name
+    | class_key class_name base_spec 	{ $<stringval>$ = $<stringval>2; }
+    | class_key class_name 				{ $<stringval>$ = $<stringval>2; }
     ;
 
 member_list
-    : member_declaration member_list
-    | member_declaration
-    | access_specifier ':' member_list
+    : member_declaration member_list 		{ $<type>$ = new_cartesian_type($<type>1,$<type>2);}
+    | member_declaration 					{ $<type>$ = $<type>1; }
+    | access_specifier ':' member_list 		{ $<type>$ = $<type>3; }
     | access_specifier ':'
 
 member_declaration
-    : declaration_specifiers member_declarator_list ';'
-    | member_declarator_list ';'
+    : declaration_specifiers member_declarator_list ';' 	{ $<type>$ = $<type>2; }
+    | member_declarator_list ';' 							{ $<type>$ = $<type>1; }
     | declaration_specifiers ';'
     | ';'
-    | function_definition
+    | function_definition									{ $<type>$ = $<type>1; }					
     ;
 
 member_declarator_list
-    : member_declarator
-    | member_declarator_list ',' member_declarator
+    : member_declarator 								{ $<type>$ = $<type>1; }
+    | member_declarator_list ',' member_declarator 		{ $<type>$ = new_cartesian_type($<type>1,$<type>3); }
     ;
 
 member_declarator
-    : declarator pure_specifier
-    | declarator
+    : declarator pure_specifier 	{ $<type>$ = $<type>1; }
+    | declarator 					{ $<type>$ = $<type>1; }
     ;
 
 pure_specifier

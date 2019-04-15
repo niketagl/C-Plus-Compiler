@@ -1,7 +1,6 @@
-int fun(int a, int b);
-
-int fun(int a, int b)
+int main()
 {
+<<<<<<< HEAD
 	return 0;
 }
 
@@ -13,4 +12,9 @@ int main()
 	int b;
 	b = a;
 	return 0;
+=======
+	int a;
+	int x ;
+	a = a * x;
+>>>>>>> 1f0aa5746291433b17284fbde42b4e3e6cc51c6d
 }
