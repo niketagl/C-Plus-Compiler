@@ -156,28 +156,28 @@ int type_width(type_ptr type)
 	int width = 0;
 	if(type->info == INTEGER )
 	{
-		width = 32;
-		if(type->shorter) width = 16;
-		if(type->longer) width = 64;
+		width = 4;
+		if(type->shorter) width = 2;
+		if(type->longer) width = 8;
 	}
 	if( type->info == FLT)
 	{
-		width = 64;
+		width = 8;
 		//if(type->shorter) width = 16;
 		//if(type->longer) width = 64;
 	}
-	if(type->info == CHR) width = 8;
+	if(type->info == CHR) width = 1;
 	if(type->info == DBL)
 	{
-		width = 64;
-		if(type->longer) width = 128;
+		width = 8;
+		if(type->longer) width = 16;
 	}
-	if(type->info == POINTER) width = 64;
+	if(type->info == POINTER) width = 8;
 	if(type->info == ARRAY) width = type_width(type->p1) * type->array_size;
 	if(type->info == STRCT) width = type_width(type->p1);
 	if(type->info == CARTESIAN) width = type_width(type->p1) + type_width(type->p2);
 	if(type->info == NOTYPE || type->info == VOD || type->info == ERROR) width = 0;
-	return width/8;
+	return width;
 }
 
 table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
@@ -197,17 +197,20 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 
 	t_entry->type = type;
 
+	if(offset!=0)
+	{
+		t_entry->offset = offset;
 
-	if (!type->param)
-	t_entry->offset = offset_stack.top();
+		t_entry->width = type_width(type);
+	}
 	else
-	t_entry->offset = offset_stack.top();
+	{
+		t_entry->offset = offset_stack.top();
 
-	t_entry->width = type_width(type);
+		t_entry->width = type_width(type);
 
-	offset_stack.top() += t_entry->width;
-
-	t->width += t_entry->width;
+		offset_stack.top() += t_entry->width;
+	}
 
 	string nam = t_entry->name;
 
@@ -830,7 +833,20 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		{
 			if(t1->info==ARRAY || t1->info==POINTER)
 			{
-				entry_out = enter(table_stack.top(), name, t1->p1, 0);
+				if (t1->info==ARRAY && t1->array_size<=t2->value)
+				{
+					string terror = "Array Out of Bounds Error";
+					char* type_error;
+    				type_error = (char *)malloc((terror.length()+1)*sizeof(char));  
+    				strcpy(type_error, terror.c_str());
+    				entry_out = new table_entry;
+    				entry_out->type = new_basic_type(ERROR);
+					return type_error;
+				}
+				int offset = 0;
+				if(t2->constnt)
+					offset = entry_in1->offset + t2->value * type_width(t1->p1);
+				entry_out = enter(table_stack.top(), name, t1->p1, offset);
 				count++;
 				f_op = "[" + entry_in2->name + "]";
 				emit(V, entry_out->name, "=", entry_in1->name, f_op);

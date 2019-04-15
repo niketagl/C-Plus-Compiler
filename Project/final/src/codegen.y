@@ -45,7 +45,7 @@ bool check_short(char* a, char* b);
 	char *stringval;
 }
 
-%token ID LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP PTR_OP INC_OP DEC_OP AND_OP OR_OP
+%token ID LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP PTR_OP
 %token INT REAL POINT
 %token INTCAST FLOATCAST DOUBLECAST
 %token END PROC_ID IF GOTO PUSH_PARAM CALL RETURN INTEGER_CONSTANT CHAR_CONSTANT FLOAT_CONSTANT
@@ -293,76 +293,80 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "int%"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rdx", ",", "0x0");
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "div", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rdx");
+                                                            emit2(V, "mov", "eax", ",", regbp3);
+                                                            emit2(V, "mov", "edx", ",", "0x0");
+                                                            emit2(V, "mov", "ebx", ",", regbp5);
+                                                            emit2(V, "div", "ebx");
+                                                            emit2(V, "mov", regbp1, ",", "edx");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int&"))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "and", "rax",  ",", "rbx");
-                                                            emit2(V, "mov", regbp1, ",",  "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "and", "eax",  ",", "ebx");
+                                                            emit2(V, "mov", regbp1, ",",  "ebx");
                                                         }
                                                         else if(!strcmp($<stringval>4, "int|"))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",",  regbp3);
-                                                            emit2(V, "mov", "rbx",  ",",  regbp5);
-                                                            emit2(V, "or", "rax",   ",", "rbx");
-                                                            emit2(V, "mov", regbp1, ",",  "rbx");
+                                                            emit2(V, "mov", "eax",  ",",  regbp3);
+                                                            emit2(V, "mov", "ebx",  ",",  regbp5);
+                                                            emit2(V, "or", "eax",   ",", "ebx");
+                                                            emit2(V, "mov", regbp1, ",",  "ebx");
                                                         }
                                                         else if(!strcmp($<stringval>4, "int^"))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "xor", "rax",  ",", "rbx");
-                                                            emit2(V, "mov", regbp1, ",",  "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "xor", "eax",  ",", "ebx");
+                                                            emit2(V, "mov", regbp1, ",",  "ebx");
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>"))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp5);
-                                                            emit2(V, "mov", "rbx",  ",", regbp3);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp5);
+                                                            emit2(V, "mov", "ebx",  ",", regbp3);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<"))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<="))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp5);
-                                                            emit2(V, "mov", "rbx",  ",", regbp3);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp5);
+                                                            emit2(V, "mov", "ebx",  ",", regbp3);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>="))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int=="))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "setz", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int!="))
                                                         {
-                                                            emit2(V, "mov", "rax",  ",", regbp3);
-                                                            emit2(V, "mov", "rbx",  ",", regbp5);
-                                                            emit2(V, "cmp", "rax",  ",", "rbx");
+                                                            emit2(V, "mov", "eax",  ",", regbp3);
+                                                            emit2(V, "mov", "ebx",  ",", regbp5);
+                                                            emit2(V, "cmp", "eax",  ",", "ebx");
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
+    | IDENTIFIER assignment_operator IDENTIFIER op INTEGER
+                                                {
+
+                                                }
     | IDENTIFIER assignment_operator op IDENTIFIER
     | IDENTIFIER assignment_operator IDENTIFIER
     											{
@@ -714,11 +718,6 @@ basic_op
     | '='       { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "="); }
     | '.'       { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "."); }
     | PTR_OP      { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "->"); }
-    | '?'       { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "?"); }
-    | INC_OP    { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "++"); }
-    | DEC_OP    { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "--"); }
-    | AND_OP    { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "&&"); }
-    | OR_OP     { $<stringval>$ = (char*)malloc(3*sizeof(char)); sprintf($<stringval>$, "||"); }
     ;
 
 %%
