@@ -1,17 +1,6 @@
-
-int ifelses()
+int fib(int n)
 {
-	int a,b,c,d,e;
-
-	if(a && b || c)
-	{
-		d = 10;
-		e = d * d - 63;
-	}
-	else
-	{
-		e = 53;
-	}
-
-
+	if(n==0 || n==1)
+		return 1;
+	return fib(n-1) + fib(n-2);
 }
