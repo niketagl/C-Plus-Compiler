@@ -54,6 +54,13 @@ void print_code( vector <code_ptr> &V )
 	ofstream f;
 	f.open("assembly.asm");
 
+	f<<"section .bss"<<endl;
+	f<<'\t'<<"digits resb 100"<<endl;
+
+	// declare all globals as well.
+
+	f<<"section .text"<<endl << '\t' << "global _start"<<endl;
+
 	for(int i=0; i < V.size() ; i++ )
 	{
 		if(V[i]->label.length())
@@ -64,15 +71,6 @@ void print_code( vector <code_ptr> &V )
 			f<<" "<<V[i]->goto_line;
 		f<<endl;
 	}
-
-	// ifstream ff;
-	// ff.open("src/input_int.asm");
-	// while(ff)
-	// {
-	// 	string s;
-	// 	ff >> s;
-	// 	f << s << endl;
-	// }
 	
 	f.close();
 

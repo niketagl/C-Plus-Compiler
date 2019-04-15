@@ -25,6 +25,7 @@ table_ptr mktable( table_ptr parent)
 {
 	table_ptr t = new table;
 	t->parent = parent;
+	t->width = 0;
 	return t;
 }
 
@@ -99,6 +100,16 @@ void print_table(table_ptr t, ofstream &f1, string scope)
 			f1<<", 1,";
 		else
 			f1<<", 0,";
+		
+		if(e->proc==1)  // calculating width
+		{
+			table_ptr t11 = e->t;
+			map < string , table_entry_ptr > ::iterator j;
+			for( j = t11->entries.begin() ; j != t11->entries.end(); j ++)
+			{
+				e->width += j->second->width;
+			}
+		}
 
 		f1<<i->first<<", "<<print_type(e->type)<<", "<< e->offset <<", "<<e->width<<"\n";
 
@@ -195,6 +206,8 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 
 	offset_stack.top() += t_entry->width;
 
+	t->width += t_entry->width;
+
 	string nam = t_entry->name;
 
 	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
@@ -231,7 +244,7 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr ch
 	{
 		t_entry->name = e->name;
 	}
-
+	t_entry->width = 0;
 
 	t_entry->type = type;
 	

@@ -11,5 +11,5 @@ int fun(int x)
 int main()
 {
 	int a;
-	alpha = 2;
+	a = 2;
 }
