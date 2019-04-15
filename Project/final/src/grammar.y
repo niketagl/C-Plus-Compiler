@@ -508,7 +508,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression 	
+	: conditional_expression 	{ $<entry>$ = $<entry>1; } 	
 	;
 
 declaration
@@ -717,7 +717,7 @@ direct_declarator
 													}
 													else
 													{
-														$<type>$ = new_array_type($<type>0, $<type>3->value);
+														$<type>$ = new_array_type($<type>0, $<entry>3->type->value);
 														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
 													}	
 												}
