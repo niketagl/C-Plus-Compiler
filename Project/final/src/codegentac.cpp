@@ -51,7 +51,7 @@ void print_code( vector <code_ptr> &V )
 	}
 
 	ofstream f;
-	f.open("output_code.txt");
+	f.open("assembly.txt");
 
 	for(int i=0; i < V.size() ; i++ )
 	{

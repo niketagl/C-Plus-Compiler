@@ -16,6 +16,8 @@ int code_line = 100;
 stack < int > offset_stack;
 vector < code_ptr > V;
 map < string , int > labels;
+vector<table> proc_table;
+vector<table> id_table;
 
 int main(int argc, char **argv)
 {
@@ -27,8 +29,6 @@ int main(int argc, char **argv)
 
 	print_code(V);
 
-	vector<table> proc_table;
-	vector<table> id_table;
 
 	ifstream ip("global_table.csv");
 
