@@ -489,7 +489,7 @@ JUMP
     															emit2(V, "cmp", "rax", ", $0");
     															emit2(V, "je", temp);
     														}
-    														else if(strcmp($<stringval>4, "==")==0 && $<intval>5 ==0)
+    														else if(strcmp($<stringval>4, "!=")==0 && $<intval>5 ==0)
     														{
                                                                 char tempoww[8];
                                                                 sprintf(tempoww, "%d", $<intval>8);

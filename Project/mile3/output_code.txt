@@ -1,0 +1,6 @@
+proc_id0<main>:
+100 : id4 = id1 [0]
+101 : id5 = id1 [5]
+102 : id6 = id1 [11]
+103 : id7 = id1 [id0]
+104 : end
