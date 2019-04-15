@@ -142,11 +142,17 @@ void copy_table_content(table_ptr t_in, table_ptr t_out)
 int type_width(type_ptr type)
 {
 	int width = 0;
-	if(type->info == INTEGER || type->info == FLT)
+	if(type->info == INTEGER )
 	{
 		width = 32;
 		if(type->shorter) width = 16;
 		if(type->longer) width = 64;
+	}
+	if( type->info == FLT)
+	{
+		width = 64;
+		//if(type->shorter) width = 16;
+		//if(type->longer) width = 64;
 	}
 	if(type->info == CHR) width = 8;
 	if(type->info == DBL)

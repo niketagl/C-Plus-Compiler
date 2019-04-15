@@ -1,0 +1,7 @@
+proc_id0<fun>:
+100 : id4 = id1 int+ id3
+101 : id2 = id4
+102 : return id1
+proc_id1<main>:
+103 : id0 = 2
+104 : end

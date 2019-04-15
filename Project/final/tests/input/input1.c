@@ -1,7 +1,15 @@
+int alpha;
+
+int fun(int x)
+{
+	int y;
+	int z;
+	y = x + z;
+	return x;
+}
+
 int main()
 {
-	short a;
-	short b;
-	b = a / b;
-	return 0;
+	int a;
+	alpha = 2;
 }
