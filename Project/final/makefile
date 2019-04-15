@@ -31,8 +31,14 @@ lex.yy.c1: $(TWO1)
 compile: $(TRY1) $(SYM1) $(TAC1) lex.yy.c y.tab.c 
 	g++ $(TRY1) $(TAC1) $(SYM1) lex.yy.c y.tab.c -w -o $(OUT1) 
 
+execute: 
+	./jaadu output_code.txt
+	nasm -f elf64 -o pri.o assembly.asm 
+	ld -o a.out pri.o
+	rm pri.o  
+
 clean:
 	rm jaadu compile
 
 clean_output:
-	rm global_table.csv structures.csv output_code.txt classes.csv assembly.asm
+	rm global_table.csv structures.csv output_code.txt classes.csv assembly.asm a.out

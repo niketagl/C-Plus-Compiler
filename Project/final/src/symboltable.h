@@ -91,6 +91,8 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset);
 
 table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr child);
 
+table_entry_ptr enter_proc2( table_ptr t, char* name, type_ptr type);
+
 void addwidth(table_ptr t, int width);
 
 table_entry_ptr lookup( table_ptr , char*);

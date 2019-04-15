@@ -85,6 +85,7 @@ string print_type(type_ptr t)
 
 void print_table(table_ptr t, ofstream &f1, string scope)
 {
+	if(t==NULL)return;
 	map < string , table_entry_ptr > ::iterator i;
 	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
 	{
@@ -101,7 +102,7 @@ void print_table(table_ptr t, ofstream &f1, string scope)
 		else
 			f1<<", 0,";
 		
-		if(e->proc==1)  // calculating width
+		if(e->proc==1 && e->t != NULL)  // calculating width
 		{
 			table_ptr t11 = e->t;
 			map < string , table_entry_ptr > ::iterator j;
@@ -255,6 +256,28 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr ch
 	string temp_label = t_entry->name + "<" + t_entry->inp_name + ">";
 	labels.insert( pair< string, int >(temp_label, code_line));
 	
+	return t_entry; 
+}
+
+
+table_entry_ptr enter_proc2( table_ptr t, char* name, type_ptr type)
+{
+	table_entry_ptr t_entry = new table_entry;
+	
+	t_entry->proc = 1;
+
+	t_entry->t = NULL;
+
+	t_entry->inp_name = name;
+
+	t_entry->name = name;
+	
+	t_entry->type = type;
+
+	string nam = t_entry->name;
+
+	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
+
 	return t_entry; 
 }
 

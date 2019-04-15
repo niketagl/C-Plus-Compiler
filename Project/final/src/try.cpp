@@ -26,6 +26,7 @@ void preprocess()
 	cout<<"got a preprocessor !!\n\n";
 }
 
+
 int main(int argc, char **argv)
 {
 	string input_filename = argv[1];
@@ -46,7 +47,10 @@ int main(int argc, char **argv)
 	global_table->scope.append("GLOBAL");
 
 	table_stack.push(global_table);
-	offset_stack.push(0); 
+	offset_stack.push(0);
+
+	type_ptr temp = new_function_type(new_basic_type(INTEGER),new_basic_type(VOD));
+	enter_proc2(global_table, "_printints", temp); 
 
 	yyparse();
 

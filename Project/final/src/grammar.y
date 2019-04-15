@@ -127,6 +127,7 @@ postfix_expression
 																else
 																{
 																	emit(V, "call",temp->name);
+																	emit(V, "pop_ret_value", $<entry>$->name);
 																} 
 															}
 
@@ -136,13 +137,14 @@ postfix_expression
 																if(char* s = type_check2("()",$<entry>$,temp,$<entry>3)) yyerror3(s);
 																else
 																{
-																	for(int i=0; i<arg_list.size(); i++)
+																	for(int i=arg_list.size()-1; i>=0; i--)
 																	{
 																		table_entry_ptr e = arg_list[i];
 																		emit(V, "push_param", e->name);
 																	}
 																	arg_list.resize(0);
 																	emit(V, "call", temp->name);
+																	emit(V, "pop_ret_value", $<entry>$->name);
 																}
 															}
 
@@ -161,6 +163,7 @@ postfix_expression
 																			else
 																			{
 																				emit(V, "call",temp->name);
+																				emit(V, "pop_ret_value", $<entry>$->name);
 																			}
 																		}
 																		else
@@ -188,13 +191,14 @@ postfix_expression
 																							if(char* t = type_check2("()",$<entry>$,temp,$<entry>5)) yyerror3(t);
 																							else
 																							{
-																								for(int i=0; i<arg_list.size(); i++)
+																								for(int i=arg_list.size()-1; i>=0; i--)
 																								{
 																									table_entry_ptr e = arg_list[i];
 																									emit(V, "push_param", e->name);
 																								}
 																								arg_list.resize(0);
 																								emit(V, "call", temp->name);
+																								emit(V, "pop_ret_value", $<entry>$->name);
 																							}
 																						}
 																						else
@@ -1044,9 +1048,9 @@ selection_statement
 							for(int i=0; i < s->labellist.size(); i++)
 							{
 								if(V[s->labellist[i]-100]->label == "default")
-									emit(V, "goto");
+								emit(V, "goto");
 								else
-									emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
+								emit(V, "if(", e->name,"==",V[s->labellist[i]-100]->label,") goto");
 								V[code_line-101]->goto_line = s->labellist[i];
 								V[s->labellist[i]-100]->label = "";
 							}
