@@ -1,30 +1,30 @@
 double func(double x) 
 { 
-    return x*x*x - x*x + 2; 
+    return x*x*x - x*x + 2.0; 
 } 
 
 double derivFunc(double x) 
 { 
-    return 3*x*x - 2*x; 
+    return 3.0*x*x - 2.0*x; 
 } 
 
-double newtonRaphson(double x) 
+void newtonRaphson(double x) 
 { 
     double h = func(x) / derivFunc(x); 
     double abslt = h;
-    if(h < 0) abslt = -1.0 * h;
+    if(h < 0.0) abslt = -1.0 * h;
+    double n = x;
     while (abslt >= 0.001) 
     { 
-        h = func(x)/derivFunc(x);    
-        x = x - h; 
+        h = func(n)/derivFunc(n);    
+        n = n - h; 
     }
-    return x;
-} 
+    //print(n);
+}
 
-int main() 
+double main() 
 { 
-    double x0 = -20;
-    double ans;
-    ans = newtonRaphson(x0);
+    double x0 = -20.0;
+    newtonRaphson(x0);
 
 } 

@@ -1,6 +1,6 @@
 int main()
 {
   float a = 3.0;
-  float b = 4.0;
-  float c = a + b;
+  int b = 4;
+  float c = a * b;
 }
