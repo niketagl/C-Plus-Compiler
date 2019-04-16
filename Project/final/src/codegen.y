@@ -1647,9 +1647,12 @@ INDEXED_ASSIGNMENT
                                                                         }
 
 
-                                                                        emit2(V, "mov rbx, 0");
-                                                                        emit2(V, "mov ebx,",regbp5);
-                                                                        emit2(V, "add rcx, rbx");
+                                                                        emit2(V, "mov rax, 0");
+                                                                        emit2(V, "mov eax,",regbp5);
+                                                                        emit2(V, "mov rbx, 4");
+                                                                        emit2(V, "mul rbx");
+
+                                                                        emit2(V, "add rcx, rax");
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
