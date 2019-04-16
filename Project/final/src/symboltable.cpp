@@ -167,7 +167,7 @@ int type_width(type_ptr type)
 		//if(type->shorter) width = 16;
 		//if(type->longer) width = 64;
 	}
-	if(type->info == CHR) width = 1;
+	if(type->info == CHR) width = 4;
 	if(type->info == DBL)
 	{
 		width = 8;

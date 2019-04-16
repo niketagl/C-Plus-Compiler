@@ -199,8 +199,8 @@ ASSIGNMENT
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            if(id_table[$<intval>3].width == 2 && id_table[$<intval>5].width == 2) prefix[0] =  ' ';
+                                                            if(id_table[$<intval>3].width == 8 || id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -219,8 +219,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            if(id_table[$<intval>3].width == 2 && id_table[$<intval>5].width == 2) prefix[0] =  ' ';
+                                                            if(id_table[$<intval>3].width == 8 || id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -239,8 +239,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            if(id_table[$<intval>3].width == 2 && id_table[$<intval>5].width == 2) prefix[0] =  ' ';
+                                                            if(id_table[$<intval>3].width == 8 || id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -265,8 +265,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int/"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            if(id_table[$<intval>3].width == 2 && id_table[$<intval>5].width == 2) prefix[0] =  ' ';
+                                                            if(id_table[$<intval>3].width == 8 || id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -327,6 +327,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<"))
@@ -334,6 +336,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<="))
@@ -341,6 +345,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>="))
@@ -348,6 +354,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int=="))
@@ -355,6 +363,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setz", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int!="))
@@ -362,6 +372,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
@@ -408,8 +420,8 @@ ASSIGNMENT
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>3].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -428,8 +440,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>3].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -449,8 +461,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>3].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -475,8 +487,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int/"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>3].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -537,6 +549,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<"))
@@ -544,6 +558,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<="))
@@ -551,6 +567,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>="))
@@ -558,6 +576,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int=="))
@@ -565,6 +585,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setz", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int!="))
@@ -572,6 +594,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
@@ -617,8 +641,8 @@ ASSIGNMENT
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -637,8 +661,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -657,8 +681,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -683,8 +707,8 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int/"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
+                                                            
+                                                            if(id_table[$<intval>5].width == 8)
                                                             {
                                                                 prefix[0] =  'r';
                                                             }
@@ -745,6 +769,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<"))
@@ -752,6 +778,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<="))
@@ -759,6 +787,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>="))
@@ -766,6 +796,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int=="))
@@ -773,6 +805,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setz", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int!="))
@@ -780,6 +814,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
@@ -810,11 +846,7 @@ ASSIGNMENT
                                                         if(!strcmp($<stringval>4, "int+"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
-                                                            {
-                                                                prefix[0] =  'r';
-                                                            }
+                                                            
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             emit2(V, "mov", reg, ",", regbp3);
@@ -830,11 +862,7 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
-                                                            {
-                                                                prefix[0] =  'r';
-                                                            }
+                                                            
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             emit2(V, "mov", reg, ",", regbp3);
@@ -850,11 +878,7 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
-                                                            {
-                                                                prefix[0] =  'r';
-                                                            }
+                                                            
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
                                                             emit2(V, "mov", reg, ",", regbp3);
@@ -876,11 +900,7 @@ ASSIGNMENT
                                                         else if(!strcmp($<stringval>4, "int/"))
 								                        {
                                                             char prefix[2] = "e";
-                                                            if(check_short($<stringval>3, $<stringval>5)) prefix[0] =  ' ';
-                                                            if(check_long($<stringval>3, $<stringval>5))
-                                                            {
-                                                                prefix[0] =  'r';
-                                                            }
+                                                            
                                                             char reg[4];
                                                             char regd[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
@@ -938,6 +958,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<"))
@@ -945,6 +967,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "sets", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int<="))
@@ -952,6 +976,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp5);
                                                             emit2(V, "mov", "ebx",  ",", regbp3);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int>="))
@@ -959,6 +985,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setns", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int=="))
@@ -966,6 +994,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setz", regbp1);
                                                         }
                                                         else if(!strcmp($<stringval>4, "int!="))
@@ -973,6 +1003,8 @@ ASSIGNMENT
                                                             emit2(V, "mov", "eax",  ",", regbp3);
                                                             emit2(V, "mov", "ebx",  ",", regbp5);
                                                             emit2(V, "cmp", "eax",  ",", "ebx");
+                                                            emit2(V, "mov rcx, 0");
+                                                            emit2(V, "mov", regbp1, ", ecx");
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
@@ -1392,9 +1424,7 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
-                                                                        emit2(V, ebx, )
                                                                     }
-    }
     ;
 
 assignment_operator
@@ -1448,15 +1478,6 @@ void yyerror(const char *s)
 
 /////////////////////   REMAINING   ///////////////////////////////////////////////////////////////////////////////////
 
-// Implicitly used check_short, check_long function
-
-/*
-POINTER
-    : IDENTIFIER assignment_operator '&' IDENTIFIER
-    | IDENTIFIER assignment_operator '*' IDENTIFIER
-    | '*' IDENTIFIER assignment_operator IDENTIFIER
-    ;
-*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool check_long(char* a, char* b)
@@ -1468,35 +1489,3 @@ bool check_short(char* a, char* b)
 {
     return 0;
 }
-
-/*
-                                                            char regbx[4];
-                                                            sprintf(regbx, "%s%s", prefix, "bx");
-                                                            char regbp[4];
-                                                            sprintf(regbp, "%s%s", prefix, "bp");
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift3);
-                                                            //stmt1
-
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift5);
-                                                            //stmt2
-
-                                                            emit2(V, "mov", regbx, regbp);
-                                                            emit2(V, "sub", regbx, sshift1);
-                                                            //stmt3
-                                                            
-                                                            ///////////FLOAT////////////////////////////////////////////////////////////////////
-
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift3);
-                                                            //stmt1
-
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift5);
-                                                            //stmt2
-
-                                                            emit2(V, "mov", "rbx", "rbp");
-                                                            emit2(V, "sub", "rbx", sshift1);
-                                                            //stmt3
-*/
