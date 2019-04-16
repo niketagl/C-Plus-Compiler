@@ -32,6 +32,7 @@ extern void preprocess();
 %%
 
 "pop_ret_value" {counts(); return(POP_RET);}
+"_inputints"	{counts(); return(PREDEF);}
 "_printints"	{counts(); return(PREDEF);}
 "cast_to_int"   {counts(); return(INTCAST); }
 "cast_to_float"   {counts(); return(FLOATCAST); }

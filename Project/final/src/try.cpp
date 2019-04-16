@@ -52,6 +52,9 @@ int main(int argc, char **argv)
 	type_ptr temp = new_function_type(new_basic_type(INTEGER),new_basic_type(VOD));
 	enter_proc2(global_table, "_printints", temp); 
 
+	type_ptr temp2 = new_function_type(NULL,new_basic_type(INTEGER));
+	enter_proc2(global_table, "_inputints", temp2); 
+
 	yyparse();
 
 	savetable(global_table, "global_table.csv");

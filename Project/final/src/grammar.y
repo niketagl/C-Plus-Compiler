@@ -123,7 +123,6 @@ postfix_expression
 	| IDENTIFIER '(' ')'							{ 
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1);
 																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1);
-																
 																if(char* s = type_check2("()",$<entry>$,temp,NULL)) yyerror3(s);
 																else
 																{
@@ -517,7 +516,10 @@ conditional_expression_mark2 : {
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| unary_expression assignment_operator assignment_expression {
+
+																	 if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); 
+																}
 	| error assignment_operator {yyerror2("lvalue required as left operand of assignment");} assignment_expression
 
 	;

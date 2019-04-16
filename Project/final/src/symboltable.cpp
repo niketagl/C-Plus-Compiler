@@ -79,7 +79,7 @@ string print_type(type_ptr t)
 		case VOD : s.append("VOID"); break;
 		case STRCT : s.append("STRUCT"); break;
 		case CLASSS : s.append("CLASS"); break;
-		case DEPTR : s.append(print_type(t->p1)); break;
+		case DEPTR : s.append(print_type(t->p1)); s.append(".");break;
 	}
 	return s;
 }
@@ -178,7 +178,7 @@ int type_width(type_ptr type)
 	if(type->info == STRCT) width = type_width(type->p1);
 	if(type->info == CARTESIAN) width = type_width(type->p1) + type_width(type->p2);
 	if(type->info == NOTYPE || type->info == VOD || type->info == ERROR) width = 0;
-	if(type->info == DEPTR) {width = type_width(type->p1);}
+	if(type->info == DEPTR) {width = 8;}
 	return width;
 }
 
@@ -658,7 +658,7 @@ char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
 	type_ptr t1 = entry_in1->type;
-	if(t1->info == DEPTR) t1 = t1->p1;
+	if(t1 && t1->info == DEPTR) t1 = t1->p1;
 	table_ptr t2 = new table;
 	if(!(lookup(struct_namespace, t1->type_name)))
 	{
@@ -841,8 +841,8 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		t2 = entry_in2->type;
 	else
 		t2 = NULL;
-	if(t1->info == DEPTR) t1 = t1->p1;
-	if(t2->info == DEPTR) t2 = t2->p1;
+	if(t1 && t1->info == DEPTR) t1 = t1->p1;
+	if(t2 && t2->info == DEPTR) t2 = t2->p1;
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
@@ -929,8 +929,8 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	string f_op;
 	type_ptr t1 = entry_in1->type;
 	type_ptr t2 = entry_in2->type;
-	if(t1->info == DEPTR) t1 = t1->p1;
-	if(t2->info == DEPTR) t2 = t2->p1;
+	if(t1 && t1->info == DEPTR && op != "=") t1->info = POINTER;
+	if(t2 && t2->info == DEPTR && op != "=") t2->info = POINTER;
 	char name[8];
 	sprintf(name, "%s%d", "t-", count); 
 
@@ -1515,6 +1515,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	}
 	else if(op=="=")
 	{
+		
 		if(entry_in2->truelist.size() || entry_in2->falselist.size())
 		{
 			sprintf(name, "%s%d", "t-", count);
