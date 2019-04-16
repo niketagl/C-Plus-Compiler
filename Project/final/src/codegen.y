@@ -1063,12 +1063,7 @@ ASSIGNMENT
                                                             emit2(V, "mov", regbp1, ",", reg);
 								                        } 
                                                     }
-<<<<<<< HEAD
-    | IDENTIFIER assignment_operator op IDENTIFIER
-=======
                                                     
-   
->>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
     | IDENTIFIER assignment_operator IDENTIFIER
     											{
 
@@ -1592,10 +1587,7 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
-<<<<<<< HEAD
-=======
 
->>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
 
                                                                         emit2(V, "mov rbx, 0");
                                                                         emit2(V, "mov ebx,",regbp5);
@@ -1603,10 +1595,7 @@ INDEXED_ASSIGNMENT
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
-<<<<<<< HEAD
-=======
 
->>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
     ;
 
 assignment_operator
