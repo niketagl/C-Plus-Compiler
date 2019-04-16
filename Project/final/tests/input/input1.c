@@ -1,8 +1,13 @@
+int fun(int a[10], int b)
+{
+	return a[0] + a[1] + a[2] + b;
+}
 int main()
 {
-	int c[3],i;
-	c[i]=1;
-	c[1]=2;
-	c[2]=3;
-	// fun(c);
+	int a[10],b,c;
+	a[0]=1;
+	a[1]=2;
+	a[2]=3;
+	c = fun(a,b);
+	_printints(c);
 }

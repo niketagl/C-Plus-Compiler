@@ -1424,7 +1424,14 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
+<<<<<<< HEAD
                                                                     }
+=======
+                                                                        
+                                                                    }
+    
+
+>>>>>>> d5d4b9a02dfa07824ac9fed9410f9bf94facef3a
     ;
 
 assignment_operator

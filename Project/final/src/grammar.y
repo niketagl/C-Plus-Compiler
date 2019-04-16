@@ -159,7 +159,7 @@ postfix_expression
 																		else if(e->type->info==ARRAY)
 																		{
 																			int n = e->type->array_size;
-																			for(i=0;i<n;i++)
+																			for(int i=0;i<n;i++)
 																			{
 																				table_entry_ptr temp2 = new table_entry;
 																				table_entry_ptr temp3 = new table_entry; 
@@ -168,7 +168,7 @@ postfix_expression
 																				temp3->type->constnt = 1;
 																				char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%d",i); 
 																				temp3->name = s;
-																				if(char* s = type_check2("[]",temp2,e,temp3)){ yyerror3(s);}
+																				if(char* q = type_check2("[]",temp2,e,temp3)){ yyerror3(q);}
 																				emit(V, "push_param", temp2->name);
 																			}
 																		}
@@ -590,15 +590,15 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator      { $<type>$ = $<type>1; }
+	: init_declarator      { $<type>$ = $<entry>1->type; }
 	| init_declarator_list ',' init_declarator_listM init_declarator    { $<type>$ = $<type>1;}
 	| error ',' {yyerror2("expecting declarator");} init_declarator
 	;
 init_declarator_listM : {$<type>$ = $<type>-2;};
 
 init_declarator
-	: declarator      { $<type>$ = $<type>1;}
-	| declarator '=' initializer
+	: declarator    { $<entry>$ = $<entry>1; }
+	| declarator '=' initializer 	{	if(char* s = type_check("=",$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
 	;
 
 storage_class_specifier
@@ -694,7 +694,7 @@ struct_declarator_list
 	;
 
 struct_declarator
-	: declarator        {$<type>$ = $<type>1;}
+	: declarator        {$<type>$ = $<entry>1->type;}
 	| ':' constant_expression
 	| declarator ':' constant_expression
 	;
@@ -722,8 +722,8 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator   {$<type>$ = $<type>2;}
-	| direct_declarator    {$<type>$ = $<type>1;}
+	: pointer direct_declarator   {$<entry>$ = $<entry>2;}
+	| direct_declarator    {$<entry>$ = $<entry>1;}
 	;
 
 direct_declarator
@@ -733,12 +733,12 @@ direct_declarator
 							char* error = (char *) malloc (100 * sizeof(char));
 							sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 							yyerror3(error);
-							$<type>$ = new_basic_type(ERROR);
+							$<entry>$ = new table_entry; 
+							$<entry>$->type = new_basic_type(ERROR);
 						}
 						else
 						{
-							enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
-							$<type>$ = $<type>0;
+							$<entry>$ = enter(table_stack.top(), $<stringval>1, $<type>0, 0 );
 						}
 					} 
 	| '(' declarator ')'
@@ -748,12 +748,13 @@ direct_declarator
 														char* error = (char *) malloc (100 * sizeof(char));
 														sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 														yyerror3(error);
-														$<type>$ = new_basic_type(ERROR);
+														$<entry>$ = new table_entry; 
+														$<entry>$->type = new_basic_type(ERROR);
 													}
 													else
 													{
-														$<type>$ = new_array_type($<type>0, $<entry>3->type->value);
-														enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+														type_ptr ty = new_array_type($<type>0, $<entry>3->type->value);
+														$<entry>$ = enter(table_stack.top(), $<stringval>1, ty, 0 );
 													}	
 												}
 	| IDENTIFIER '[' ']'  	{
@@ -762,12 +763,13 @@ direct_declarator
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
-									$<type>$ = new_basic_type(ERROR);
+									$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(ERROR);
 								}
 								else
 								{
-									$<type>$ = new_pointer_type($<type>0);
-									enter(table_stack.top(), $<stringval>1, $<type>$, 0 );
+									type_ptr ty= new_pointer_type($<type>0);
+									$<entry>$ = enter(table_stack.top(), $<stringval>1, ty, 0 );
 								}
 							}
 
@@ -781,16 +783,18 @@ direct_declarator
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
-									$<type>$ = new_basic_type(ERROR);
+									$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(ERROR);
 									table_stack.push(t1); offset_stack.push(0);
 								}
 								else if( e != NULL && e->proc_decl)
 								{
-									$<type>$ = new_function_type($<type>4,$<type>0);
-									if(type_compare(e->type, $<type>$))
+									type_ptr ty = new_function_type($<type>4,$<type>0);
+									if(type_compare(e->type, ty))
 									{
-										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, ty, t1);
 										if(e==NULL)ne->proc_decl=0;
+										$<entry>$ = ne;
 										t1->name.append($<stringval>1);
 										t1->scope = t1->name;
 										table_stack.push(t1); offset_stack.push(0);
@@ -800,15 +804,17 @@ direct_declarator
 										char* error = (char *) malloc (100 * sizeof(char));
 										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
 										yyerror3(error);
-										$<type>$ = new_basic_type(ERROR);
+										$<entry>$ = new table_entry; 
+										$<entry>$->type = new_basic_type(ERROR);
 										table_stack.push(t1); offset_stack.push(0);
 									}
 								}
 								else
 								{
-									$<type>$ = new_function_type($<type>4,$<type>0);
-									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									type_ptr ty = new_function_type($<type>4,$<type>0);
+									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, ty, t1);
 									if(e==NULL)ne->proc_decl=0;
+									$<entry>$ = ne;
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
 									table_stack.push(t1); offset_stack.push(0);
@@ -827,17 +833,19 @@ direct_declarator
 									char* error = (char *) malloc (100 * sizeof(char));
 									sprintf(error, "%s%s%s","Multiple declarations for identifier \"", $<stringval>1, "\"");
 									yyerror3(error);
-									$<type>$ = new_basic_type(ERROR);
+									$<entry>$ = new table_entry; 
+									$<entry>$->type = new_basic_type(ERROR);
 									table_ptr temp = new table;
 									table_stack.push(temp); offset_stack.push(0);
 								}
 								else if( e != NULL && e->proc_decl)
 								{
-									$<type>$ = new_function_type(NULL,$<type>0);
-									if(type_compare(e->type, $<type>$))
+									type_ptr ty = new_function_type(NULL,$<type>0);
+									if(type_compare(e->type, ty))
 									{
-										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+										table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, ty, t1);
 										if(e==NULL)ne->proc_decl=0;
+										$<entry>$ = ne;
 										t1->name.append($<stringval>1);
 										t1->scope = t1->name;
 										table_stack.push(t1); offset_stack.push(0);
@@ -847,14 +855,16 @@ direct_declarator
 										char* error = (char *) malloc (100 * sizeof(char));
 										sprintf(error, "%s%s%s","Declaration and definition do not match for identifier \"", $<stringval>1, "\"");
 										yyerror3(error);
-										$<type>$ = new_basic_type(ERROR);
+										$<entry>$ = new table_entry; 
+										$<entry>$->type = new_basic_type(ERROR);
 									}
 								}
 								else
 								{
-									$<type>$ = new_function_type(NULL,$<type>0);
-									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, $<type>$, t1);
+									type_ptr ty = new_function_type(NULL,$<type>0);
+									table_entry_ptr ne = enter_proc(table_stack.top(), $<stringval>1, ty, t1);
 									if(e==NULL)ne->proc_decl=0;
+									$<entry>$ = ne;
 									t1->name.append($<stringval>1);
 									t1->scope = t1->name;
 									table_stack.push(t1); offset_stack.push(0);
@@ -890,7 +900,7 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers parameter_declaration_M declarator     {$<type>$ = $<type>2;}
+	: declaration_specifiers parameter_declaration_M declarator     {if($<entry>3->type->info==ARRAY) $<type>$ = $<entry>3->type; else $<type>$ = $<type>2; }
 	| declaration_specifiers parameter_declaration_M abstract_declarator
 	| declaration_specifiers parameter_declaration_M    {$<type>$ = $<type>1;}
 	;
@@ -926,14 +936,17 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
+	: assignment_expression 			{ $<entry>$ = $<entry>1; }
+	| '{' initializer_list '}'     		{ $<entry>$ = $<entry>2; }
+	| '{' initializer_list ',' '}' 		{ $<entry>$ = $<entry>2; }
 	;
 
 initializer_list
-	: initializer
-	| initializer_list ',' initializer
+	: initializer 						{ $<entry>$ = $<entry>1; }
+	| initializer_list ',' initializer 	{ 	
+											$<entry>$ = new table_entry; 
+											$<entry>$->type = new_cartesian_type($<entry>1->type, $<entry>3->type);
+										}
 	;
 
 statement
@@ -1264,8 +1277,8 @@ function_definition
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																type_ptr temp = $<type>2;
-																$<type>$ = $<type>2;
+																type_ptr temp = $<entry>2->type;
+																$<type>$ = $<entry>2->type;
 																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
@@ -1274,8 +1287,8 @@ function_definition
 																table_ptr t1 = table_stack.top();
 																table_stack.pop();offset_stack.pop();
 																char *nam = strdup(t1->name.c_str());
-																type_ptr temp = $<type>2;
-																$<type>$ = $<type>2;
+																type_ptr temp = $<entry>2->type;
+																$<type>$ = $<entry>2->type;
 																table_entry_ptr e=same_lookup(table_stack.top(),nam, temp->p1);
 																if(e)e->proc_decl=0;
 															}
@@ -1348,8 +1361,8 @@ member_declarator_list
     ;
 
 member_declarator
-    : declarator pure_specifier 	{ $<type>$ = $<type>1; }
-    | declarator 					{ $<type>$ = $<type>1; }
+    : declarator pure_specifier 	{ $<type>$ = $<entry>1->type; }
+    | declarator 					{ $<type>$ = $<entry>1->type; }
     ;
 
 pure_specifier
