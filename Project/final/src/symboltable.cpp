@@ -1571,7 +1571,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				return NULL;
 			}
 		}
-		else if(t1->info == DEPTR)
+		if(t1->info == DEPTR)
 		{
 			if(t1->p1->info == t2->info)
 			{
@@ -1607,44 +1607,46 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				entry_out = entry_in1;
 				return NULL;
 			}
-		else if(t2->info==DEPTR && (t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL ))
-		{
-			if(t1->info == t2->p1->info)
-			{
-				emit(V,entry_in1->name,"= *",entry_in2->name);
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == INTEGER && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
-				warning("Implicit Typecast to INTEGER");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == CHR && ( t2->p1->info == FLT || t2->p1->info == INTEGER || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
-				warning("Implicit Typecast to CHAR");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == FLT && ( t2->p1->info == INTEGER || t2->p1->info == CHR || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_float ( *", entry_in2->name,")");
-				warning("Implicit Typecast to FLOAT");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == DBL && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == INTEGER  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_double ( *", entry_in2->name,")");
-				warning("Implicit Typecast to DOUBLE");
-				entry_out = entry_in1;
-				return NULL;
-			}
+
 		}
-		}
+		if(t2->info==DEPTR && (t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL ))
+			{
+				
+				if(t1->info == t2->p1->info)
+				{
+					emit(V,entry_in1->name,"= *",entry_in2->name);
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == INTEGER && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
+					warning("Implicit Typecast to INTEGER");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == CHR && ( t2->p1->info == FLT || t2->p1->info == INTEGER || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
+					warning("Implicit Typecast to CHAR");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == FLT && ( t2->p1->info == INTEGER || t2->p1->info == CHR || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_float ( *", entry_in2->name,")");
+					warning("Implicit Typecast to FLOAT");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == DBL && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == INTEGER  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_double ( *", entry_in2->name,")");
+					warning("Implicit Typecast to DOUBLE");
+					entry_out = entry_in1;
+					return NULL;
+				}
+			}
 	}
 	
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 

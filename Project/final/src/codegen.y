@@ -1008,6 +1008,7 @@ ASSIGNMENT
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
+
     | IDENTIFIER assignment_operator IDENTIFIER op '-' INTEGER
                                                     {
                                                         if($<intval>6 == 1 && !strcmp($<stringval>4, "int*"))
@@ -1062,7 +1063,12 @@ ASSIGNMENT
                                                             emit2(V, "mov", regbp1, ",", reg);
 								                        } 
                                                     }
+<<<<<<< HEAD
     | IDENTIFIER assignment_operator op IDENTIFIER
+=======
+                                                    
+   
+>>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
     | IDENTIFIER assignment_operator IDENTIFIER
     											{
 
@@ -1237,6 +1243,46 @@ ASSIGNMENT
                                             emit2(V, "mov eax,", regbp4);
                                             emit2(V, "mov rcx,", regbp);
                                             emit2(V, "mov [rcx], eax");
+                                        }
+    | IDENTIFIER assignment_operator '*' IDENTIFIER
+                                        {
+                                            char regbp[10];
+                                            char regbp4[15];
+                                            if(id_table[$<intval>1].is_param)
+                                            {
+                                                int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                                sprintf(regbp, "[%s + %d]", "rbp", shift1);
+
+                                            }
+                                            else if(id_table[$<intval>1].scope != "Global")
+                                            {
+                                                int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                                sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                            }
+                                            else
+                                            {
+                                                sprintf(regbp, "id%d", $<intval>1);
+                                            }
+
+                                            if(id_table[$<intval>4].is_param)
+                                            {
+                                                int shift4 = abs(id_table[$<intval>4].offset) + 16;
+                                                sprintf(regbp4, "[%s + %d]", "rbp", shift4);
+
+                                            }
+                                            else if(id_table[$<intval>4].scope != "Global")
+                                            {
+                                                int shift4 = abs(id_table[$<intval>4].offset) + abs(id_table[$<intval>4].width);
+                                                sprintf(regbp4, "[%s - %d]", "rbp", shift4);
+                                            }
+                                            else
+                                            {
+                                                sprintf(regbp4, "id%d", $<intval>4);
+                                            }	
+                                            
+                                            emit2(V, "mov rcx,", regbp4);
+                                            emit2(V, "mov eax, [rcx]");
+                                            emit2(V, "mov eax,", regbp);
                                         }
     ;
 
@@ -1546,6 +1592,10 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
 
                                                                         emit2(V, "mov rbx, 0");
                                                                         emit2(V, "mov ebx,",regbp5);
@@ -1553,6 +1603,10 @@ INDEXED_ASSIGNMENT
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2cd65de5fe36ffdaecd4a66cdfc0c05b12af82e3
     ;
 
 assignment_operator
