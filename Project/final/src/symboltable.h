@@ -28,7 +28,8 @@ typedef enum {
 	VOLAT,
 	CONSTNT,
 	STAT,
-	REGIS
+	REGIS,
+	DEPTR
 } type_inf;
 
 typedef struct typenode{

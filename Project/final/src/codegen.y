@@ -481,6 +481,7 @@ ASSIGNMENT
                                             emit2(V, "mov", regbp, ",", "al");
                                         }
     | IDENTIFIER assignment_operator STRING_LITERAL
+    | '*' IDENTIFIER assignment_operator INTEGER
     ;
 
 cast_expression
@@ -681,7 +682,112 @@ FUNCTION
     ;
 
 INDEXED_ASSIGNMENT
-    : IDENTIFIER assignment_operator IDENTIFIER '[' INTEGER ']'  
+    : IDENTIFIER assignment_operator IDENTIFIER '[' INTEGER ']'     {
+                                                                        char regbp3[15];
+                                                                        char regbp5[15];
+                                                                        char regbp1[15];
+                                                                        if(id_table[$<intval>3].is_param)
+                                                                        {
+                                                                            int shift3 = abs(id_table[$<intval>3].offset) + 16;
+                                                                            sprintf(regbp3, "[%s + %d]", "rbp", shift3);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>3].scope != "Global")
+                                                                        {
+                                                                            int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
+                                                                            sprintf(regbp3, "[%s - %d]", "rbp", shift3);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp3, "id%d", $<intval>3);
+                                                                        }
+                                                                        
+                                                                        if(id_table[$<intval>5].is_param)
+                                                                        {
+                                                                            int shift5 = abs(id_table[$<intval>5].offset) + 16;
+                                                                            sprintf(regbp5, "[%s + %d]", "rbp", shift5);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>5].scope != "Global")
+                                                                        {
+                                                                            int shift5 = abs(id_table[$<intval>5].offset) + abs(id_table[$<intval>5].width);
+                                                                            sprintf(regbp5, "[%s - %d]", "rbp", shift5);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp5, "id%d", $<intval>5);
+                                                                        }
+
+                                                                        if(id_table[$<intval>1].is_param)
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                                                            sprintf(regbp1, "[%s + %d]", "rbp", shift1);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>1].scope != "Global")
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                                                            sprintf(regbp1, "[%s - %d]", "rbp", shift1);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp1, "id%d", $<intval>1);
+                                                                        }
+                                                                    }
+    | IDENTIFIER assignment_operator IDENTIFIER '[' IDENTIFIER ']'  {
+                                                                        char regbp3[15];
+                                                                        char regbp5[15];
+                                                                        char regbp1[15];
+                                                                        if(id_table[$<intval>3].is_param)
+                                                                        {
+                                                                            int shift3 = abs(id_table[$<intval>3].offset) + 16;
+                                                                            sprintf(regbp3, "%s + %d", "rbp", shift3);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>3].scope != "Global")
+                                                                        {
+                                                                            int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
+                                                                            sprintf(regbp3, "[%s - %d]", "rbp", shift3);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp3, "id%d", $<intval>3);
+                                                                        }
+                                                                        
+                                                                        if(id_table[$<intval>5].is_param)
+                                                                        {
+                                                                            int shift5 = abs(id_table[$<intval>5].offset) + 16;
+                                                                            sprintf(regbp5, "[%s + %d]", "rbp", shift5);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>5].scope != "Global")
+                                                                        {
+                                                                            int shift5 = abs(id_table[$<intval>5].offset) + abs(id_table[$<intval>5].width);
+                                                                            sprintf(regbp5, "[%s - %d]", "rbp", shift5);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp5, "id%d", $<intval>5);
+                                                                        }
+
+                                                                        if(id_table[$<intval>1].is_param)
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                                                            sprintf(regbp1, "[%s + %d]", "rbp", shift1);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>1].scope != "Global")
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                                                            sprintf(regbp1, "[%s - %d]", "rbp", shift1);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp1, "id%d", $<intval>1);
+                                                                        }
+                                                                        emit2(V, ebx, )
+                                                                    }
+    }
     ;
 
 assignment_operator
