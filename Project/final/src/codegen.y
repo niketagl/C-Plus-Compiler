@@ -47,7 +47,7 @@ bool check_short(char* a, char* b);
 }
 
 %token ID LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP PTR_OP
-%token INT REAL POINT
+%token INT REAL POINT BASE_POINTER
 %token INTCAST FLOATCAST DOUBLECAST
 %token END PROC_ID IF GOTO PUSH_PARAM CALL RETURN INTEGER_CONSTANT CHAR_CONSTANT FLOAT_CONSTANT
 %token STRING_LITERAL FUN_NAME PREDEF POP_RET
@@ -1279,6 +1279,29 @@ ASSIGNMENT
                                             emit2(V, "mov eax, [rcx]");
                                             emit2(V, "mov eax,", regbp);
                                         }
+    | IDENTIFIER assignment_operator BASE_POINTER '+' INTEGER       {
+                                                                        char regbp[10];
+                                                                        if(id_table[$<intval>1].is_param)
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                                                            sprintf(regbp, "[%s + %d]", "rbp", shift1);
+
+                                                                        }
+                                                                        else if(id_table[$<intval>1].scope != "Global")
+                                                                        {
+                                                                            int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                                                            sprintf(regbp, "[%s - %d]", "rbp", shift1);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            sprintf(regbp, "id%d", $<intval>1);
+                                                                        }
+                                                                        char kuch[10];
+                                                                        int tint = $<intval>5 + 4;
+                                                                        sprintf(kuch, "[%s - %d]", "rbp", tint);
+                                                                        emit2(V, "lea", "rax", ",",  kuch);
+                                                                        emit2(V, "mov", regbp, ",", "rax");
+                                                                    }
     ;
 
 cast_expression
@@ -1595,7 +1618,6 @@ INDEXED_ASSIGNMENT
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
-
     ;
 
 assignment_operator

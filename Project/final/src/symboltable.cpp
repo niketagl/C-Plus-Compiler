@@ -798,7 +798,7 @@ bool type_compare(type_ptr t1, type_ptr t2)
 		if(t1->info==t2->info)
 		{
 			bool val = (t1->extrn^t2->extrn)|(t1->regis^t2->regis)|(t1->stat^t2->stat)|(t1->volat^t2->volat)|(t1->sign^t2->sign)|(t1->unsign^t2->unsign)|(t1->longer^t2->longer)|(t1->shorter^t2->shorter);
-			if((!val) && t1->array_size == t2->array_size && t1->value == t2->value && (t1->type_name==NULL || t2->type_name==NULL || !strcmp(t1->type_name, t2->type_name)))
+			if((!val) && t1->array_size == t2->array_size && (t1->type_name==NULL || t2->type_name==NULL || !strcmp(t1->type_name, t2->type_name)))
 			{
 				if(t1->p1==NULL && t2->p1==NULL)
 				{
@@ -1530,7 +1530,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			backpatch(V, temp->truelist, code_line);
 			entry_in2 = temp;
 		}
-		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL )
+		if(t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL)
 		{
 			if(t1->info == t2->info)
 			{
@@ -1643,6 +1643,12 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 					return NULL;
 				}
 			}
+		if(type_compare(t1,t2))
+		{
+			emit(V,entry_in1->name,"=",entry_in2->name);
+			entry_out = entry_in1;
+			return NULL;
+		}
 	}
 	
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 

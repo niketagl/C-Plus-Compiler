@@ -1,15 +1,10 @@
+int add(int a, int b)
+{
+	return a+b;
+}
 int main()
 {
-	int a[5],b=1;
-
-	a[1] = 4;
 	int c;
-
-	//c = -5;
-
-	c = a[b];
-
-
-	//c = fun(a,b);
+	c = add(2,5);
 	_printints(c);
 }
