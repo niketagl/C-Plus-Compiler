@@ -36,6 +36,7 @@ bool check_short(char* a, char* b);
     extern vector<table> proc_table;
     extern vector<table> id_table;
     extern vector<int> fake_labels;
+    extern vector<int> code_lines;
 }
 
 %union{
@@ -75,21 +76,22 @@ L
     											emit2(V, "mov rdi, 0");
     											emit2(V, "syscall");
     										}
+
+                            for(int i=0; i<fake_labels.size(); i++)
+                            {
+                                char temp_label[20];
+                                sprintf(temp_label, "_label%d", fake_labels[i]);
+                                labels.insert ( pair< string, int >(temp_label, code_lines[fake_labels[i]-100]));
+                                
+                            }
     					}
     ;
 
 LINE_NO
     : INTEGER 				 { 
+                                code_lines.push_back(code_line);
     							$<intval>$ = $<intval>1; 
-    							for(int i=0; i<fake_labels.size(); i++)
-    							{
-    								if(fake_labels[i]==$<intval>1)
-    								{
-    									char temp_label[20];
-    									sprintf(temp_label, "_label%d", $<intval>1);
-										labels.insert ( pair< string, int >(temp_label, code_line));
-    								}
-    							}
+
     						}
     ;
 
@@ -551,8 +553,9 @@ JUMP
 
 LABEL
     : LINE_NO 		{
+                        code_lines.resize(code_lines.size()-1);
     					$<intval>$ = $<intval>1 ;
-    					fake_labels.push_back($<intval>1);
+                        fake_labels.push_back($<intval>1);
     				}
     ;
 
@@ -678,8 +681,7 @@ FUNCTION
     ;
 
 INDEXED_ASSIGNMENT
-    : IDENTIFIER assignment_operator '[' IDENTIFIER ']'
-    | '[' IDENTIFIER ']' assignment_operator IDENTIFIER
+    : IDENTIFIER assignment_operator IDENTIFIER '[' INTEGER ']'  
     ;
 
 assignment_operator

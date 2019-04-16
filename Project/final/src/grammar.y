@@ -140,11 +140,17 @@ postfix_expression
 																	for(int i=arg_list.size()-1; i>=0; i--)
 																	{
 																		table_entry_ptr e = arg_list[i];
-																		emit(V, "push_param", e->name);
+																		if(e->type->info==STRUCT)
+																		{
+
+																		}
+																		else
+																			emit(V, "push_param", e->name);
 																	}
 																	arg_list.resize(0);
 																	emit(V, "call", temp->name);
-																	emit(V, "pop_ret_value", $<entry>$->name);
+																	if(!($<entry>$->type==NULL || $<entry>$->type->info==VOD)) 
+																		emit(V, "pop_ret_value", $<entry>$->name);
 																}
 															}
 

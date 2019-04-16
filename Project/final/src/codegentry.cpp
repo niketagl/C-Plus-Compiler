@@ -19,6 +19,7 @@ map < string , int > labels;
 vector<int> fake_labels;
 vector<table> proc_table;
 vector<table> id_table;
+vector<int> code_lines;
 
 int main(int argc, char **argv)
 {

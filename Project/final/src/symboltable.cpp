@@ -197,10 +197,14 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 
 	t_entry->type = type;
 
-	if(offset!=0)
+	if(offset!=0 && offset!=-1)
 	{
 		t_entry->offset = offset;
-
+		t_entry->width = type_width(type);
+	}
+	else if(offset==-1)
+	{
+		t_entry->offset = 0;
 		t_entry->width = type_width(type);
 	}
 	else
@@ -692,8 +696,11 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 			}
 			else
 			{
+				int offset = 0;
 				table_entry_ptr temp = lookup(t2, id);
-				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, 0);
+				offset = entry_in1->offset + temp->offset;
+				if(offset==0){offset=-1;}
+				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, offset);
 				count++;
 				emit(V, entry_out->name, "=", entry_in1->name, ".", temp->name);
 				return NULL;
