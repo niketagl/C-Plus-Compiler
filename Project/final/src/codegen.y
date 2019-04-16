@@ -1391,9 +1391,9 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
-                                                                        emit2(V, ebx, )
+                                                                        
                                                                     }
-    }
+    
     ;
 
 assignment_operator
