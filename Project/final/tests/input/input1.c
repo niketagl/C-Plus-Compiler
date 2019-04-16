@@ -1,8 +1,10 @@
+int fun(int a, int b)
+{
+	return a + b;
+}
 int main()
 {
-	int c[3],i;
-	c[i]=1;
-	c[1]=2;
-	c[2]=3;
-	// fun(c);
+	int a = 1, b = 2, c = 3;
+	c = fun(a,b);
+	_printints(c);
 }
