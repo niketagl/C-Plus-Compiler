@@ -26,6 +26,7 @@ bool check_short(char* a, char* b);
 	#include <string>
     #include <cstdlib>
     #include <string.h>
+    #include<bitset>
 	using namespace std;
 	extern vector < table > id_table;
     extern vector < table > proc_table;
@@ -212,9 +213,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "add", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fld qword ", regbp3);
+                                                            emit2(V, "fadd qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "add", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
@@ -232,9 +236,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "sub", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fld qword ", regbp3);
+                                                            emit2(V, "fsub qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "sub", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
@@ -256,10 +263,13 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real*"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "mul", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fld qword ", regbp3);
+                                                            emit2(V, "fmul qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "mul", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
                                                             
 								                        }
                                                         else if(!strcmp($<stringval>4, "int/"))
@@ -287,11 +297,14 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real/"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rdx", ",", "0x0");
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "div", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fld qword ", regbp3);
+                                                            emit2(V, "fdiv qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rdx", ",", "0x0");
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "div", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int%"))
 								                        {
@@ -433,9 +446,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "add", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp5);
+                                                            emit2(V, "fadd qword", regbp3);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "add", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
@@ -454,9 +470,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "sub", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp5);
+                                                            emit2(V, "fsub qword", regbp3);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "sub", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
@@ -478,10 +497,13 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real*"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "mul", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp5);
+                                                            emit2(V, "fmul qword", regbp3);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "mul", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
                                                             
 								                        }
                                                         else if(!strcmp($<stringval>4, "int/"))
@@ -509,11 +531,14 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real/"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rdx", ",", "0x0");
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "div", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp5);
+                                                            emit2(V, "fdiv qword", regbp3);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rdx", ",", "0x0");
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "div", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int%"))
 								                        {
@@ -654,9 +679,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real+"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "add", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp3);
+                                                            emit2(V, "fadd qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "add", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int-"))
 								                        {
@@ -674,9 +702,12 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real-"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "sub", "rax", ",", regbp5);
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp3);
+                                                            emit2(V, "fsub qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "sub", "rax", ",", regbp5);
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int*"))
 								                        {
@@ -698,10 +729,13 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real*"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "mul", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp3);
+                                                            emit2(V, "fmul qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "mul", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
                                                             
 								                        }
                                                         else if(!strcmp($<stringval>4, "int/"))
@@ -729,11 +763,14 @@ ASSIGNMENT
 								                        }
                                                         else if(!strcmp($<stringval>4, "real/"))
 								                        {
-                                                            emit2(V, "mov", "rax", ",", regbp3);
-                                                            emit2(V, "mov", "rdx", ",", "0x0");
-                                                            emit2(V, "mov", "rbx", ",", regbp5);
-                                                            emit2(V, "div", "rbx");
-                                                            emit2(V, "mov", regbp1, ",", "rax");
+                                                            emit2(V, "fild qword ", regbp3);
+                                                            emit2(V, "fdiv qword", regbp5);
+                                                            emit2(V, "fstp qword ", regbp1);
+                                                            // emit2(V, "mov", "rax", ",", regbp3);
+                                                            // emit2(V, "mov", "rdx", ",", "0x0");
+                                                            // emit2(V, "mov", "rbx", ",", regbp5);
+                                                            // emit2(V, "div", "rbx");
+                                                            // emit2(V, "mov", regbp1, ",", "rax");
 								                        }
                                                         else if(!strcmp($<stringval>4, "int%"))
 								                        {
@@ -1105,6 +1142,51 @@ ASSIGNMENT
 
     											}
     | IDENTIFIER assignment_operator cast_expression '(' IDENTIFIER ')'
+                                        // {
+                                        //     char regbp1[10];
+                                        //     char regbp5[10];
+                                        //     if(id_table[$<intval>1].is_param)
+                                        //     {
+                                        //         int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                        //         sprintf(regbp1, "[%s + %d]", "rbp", shift1);
+
+                                        //     }
+                                        //     else if(id_table[$<intval>1].scope != "Global")
+                                        //     {
+                                        //         int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                        //         sprintf(regbp1, "[%s - %d]", "rbp", shift1);
+                                        //     }
+                                        //     else
+                                        //     {
+                                        //         sprintf(regbp1, "id%d", $<intval>1);
+                                        //     }
+
+                                        //     if(id_table[$<intval>5].is_param)
+                                        //     {
+                                        //         int shift5 = abs(id_table[$<intval>5].offset) + 16;
+                                        //         sprintf(regbp5, "[%s + %d]", "rbp", shift1);
+
+                                        //     }
+                                        //     else if(id_table[$<intval>5].scope != "Global")
+                                        //     {
+                                        //         int shift5 = abs(id_table[$<intval>5].offset) + abs(id_table[$<intval>5].width);
+                                        //         sprintf(regbp5, "[%s - %d]", "rbp", shift5);
+                                        //     }
+                                        //     else
+                                        //     {
+                                        //         sprintf(regbp5, "id%d", $<intval>1);
+                                        //     }
+
+                                        //     char kuch[34];
+                                            
+                                        //     float f = $<intval>5;
+                                        //     // cout<<bitset<sizeof f*8>(*(long unsigned int*)(&f))<<endl;
+                                        //     sprintf(kuch, "%d", bitset<sizeof f*8>(*(long unsigned int*)(&f)));
+                                        //     emit2(V, "mov", "rax", ",",  kuch);
+                                        //     emit2(V, "mov", regbp1, ",", "rax");
+                                        //     // emit2(V, "fld",  regbp);
+                                        //     // emit2(V, "fst", regbp);
+                                        // }
     | IDENTIFIER assignment_operator INTEGER
                                         {
                                             char regbp[10];
@@ -1146,10 +1228,15 @@ ASSIGNMENT
                                             {
                                                 sprintf(regbp, "id%d", $<intval>1);
                                             }
-                                            char kuch[10];
-                                            sprintf(kuch, "%f", $<floatval>3);
+                                            char kuch[34];
+                                            
+                                            float f = $<floatval>3;
+                                            // cout<<bitset<sizeof f*8>(*(long unsigned int*)(&f))<<endl;
+                                            sprintf(kuch, "%d", bitset<sizeof f*8>(*(long unsigned int*)(&f)));
                                             emit2(V, "mov", "rax", ",",  kuch);
                                             emit2(V, "mov", regbp, ",", "rax");
+                                            // emit2(V, "fld",  regbp);
+                                            // emit2(V, "fst", regbp);
                                         }
     | IDENTIFIER assignment_operator CHAR_CONSTANT
                                         {
