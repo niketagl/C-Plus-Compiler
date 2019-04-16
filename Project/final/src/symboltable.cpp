@@ -598,7 +598,6 @@ char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		return type_error;
 	}
 	type_ptr t1 = entry_in1->type;
-	if(t1->info == DEPTR) t1 = t1->p1;
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
@@ -660,7 +659,6 @@ char* type_check3(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in1, char* id)
 {
 	type_ptr t1 = entry_in1->type;
-	if(t1 && t1->info == DEPTR) t1 = t1->p1;
 	table_ptr t2 = new table;
 	if(!(lookup(struct_namespace, t1->type_name)))
 	{
@@ -843,8 +841,6 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		t2 = entry_in2->type;
 	else
 		t2 = NULL;
-	if(t1 && t1->info == DEPTR) t1 = t1->p1;
-	if(t2 && t2->info == DEPTR) t2 = t2->p1;
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);

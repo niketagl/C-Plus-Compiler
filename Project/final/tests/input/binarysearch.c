@@ -4,8 +4,17 @@ int main()
     int first, last, middle;
     int search;
 
-    n = 10;
-    int array[] = {1, 3, 5, 6, 7, 10, 13, 16, 19, 25};
+    n = _inputints();
+    int array[100];
+    for(int i=0; i<n; i++)
+    {
+        int x;
+        x = _inputints();
+        array[i] = x;
+    }
+
+    search = _inputints();
+
 
     first = 0;
     last = n-1;
@@ -13,11 +22,12 @@ int main()
 
     while (first <= last)
     {
-        if (array[middle] < search)
+        int temp = array[middle];
+        if ( temp < search)
             first = middle + 1;
-        else if (array[middle] == search)
+        else if (temp == search)
         {
-            int ans = middle + 1;
+            int ans = middle;
             _printints(ans);
             break;
         }
@@ -27,7 +37,8 @@ int main()
         middle = (first + last) / 2;
     }
     if (first > last)
-        _printints(-1);
-
-    return 0;
+    {
+        int x = -1;
+        _printints(x);
+    }
 }

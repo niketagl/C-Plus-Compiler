@@ -163,6 +163,9 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp3, "id%d", $<intval>3);
+                                                            emit2(V, "mov rdx,", regbp3);
+                                                            sprintf(regbp3, "[rdx]");
+
                                                         }
                                                         
                                                         if(id_table[$<intval>5].is_param)
@@ -179,6 +182,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp5, "id%d", $<intval>5);
+                                                            emit2(V, "mov rdx,", regbp5);
+                                                            sprintf(regbp5, "[rdx]");
                                                         }
 
                                                         if(id_table[$<intval>1].is_param)
@@ -195,6 +200,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp1, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp1);
+                                                            sprintf(regbp1, "[rdx]");
                                                         }
                                                         
                                                         if(!strcmp($<stringval>4, "int+"))
@@ -410,6 +417,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp3, "id%d", $<intval>3);
+                                                            emit2(V, "mov rdx,", regbp3);
+                                                            sprintf(regbp3, "[rdx]");
                                                         }
                                                         
                                                         
@@ -428,6 +437,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp1, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp1);
+                                                            sprintf(regbp1, "[rdx]");
                                                         }
                                                         
                                                         if(!strcmp($<stringval>4, "int+"))
@@ -645,6 +656,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp5, "id%d", $<intval>5);
+                                                            emit2(V, "mov rdx,", regbp5);
+                                                            sprintf(regbp5, "[rdx]");
                                                         }
 
                                                         if(id_table[$<intval>1].is_param)
@@ -661,6 +674,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp1, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp1);
+                                                            sprintf(regbp1, "[rdx]");
                                                         }
                                                         
                                                         if(!strcmp($<stringval>4, "int+"))
@@ -878,6 +893,8 @@ ASSIGNMENT
                                                         else
                                                         {
                                                             sprintf(regbp1, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp1);
+                                                            sprintf(regbp1, "[rdx]");
                                                         }
                                                         
                                                         if(!strcmp($<stringval>4, "int+"))
@@ -1067,6 +1084,8 @@ ASSIGNMENT
                                                             else
                                                             {
                                                                 sprintf(regbp3, "id%d", $<intval>3);
+	                                                            emit2(V, "mov rdx,", regbp3);
+	                                                            sprintf(regbp3, "[rdx]");
                                                             }
 
                                                             if(id_table[$<intval>1].is_param)
@@ -1083,6 +1102,8 @@ ASSIGNMENT
                                                             else
                                                             {
                                                                 sprintf(regbp1, "id%d", $<intval>1);
+	                                                            emit2(V, "mov rdx,", regbp1);
+	                                                            sprintf(regbp1, "[rdx]");
                                                             }
 
                                                             char prefix[2] = "e";
@@ -1120,6 +1141,8 @@ ASSIGNMENT
 		                                            else
 		                                            {
 		                                                sprintf(regbp, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp);
+                                                            sprintf(regbp, "[rdx]");
 		                                            }
 
 		                                            if(id_table[$<intval>3].is_param)
@@ -1136,6 +1159,8 @@ ASSIGNMENT
 		                                            else
 		                                            {
 		                                                sprintf(regbp3, "id%d", $<intval>3);
+                                                            emit2(V, "mov rdx,", regbp3);
+                                                            sprintf(regbp3, "[rdx]");
 		                                            }
 		                                            emit2(V, "mov eax,", regbp3);
 		                                            emit2(V, "mov", regbp,",","eax");
@@ -1204,6 +1229,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>1);
+                                                emit2(V, "mov rdx,", regbp);
+                                                sprintf(regbp, "[rdx]");
                                             }
                                             char kuch[10];
                                             sprintf(kuch, "%d", $<intval>3);
@@ -1227,6 +1254,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>1);
+                                                emit2(V, "mov rdx,", regbp);
+                                                sprintf(regbp, "[rdx]");
                                             }
                                             char kuch[34];
                                             
@@ -1255,6 +1284,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp);
+                                                            sprintf(regbp, "[rdx]");
                                             }
                                             char kuch[10];
                                             sprintf(kuch, "%d", $<charval>3);
@@ -1279,6 +1310,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>2);
+                                                            emit2(V, "mov rdx,", regbp);
+                                                            sprintf(regbp, "[rdx]");
                                             }
                                             char kuch[10];
                                             sprintf(kuch, "%d", $<intval>4);
@@ -1304,6 +1337,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>2);
+                                                            emit2(V, "mov rdx,", regbp);
+                                                            sprintf(regbp, "[rdx]");
                                             }
 
                                             if(id_table[$<intval>4].is_param)
@@ -1320,6 +1355,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp4, "id%d", $<intval>4);
+                                                            emit2(V, "mov rdx,", regbp4);
+                                                            sprintf(regbp4, "[rdx]");
                                             }	
 
                                             emit2(V, "mov eax,", regbp4);
@@ -1344,6 +1381,8 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp, "id%d", $<intval>1);
+                                                            emit2(V, "mov rdx,", regbp);
+                                                            sprintf(regbp, "[rdx]");
                                             }
 
                                             if(id_table[$<intval>4].is_param)
@@ -1360,11 +1399,13 @@ ASSIGNMENT
                                             else
                                             {
                                                 sprintf(regbp4, "id%d", $<intval>4);
+                                                            emit2(V, "mov rdx,", regbp4);
+                                                            sprintf(regbp4, "[rdx]");
                                             }	
                                             
                                             emit2(V, "mov rcx,", regbp4);
                                             emit2(V, "mov eax, [rcx]");
-                                            emit2(V, "mov eax,", regbp);
+                                            emit2(V, "mov", regbp,", eax");
                                         }
     ;
 
@@ -1392,6 +1433,8 @@ JUMP
 				                                            else
 				                                            {
 				                                                sprintf(regbp, "id%d", $<intval>3);
+	                                                            emit2(V, "mov rdx,", regbp);
+	                                                            sprintf(regbp, "[rdx]");
 				                                            }
 
     														if(strcmp($<stringval>4, "==")==0 && $<intval>5 ==0 )
@@ -1462,6 +1505,8 @@ FUNCTION
                     else
                     {
                         sprintf(regbp, "id%d", $<intval>2);
+                        emit2(V, "mov rdx,", regbp);
+                        sprintf(regbp, "[rdx]");
                     }
 
                     emit2(V, "mov ebx,", regbp);
@@ -1490,6 +1535,8 @@ FUNCTION
                     else
                     {
                         sprintf(regbp, "id%d", $<intval>2);
+	                    emit2(V, "mov rdx,", regbp);
+	                    sprintf(regbp, "[rdx]");
                     }
 
                     emit2(V, "mov", regbp, ", eax");
@@ -1500,10 +1547,12 @@ FUNCTION
     				sprintf(proc, "%s", $<stringval>2);
 
     				//emit2(V, "pop rax");
-    				emit2(V, "mov rax, 0");
-    				emit2(V, "mov eax, [rsp]");
-    				emit2(V, "add rsp, 4");
-
+    				if(!strcmp(proc,"_printints"))
+    				{
+	    				emit2(V, "mov rax, 0");
+	    				emit2(V, "mov eax, [rsp]");
+	    				emit2(V, "add rsp, 4");
+	    			}
     				emit2(V, "call", proc);
     			}
     | CALL PROC_ID INTEGER
@@ -1529,6 +1578,8 @@ FUNCTION
                     else
                     {
                         sprintf(regbp, "id%d", $<intval>2);
+                        emit2(V, "mov rdx,", regbp);
+                        sprintf(regbp, "[rdx]");
                     }
                     emit2(V, "mov", "rax", ",", regbp);
                     emit2(V, "mov rsp, rbp");
@@ -1609,10 +1660,13 @@ INDEXED_ASSIGNMENT
                                                                         else
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
+				                                                            emit2(V, "mov rdx,", regbp1);
+				                                                            sprintf(regbp1, "[rdx]");
                                                                         }
                                                                         char t_num[10];
-                                                                        sprintf(t_num, "%d", $<intval>5);
+                                                                        sprintf(t_num, "%d", $<intval>5*4);
                                                                         emit2(V, "mov rbx,", t_num);
+                                                                        emit2(V, "add rcx, rbx");
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
@@ -1657,6 +1711,8 @@ INDEXED_ASSIGNMENT
                                                                         else
                                                                         {
                                                                             sprintf(regbp5, "id%d", $<intval>5);
+				                                                            emit2(V, "mov rdx,", regbp5);
+				                                                            sprintf(regbp5, "[rdx]");
                                                                         }
 
                                                                         if(id_table[$<intval>1].is_param)
@@ -1673,12 +1729,17 @@ INDEXED_ASSIGNMENT
                                                                         else
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
+				                                                            emit2(V, "mov rdx,", regbp1);
+				                                                            sprintf(regbp1, "[rdx]");
                                                                         }
 
 
-                                                                        emit2(V, "mov rbx, 0");
-                                                                        emit2(V, "mov ebx,",regbp5);
-                                                                        emit2(V, "add rcx, rbx");
+                                                                        emit2(V, "mov rax, 0");
+                                                                        emit2(V, "mov eax,",regbp5);
+                                                                        emit2(V, "mov rbx, 4");
+                                                                        emit2(V, "mul rbx");
+
+                                                                        emit2(V, "add rcx, rax");
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
