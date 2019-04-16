@@ -36,7 +36,13 @@ void quickSort(int arr[], int low, int high)
 
 int main()
 {
-  int arr[] = {6, 1, 9, 5, 10, 2};
+  int arr[6];
+  arr[0] = 6;
+  arr[1] = 1;
+  arr[2] = 9;
+  arr[3] = 5;
+  arr[4] = 10;
+  arr[5] = 2;
   int n;
   n = 6;
 
