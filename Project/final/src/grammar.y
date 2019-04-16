@@ -123,7 +123,6 @@ postfix_expression
 	| IDENTIFIER '(' ')'							{ 
 																table_entry_ptr temp = same_lookup(table_stack.top()->parent, $<stringval>1);
 																if(temp==NULL) temp = same_lookup(table_stack.top(), $<stringval>1);
-																
 																if(char* s = type_check2("()",$<entry>$,temp,NULL)) yyerror3(s);
 																else
 																{
@@ -321,6 +320,19 @@ unary_expression
 									temp->type->constnt = 1;
 									temp->type->value = -1;
 									temp->name = "-1";
+
+									char naam[10];
+									sprintf(naam, "t-%d", count);
+									if($<entry>2->type->constnt)
+									{
+										table_entry_ptr tempow = enter(table_stack.top(), naam, $<entry>2->type,0);
+										count++;
+										char val[10];
+										sprintf(val,"%d",$<entry>2->type->value);
+										emit(V,tempow->name,"=",val);
+										if(char* s = type_check("*=",$<entry>$,tempow, temp)) yyerror3(s);	
+									}
+									else
 									if(char* s = type_check("*=",$<entry>$,$<entry>2, temp)) yyerror3(s);
 								}
 								else if(!strcmp($<stringval>1, "*"))
@@ -517,7 +529,10 @@ conditional_expression_mark2 : {
 
 assignment_expression
 	: conditional_expression     { $<entry>$ = $<entry>1; }
-	| unary_expression assignment_operator assignment_expression { if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); }
+	| unary_expression assignment_operator assignment_expression {
+
+																	 if(char* s = type_check($<stringval>2,$<entry>$,$<entry>1,$<entry>3)) yyerror3(s); 
+																}
 	| error assignment_operator {yyerror2("lvalue required as left operand of assignment");} assignment_expression
 
 	;

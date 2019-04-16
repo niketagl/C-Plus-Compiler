@@ -167,7 +167,7 @@ int type_width(type_ptr type)
 		//if(type->shorter) width = 16;
 		//if(type->longer) width = 64;
 	}
-	if(type->info == CHR) width = 1;
+	if(type->info == CHR) width = 4;
 	if(type->info == DBL)
 	{
 		width = 8;
@@ -259,10 +259,12 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr ch
 	
 	string nam = t_entry->name;
 
-	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
-
+	//t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
+	t->entries[nam] = t_entry;
 	string temp_label = t_entry->name + "<" + t_entry->inp_name + ">";
-	labels.insert( pair< string, int >(temp_label, code_line));
+	//cout<<"inserting label for "<<temp_label<<endl; 
+	//labels.insert( pair< string, int >(temp_label, code_line));
+	labels[temp_label] = code_line;
 	
 	return t_entry; 
 }
@@ -925,8 +927,8 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 	string f_op;
 	type_ptr t1 = entry_in1->type;
 	type_ptr t2 = entry_in2->type;
-	if(t1->info == DEPTR && op != "=") t1->info = POINTER;
-	if(t2->info == DEPTR && op != "=") t2->info = POINTER;
+	if(t1 && t1->info == DEPTR && op != "=") t1->info = POINTER;
+	if(t2 && t2->info == DEPTR && op != "=") t2->info = POINTER;
 	char name[8];
 	sprintf(name, "%s%d", "t-", count); 
 
@@ -1565,7 +1567,7 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				return NULL;
 			}
 		}
-		else if(t1->info == DEPTR)
+		if(t1->info == DEPTR)
 		{
 			if(t1->p1->info == t2->info)
 			{
@@ -1601,45 +1603,46 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 				entry_out = entry_in1;
 				return NULL;
 			}
+
 		}
-		else if(t2->info == DEPTR)
-		{
-			cout << t2->p1->info << endl;
-			if(t2->p1->info == t1->info)
+		if(t2->info==DEPTR && (t1->info == INTEGER || t1->info == FLT || t1->info==CHR || t1->info==DBL ))
 			{
-				emit(V, entry_in1->name,"=","*",entry_in2->name);
-				entry_out = entry_in1;
-				return NULL;
+				
+				if(t1->info == t2->p1->info)
+				{
+					emit(V,entry_in1->name,"= *",entry_in2->name);
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == INTEGER && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
+					warning("Implicit Typecast to INTEGER");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == CHR && ( t2->p1->info == FLT || t2->p1->info == INTEGER || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_int ( *", entry_in2->name,")");
+					warning("Implicit Typecast to CHAR");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == FLT && ( t2->p1->info == INTEGER || t2->p1->info == CHR || t2->p1->info == DBL  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_float ( *", entry_in2->name,")");
+					warning("Implicit Typecast to FLOAT");
+					entry_out = entry_in1;
+					return NULL;
+				}
+				else if(t1->info == DBL && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == INTEGER  ) )
+				{
+					emit(V, entry_in1->name, "= cast_to_double ( *", entry_in2->name,")");
+					warning("Implicit Typecast to DOUBLE");
+					entry_out = entry_in1;
+					return NULL;
+				}
 			}
-			else if(t1->info == INTEGER && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_int (","*", entry_in2->name,")");
-				warning("Implicit Typecast to INTEGER");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == CHR && ( t2->p1->info == FLT || t2->p1->info == INTEGER || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_int (","*", entry_in2->name,")");
-				warning("Implicit Typecast to CHAR");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == FLT && ( t2->p1->info == INTEGER || t2->p1->info == CHR || t2->p1->info == DBL  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_float (" ,"*", entry_in2->name,")");
-				warning("Implicit Typecast to FLOAT");
-				entry_out = entry_in1;
-				return NULL;
-			}
-			else if(t1->info == DBL && ( t2->p1->info == FLT || t2->p1->info == CHR || t2->p1->info == INTEGER  ) )
-			{
-				emit(V, entry_in1->name, "= cast_to_double (","*", entry_in2->name,")");
-				warning("Implicit Typecast to DOUBLE");
-				entry_out = entry_in1;
-				return NULL;
-			}
-		}
 	}
 	
 	string terror = "Unable to perform \"" + op + "\" operation on Data types: \"" + print_type(t1) + "\" and \"" + print_type(t2) + "\""; 

@@ -1,12 +1,6 @@
-int fun(int a)
-{
-  a = a + a;
-  return a;
-}
-
 int main()
 {
-  int x,y;
-  x = x*y;
-  return 0;
+  float a = 3.0;
+  float b = 4.0;
+  float c = a + b;
 }

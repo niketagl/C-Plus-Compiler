@@ -1,6 +1,15 @@
-int main() {
-	int a[3],b=0;
-	b = a[0];
-	b += a[1];
-	return 0; 
+int main()
+{
+	int a[5],b=1;
+
+	a[1] = 4;
+	int c;
+
+	//c = -5;
+
+	c = a[b];
+
+
+	//c = fun(a,b);
+	_printints(c);
 }
