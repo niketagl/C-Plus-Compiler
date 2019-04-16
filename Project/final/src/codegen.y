@@ -435,6 +435,7 @@ ASSIGNMENT
                                                             }
                                                             char reg[4];
                                                             sprintf(reg, "%s%s", prefix, "ax");
+                                                            
                                                             emit2(V, "mov", reg, ",", regbp3);
                                                             emit2(V, "sub", reg, ",", regbp5);
                                                             emit2(V, "mov", regbp1, ",", reg);
