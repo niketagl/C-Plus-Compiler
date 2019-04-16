@@ -159,7 +159,7 @@ postfix_expression
 																		else if(e->type->info==ARRAY)
 																		{
 																			int n = e->type->array_size;
-																			for(i=0;i<n;i++)
+																			for(int i=0;i<n;i++)
 																			{
 																				table_entry_ptr temp2 = new table_entry;
 																				table_entry_ptr temp3 = new table_entry; 
@@ -168,7 +168,7 @@ postfix_expression
 																				temp3->type->constnt = 1;
 																				char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%d",i); 
 																				temp3->name = s;
-																				if(char* s = type_check2("[]",temp2,e,temp3)){ yyerror3(s);}
+																				if(char* q = type_check2("[]",temp2,e,temp3)){ yyerror3(q);}
 																				emit(V, "push_param", temp2->name);
 																			}
 																		}
@@ -900,7 +900,7 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers parameter_declaration_M declarator     {$<type>$ = $<type>2;}
+	: declaration_specifiers parameter_declaration_M declarator     {if($<entry>3->type->info==ARRAY) $<type>$ = $<entry>3->type; else $<type>$ = $<type>2; }
 	| declaration_specifiers parameter_declaration_M abstract_declarator
 	| declaration_specifiers parameter_declaration_M    {$<type>$ = $<type>1;}
 	;
