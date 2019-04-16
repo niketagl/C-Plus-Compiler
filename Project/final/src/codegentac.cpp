@@ -7,6 +7,7 @@
 
 extern int code_line;
 extern map < string , int > labels;
+extern vector< table > id_table;
 
 void emit2(vector < code_ptr > &V, string s1, string s2 , string s3 , string s4, string s5 )
 {
@@ -58,6 +59,11 @@ void print_code( vector <code_ptr> &V )
 	f<<'\t'<<"digits resb 100"<<endl;
 
 	// declare all globals as well.
+	for(int i=0; i<id_table.size(); i++)
+	{
+		if(id_table[i].scope=="Global")
+			f<<'\t'<<id_table[i].name<<" resb "<<id_table[i].width<<endl;
+	}
 
 	f<<"section .text"<<endl << '\t' << "global _start"<<endl;
 

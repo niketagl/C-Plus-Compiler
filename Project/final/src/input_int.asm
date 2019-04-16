@@ -134,13 +134,15 @@ _printintloop2:
 	ret
 
 _printints:
-	mov rbx, rax
-	cmp rbx, 0
+	mov ebx, eax
+	mov rax, 0
+	mov eax, ebx
+	cmp ebx, 0
 	mov rbx, 1
 	jge _printints2
 	mov rbx, -1
-	mul rbx
-	
+	mul ebx
+		
 _printints2: 
 	push rbx
 	mov rcx, digits
