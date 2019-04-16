@@ -259,10 +259,12 @@ table_entry_ptr enter_proc( table_ptr t, char* name, type_ptr type, table_ptr ch
 	
 	string nam = t_entry->name;
 
-	t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
-
+	//t->entries.insert( pair<string, table_entry_ptr >(nam, t_entry) ) ;
+	t->entries[nam] = t_entry;
 	string temp_label = t_entry->name + "<" + t_entry->inp_name + ">";
-	labels.insert( pair< string, int >(temp_label, code_line));
+	//cout<<"inserting label for "<<temp_label<<endl; 
+	//labels.insert( pair< string, int >(temp_label, code_line));
+	labels[temp_label] = code_line;
 	
 	return t_entry; 
 }

@@ -1008,6 +1008,63 @@ ASSIGNMENT
                                                             emit2(V, "setnz", regbp1);
                                                         }
                                                     }
+
+    | IDENTIFIER assignment_operator IDENTIFIER op '-' INTEGER
+                                                    {
+                                                        if($<intval>6 == 1 && !strcmp($<stringval>4, "int*"))
+                                                        {
+                                                            char regbp3[15];
+                                                            char regbp1[15];
+
+                                                            if(id_table[$<intval>3].is_param)
+                                                            {
+                                                                int shift3 = abs(id_table[$<intval>3].offset) + 16;
+                                                                sprintf(regbp3, "[%s + %d]", "rbp", shift3);
+
+                                                            }
+                                                            else if(id_table[$<intval>3].scope != "Global")
+                                                            {
+                                                                int shift3 = abs(id_table[$<intval>3].offset) + abs(id_table[$<intval>3].width);
+                                                                sprintf(regbp3, "[%s - %d]", "rbp", shift3);
+                                                            }
+                                                            else
+                                                            {
+                                                                sprintf(regbp3, "id%d", $<intval>3);
+                                                            }
+
+                                                            if(id_table[$<intval>1].is_param)
+                                                            {
+                                                                int shift1 = abs(id_table[$<intval>1].offset) + 16;
+                                                                sprintf(regbp1, "[%s + %d]", "rbp", shift1);
+
+                                                            }
+                                                            else if(id_table[$<intval>1].scope != "Global")
+                                                            {
+                                                                int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
+                                                                sprintf(regbp1, "[%s - %d]", "rbp", shift1);
+                                                            }
+                                                            else
+                                                            {
+                                                                sprintf(regbp1, "id%d", $<intval>1);
+                                                            }
+
+                                                            char prefix[2] = "e";
+                                                            if(id_table[$<intval>3].width == 8)
+                                                            {
+                                                                prefix[0] =  'r';
+                                                            }
+                                                            char reg[4];
+                                                            sprintf(reg, "%s%s", prefix, "ax");
+                                                            emit2(V, "mov", reg, ",", regbp3);
+                                                            char regbx[4];
+                                                            sprintf(regbx, "%s%s",prefix, "bx");
+                                                            emit2(V, "mov", regbx,",", "0xffffffffffff");
+                                                            emit2(V, "mul", regbx);
+                                                            emit2(V, "mov", regbp1, ",", reg);
+								                        } 
+                                                    }
+                                                    
+   
     | IDENTIFIER assignment_operator IDENTIFIER
     											{
 
@@ -1226,9 +1283,9 @@ ASSIGNMENT
     ;
 
 cast_expression
-    : INTCAST
-    | FLOATCAST
-    | DOUBLECAST
+    : INTCAST               { $<stringval>$ = (char*)malloc(11*sizeof(char)); sprintf($<stringval>$, "intcast"); }
+    | FLOATCAST             { $<stringval>$ = (char*)malloc(11*sizeof(char)); sprintf($<stringval>$, "floatcast"); }
+    | DOUBLECAST            { $<stringval>$ = (char*)malloc(11*sizeof(char)); sprintf($<stringval>$, "doublecast"); }
     ;
 
 JUMP
@@ -1532,12 +1589,14 @@ INDEXED_ASSIGNMENT
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
 
+
                                                                         emit2(V, "mov rbx, 0");
                                                                         emit2(V, "mov ebx,",regbp5);
                                                                         emit2(V, "add rcx, rbx");
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
+
     ;
 
 assignment_operator
