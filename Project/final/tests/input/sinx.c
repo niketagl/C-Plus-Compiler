@@ -2,10 +2,11 @@ void main()
 {
     int n;
     float term, denominator, x, sinx;
- 
-    x = 90;
+
+    x = 90.0;
     /*  Converting degrees to radians */
-    x = x * (3.142 / 180.0);
+    x = x * 3.142;
+    x = x / 180.0;
     term = x;
     sinx = term;
     n = 1;

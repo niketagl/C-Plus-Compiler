@@ -1166,6 +1166,9 @@ ASSIGNMENT
 		                                            emit2(V, "mov", regbp,",","eax");
 
     											}
+    | IDENTIFIER assignment_operator cast_expression '(' INTEGER ')'
+    | IDENTIFIER assignment_operator cast_expression '(' '-' INTEGER ')'
+    | IDENTIFIER assignment_operator cast_expression '(' '-' IDENTIFIER ')'
     | IDENTIFIER assignment_operator cast_expression '(' IDENTIFIER ')'
                                         // {
                                         //     char regbp1[10];
@@ -1430,6 +1433,9 @@ ASSIGNMENT
                                                                         emit2(V, "lea", "rax", ",",  kuch);
                                                                         emit2(V, "mov", regbp, ",", "rax");
                                                                     }
+    | IDENTIFIER assignment_operator IDENTIFIER op FLOAT_CONSTANT
+    | IDENTIFIER assignment_operator FLOAT_CONSTANT op FLOAT_CONSTANT
+    | IDENTIFIER assignment_operator FLOAT_CONSTANT op IDENTIFIER
     ;
 
 cast_expression
