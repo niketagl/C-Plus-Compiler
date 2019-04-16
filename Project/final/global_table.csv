@@ -1,0 +1,70 @@
+Scope, Is_Param, Name, Type, Offset, Width
+GLOBAL, 0,_inputints, FUNCTION : NIL -> INT, 0, 0
+GLOBAL, 0,_printints, FUNCTION : INT -> VOID, 0, 0
+GLOBAL, 0,proc_id0, FUNCTION : NIL -> INT, 0, 1468
+proc_id0, 0,id0, INT, 0, 4
+proc_id0, 0,id1, INT, 4, 4
+proc_id0, 0,id10, INT, 436, 4
+proc_id0, 0,id11, INT, 440, 4
+proc_id0, 0,id12, INT., 444, 8
+proc_id0, 0,id13, INT, 424, 4
+proc_id0, 0,id14, INT, 428, 4
+proc_id0, 0,id15, INT, 432, 4
+proc_id0, 0,id16, INT, 436, 4
+proc_id0, 0,id17, INT, 440, 4
+proc_id0, 0,id18, INT, 444, 4
+proc_id0, 0,id19, *INT, 448, 400
+proc_id0, 0,id2, INT, 8, 4
+proc_id0, 0,id20, INT, 848, 4
+proc_id0, 0,id21, INT, 852, 4
+proc_id0, 0,id22, INT, 856, 4
+proc_id0, 0,id23, INT, 860, 4
+proc_id0, 0,id24, INT, 864, 4
+proc_id0, 0,id25, INT., 868, 8
+proc_id0, 0,id26, INT, 848, 4
+proc_id0, 0,id27, INT, 852, 4
+proc_id0, 0,id28, CONSTANT INT, 856, 4
+proc_id0, 0,id29, CONSTANT INT, 860, 4
+proc_id0, 0,id3, INT, 12, 4
+proc_id0, 0,id30, VOID, 864, 0
+proc_id0, 0,id31, *INT, 852, 400
+proc_id0, 0,id32, INT, 1252, 4
+proc_id0, 0,id33, INT, 1256, 4
+proc_id0, 0,id34, INT, 1260, 4
+proc_id0, 0,id35, INT, 1264, 4
+proc_id0, 0,id36, INT, 1268, 4
+proc_id0, 0,id37, INT, 1272, 4
+proc_id0, 0,id38, INT, 1276, 4
+proc_id0, 0,id39, INT, 1280, 4
+proc_id0, 0,id4, INT, 16, 4
+proc_id0, 0,id40, INT, 1284, 4
+proc_id0, 0,id41, INT, 1288, 4
+proc_id0, 0,id42, INT, 1292, 4
+proc_id0, 0,id43, INT, 1296, 4
+proc_id0, 0,id44, INT, 1300, 4
+proc_id0, 0,id45, INT, 1304, 4
+proc_id0, 0,id46, INT, 1308, 4
+proc_id0, 0,id47, INT, 1312, 4
+proc_id0, 0,id48, INT, 1316, 4
+proc_id0, 0,id49, INT, 1320, 4
+proc_id0, 0,id5, INT, 20, 4
+proc_id0, 0,id50, INT., 1324, 8
+proc_id0, 0,id51, INT., 1332, 8
+proc_id0, 0,id52, INT, 1340, 4
+proc_id0, 0,id53, INT, 1344, 4
+proc_id0, 0,id54, INT, 1280, 4
+proc_id0, 0,id55, INT, 1284, 4
+proc_id0, 0,id56, INT, 1288, 4
+proc_id0, 0,id57, INT., 1292, 8
+proc_id0, 0,id58, INT, 848, 4
+proc_id0, 0,id59, INT, 852, 4
+proc_id0, 0,id6, *INT, 24, 400
+proc_id0, 0,id60, INT, 856, 4
+proc_id0, 0,id61, INT, 860, 4
+proc_id0, 0,id62, INT, 864, 4
+proc_id0, 0,id63, INT, 868, 4
+proc_id0, 0,id64, INT., 872, 8
+proc_id0, 0,id65, VOID, 880, 0
+proc_id0, 0,id7, INT, 424, 4
+proc_id0, 0,id8, INT, 428, 4
+proc_id0, 0,id9, INT, 432, 4

@@ -1,6 +1,7 @@
 struct node
 {
     int a;
+    int b;
 };
 
 int fun(struct node x)
@@ -13,5 +14,6 @@ int main()
     struct node alpha;
     int b = 3;
     alpha.a = b;
+    alpha.b = b;
     _printints(fun(alpha));
 }
