@@ -1,8 +1,10 @@
 int main()
 {
-	int a;
-	a = _inputints();
-	_printints(a);
+	int a[5],b;
+
+	int c;
+
+	c = -5;
 
 	//c = a[b];
 
