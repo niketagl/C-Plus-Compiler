@@ -171,6 +171,14 @@ postfix_expression
 																				emit(V, "push_param", temp2->name);
 																			}
 																		}
+																		else if(e->type->constnt)
+																		{
+																			table_entry_ptr temp2 = new table_entry;
+																			char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%d",e->type->value);
+																			temp2 = enter(table_stack.top(),s, e->type, 0);
+																			emit(V, temp2->name, "=", s);
+																			emit(V, "push_param", temp2->name);
+																		}
 																		else
 																		{
 																			emit(V, "push_param", e->name);

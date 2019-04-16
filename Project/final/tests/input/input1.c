@@ -1,12 +1,11 @@
-int x;
-
+int add(int a, int b)
+{
+	return a+b;
+}
 int main()
 {
-	int a;
-	a = _inputints();
-	_printints(a);
-	
-	
+	int c;
+	c = add(2,5);
+	_printints(c);
 }
-
 

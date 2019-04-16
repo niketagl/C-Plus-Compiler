@@ -43,7 +43,7 @@ extern void preprocess();
 "int"			{ counts(); return(INT); }
 
 "pointer"       {counts(); return(POINT); }
-
+"BASE_POINTER" 	{counts(); return(BASE_POINTER); }
 "real"			{ counts(); return(REAL); }
 
 "return"		{ counts(); return(RETURN); }
