@@ -1057,47 +1057,10 @@ ASSIGNMENT
                                                             emit2(V, "mov", reg, ",", regbp3);
                                                             char regbx[4];
                                                             sprintf(regbx, "%s%s",prefix, "bx");
-                                                            emit2(V, "mov", regbx,",", "0xffffffffffff");
+                                                            emit2(V, "mov", regbx,",", "-1");
                                                             emit2(V, "mul", regbx);
                                                             emit2(V, "mov", regbp1, ",", reg);
 								                        } 
-                                                        }
-                                                    }
-    | IDENTIFIER assignment_operator INTEGER op '-' INTEGER
-                                                    {
-                                                        if($<intval>6 == 1 && !strcmp($<stringval>4, "int*"))
-                                                        {
-                                                            char regbp3[15];
-                                                            char regbp1[15];
-                                                            sprintf(regbp3, "%d", $<intval>3);
-
-                                                            if(id_table[$<intval>1].is_param)
-                                                            {
-                                                                int shift1 = abs(id_table[$<intval>1].offset) + 16;
-                                                                sprintf(regbp1, "[%s + %d]", "rbp", shift1);
-
-                                                            }
-                                                            else if(id_table[$<intval>1].scope != "Global")
-                                                            {
-                                                                int shift1 = abs(id_table[$<intval>1].offset) + abs(id_table[$<intval>1].width);
-                                                                sprintf(regbp1, "[%s - %d]", "rbp", shift1);
-                                                            }
-                                                            else
-                                                            {
-                                                                sprintf(regbp1, "id%d", $<intval>1);
-                                                            }
-
-                                                            char prefix[2] = "e";
-                                                            
-                                                            char reg[4];
-                                                            sprintf(reg, "%s%s", prefix, "ax");
-                                                            emit2(V, "mov", reg, ",", regbp3);
-                                                            char regbx[4];
-                                                            sprintf(regbx, "%s%s",prefix, "bx");
-                                                            emit2(V, "mov", regbx,",", "0xffffffffffff");
-                                                            emit2(V, "mul", regbx);
-                                                            emit2(V, "mov", regbp1, ",", reg);
-                                                        }
                                                     }
     | IDENTIFIER assignment_operator op IDENTIFIER
     | IDENTIFIER assignment_operator IDENTIFIER
@@ -1583,12 +1546,6 @@ INDEXED_ASSIGNMENT
                                                                         {
                                                                             sprintf(regbp1, "id%d", $<intval>1);
                                                                         }
-<<<<<<< HEAD
-                                                                        
-                                                                    }
-    
-
-=======
 
                                                                         emit2(V, "mov rbx, 0");
                                                                         emit2(V, "mov ebx,",regbp5);
@@ -1596,7 +1553,6 @@ INDEXED_ASSIGNMENT
                                                                         emit2(V, "mov", regbp1, ", rcx");
 
                                                                     }
->>>>>>> 3d01c63b0db3ea8398c06b6e241ed8707d8f37de
     ;
 
 assignment_operator

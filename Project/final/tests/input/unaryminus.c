@@ -1,7 +1,7 @@
 int main()
 {
     int a = 5;
-    a /= -1;
+    int b = -a;
 
-    _printints(a);
+    _printints(b);
 }
