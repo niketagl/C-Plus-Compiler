@@ -23,6 +23,7 @@ extern int yylineno;
 	#include <stack>
 	#include <iostream>
 	#include <vector>
+	#include <cstring>
 	#include <string>
 	using namespace std;
 	extern stack < table_ptr > table_stack;
@@ -140,12 +141,41 @@ postfix_expression
 																	for(int i=arg_list.size()-1; i>=0; i--)
 																	{
 																		table_entry_ptr e = arg_list[i];
-																		if(e->type->info==STRUCT)
+																		if(e->type->info==STRCT)
 																		{
+																			table_entry_ptr str = same_lookup1(struct_namespace,e->type->type_name);
+																			map < string , table_entry_ptr > ::iterator j;
+																			for ( j = str->t->entries.begin() ; j != str->t->entries.end(); j++ )
+																			{	
+																				table_entry_ptr elmt = j->second;
+																				table_entry_ptr temp2 = new table_entry;
+																				char cstr[elmt->inp_name.size() + 1];
+																				strcpy(cstr, elmt->inp_name.c_str());
+																				if(char* s = type_check4(".",temp2,e,cstr)){ yyerror3(s);}
+																				emit(V, "push_param", temp2->name);
+																			}
 
 																		}
+																		else if(e->type->info==ARRAY)
+																		{
+																			int n = e->type->array_size;
+																			for(i=0;i<n;i++)
+																			{
+																				table_entry_ptr temp2 = new table_entry;
+																				table_entry_ptr temp3 = new table_entry; 
+																				temp3->type = new_basic_type(INTEGER);
+																				temp3->type->value = i; 
+																				temp3->type->constnt = 1;
+																				char *s = (char*)malloc(15*sizeof(char)); sprintf(s,"%d",i); 
+																				temp3->name = s;
+																				if(char* s = type_check2("[]",temp2,e,temp3)){ yyerror3(s);}
+																				emit(V, "push_param", temp2->name);
+																			}
+																		}
 																		else
+																		{
 																			emit(V, "push_param", e->name);
+																		}
 																	}
 																	arg_list.resize(0);
 																	emit(V, "call", temp->name);
@@ -190,7 +220,6 @@ postfix_expression
 																					if(lookup(class_namespace, $<entry>1->type->type_name))
 																					{	
 																						table_entry_ptr temp_class = lookup(class_namespace, $<entry>1->type->type_name);
-																						cout << temp_class->name << endl;
 																						if(same_lookup(temp_class->t, $<stringval>3))
 																						{
 																							table_entry_ptr temp = same_lookup(temp_class->t, $<stringval>3);
@@ -693,8 +722,8 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator   {$<type>$ = $<type>2; }
-	| direct_declarator    {$<type>$ = $<type>1; }
+	: pointer direct_declarator   {$<type>$ = $<type>2;}
+	| direct_declarator    {$<type>$ = $<type>1;}
 	;
 
 direct_declarator

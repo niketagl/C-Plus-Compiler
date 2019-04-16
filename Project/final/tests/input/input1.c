@@ -1,7 +1,8 @@
 int main()
 {
-	int a,b;
-	b = 3;
-	a = ((b + (b * (b + 1))) - b) || (b != 3);
-	_printints(a);
+	int c[3],i;
+	c[i]=1;
+	c[1]=2;
+	c[2]=3;
+	// fun(c);
 }

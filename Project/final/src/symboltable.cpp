@@ -79,6 +79,7 @@ string print_type(type_ptr t)
 		case VOD : s.append("VOID"); break;
 		case STRCT : s.append("STRUCT"); break;
 		case CLASSS : s.append("CLASS"); break;
+		case DEPTR : s.append(print_type(t->p1)); break;
 	}
 	return s;
 }
@@ -177,6 +178,7 @@ int type_width(type_ptr type)
 	if(type->info == STRCT) width = type_width(type->p1);
 	if(type->info == CARTESIAN) width = type_width(type->p1) + type_width(type->p2);
 	if(type->info == NOTYPE || type->info == VOD || type->info == ERROR) width = 0;
+	if(type->info == DEPTR) {width = type_width(type->p1);}
 	return width;
 }
 
@@ -193,7 +195,6 @@ table_entry_ptr enter( table_ptr t, char* name, type_ptr type, int offset)
 
 	t_entry->name += "id";
 	t_entry->name += temp;
-	
 
 	t_entry->type = type;
 
@@ -541,22 +542,20 @@ table_entry_ptr lookup ( table_ptr t, char* name)
 
 table_entry_ptr same_lookup ( table_ptr t, char* name, type_ptr t1)
 {
-	if(t==NULL) return NULL;
+	if(t==NULL) {return NULL;}
 	string nam = name;
 	map < string , table_entry_ptr > ::iterator i;
 	for ( i = t->entries.begin() ; i != t->entries.end(); i++ )
 	{
-		
 		table_entry_ptr e = i->second;
 		if(e->inp_name==nam && e->type->info==FUNCTION)
 		{
-			if(t1 == NULL && e->type->p1==NULL) return e;
+			if(t1 == NULL && e->type->p1==NULL) {return e;}
 			else
 			{
-				if(type_compare(e->type->p1, t1)) return e;
+				if(type_compare(e->type->p1, t1)) {return e;}
 			}
-		}
-		
+		}		
 	}
 	return same_lookup(t->parent, name, t1);
 }
@@ -678,7 +677,7 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 	{
 		t2 = lookup(struct_namespace, t1->type_name)->t;
 	}
-	
+
 	char name[8];
 	string f_op;
 	sprintf(name, "%s%d", "t-", count);
@@ -700,7 +699,17 @@ char* type_check4(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 				table_entry_ptr temp = lookup(t2, id);
 				offset = entry_in1->offset + temp->offset;
 				if(offset==0){offset=-1;}
-				entry_out = enter(table_stack.top(), name, lookup(t2, id)->type, offset);
+				type_ptr tetype = new type_node;
+				type_ptr retype = lookup(t2, id)->type;
+				tetype->info = retype->info;
+				tetype->p1 = retype->p1;
+				tetype->sign = retype->sign;
+				tetype->unsign = retype->unsign;
+				tetype->longer = retype->longer;
+				tetype->shorter = retype->shorter;
+				tetype->array_size = retype->array_size;
+				tetype->param = t1->param;
+				entry_out = enter(table_stack.top(), name, tetype, offset);
 				count++;
 				emit(V, entry_out->name, "=", entry_in1->name, ".", temp->name);
 				return NULL;
@@ -787,7 +796,7 @@ bool type_compare(type_ptr t1, type_ptr t2)
 		if(t1->info==t2->info)
 		{
 			bool val = (t1->extrn^t2->extrn)|(t1->regis^t2->regis)|(t1->stat^t2->stat)|(t1->volat^t2->volat)|(t1->sign^t2->sign)|(t1->unsign^t2->unsign)|(t1->longer^t2->longer)|(t1->shorter^t2->shorter);
-			if((!val) && t1->array_size == t2->array_size && t1->value == t2->value && t1->type_name == t2->type_name)
+			if((!val) && t1->array_size == t2->array_size && t1->value == t2->value && (t1->type_name==NULL || t2->type_name==NULL || !strcmp(t1->type_name, t2->type_name)))
 			{
 				if(t1->p1==NULL && t2->p1==NULL)
 				{
@@ -840,7 +849,7 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
 		{
 			if(t1->info==ARRAY || t1->info==POINTER)
 			{
-				if (t1->info==ARRAY && t1->array_size<=t2->value)
+				if (t1->info==ARRAY && t2->constnt && t1->array_size<=t2->value)
 				{
 					string terror = "Array Out of Bounds Error";
 					char* type_error;
@@ -850,10 +859,10 @@ char* type_check2(string op, table_entry_ptr &entry_out, table_entry_ptr entry_i
     				entry_out->type = new_basic_type(ERROR);
 					return type_error;
 				}
-				int offset = 0;
-				if(t2->constnt)
-					offset = entry_in1->offset + t2->value * type_width(t1->p1);
-				entry_out = enter(table_stack.top(), name, t1->p1, offset);
+				type_ptr tetype = new type_node;
+				tetype->info = DEPTR;
+				tetype->p1 = t1->p1;
+				entry_out = enter(table_stack.top(), name, tetype, 0);
 				count++;
 				f_op = "[" + entry_in2->name + "]";
 				emit(V, entry_out->name, "=", entry_in1->name, f_op);
@@ -1548,6 +1557,43 @@ char* type_check(string op, table_entry_ptr &entry_out, table_entry_ptr entry_in
 			else if(t1->info == DBL && ( t2->info == FLT || t2->info == CHR || t2->info == INTEGER  ) )
 			{
 				emit(V, entry_in1->name, "= cast_to_double (", entry_in2->name,")");
+				warning("Implicit Typecast to DOUBLE");
+				entry_out = entry_in1;
+				return NULL;
+			}
+		}
+		else if(t1->info == DEPTR)
+		{
+			if(t1->p1->info == t2->info)
+			{
+				emit(V,"*",entry_in1->name,"=",entry_in2->name);
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->p1->info == INTEGER && ( t2->info == FLT || t2->info == CHR || t2->info == DBL  ) )
+			{
+				emit(V,"*", entry_in1->name, "= cast_to_int (", entry_in2->name,")");
+				warning("Implicit Typecast to INTEGER");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->p1->info == CHR && ( t2->info == FLT || t2->info == INTEGER || t2->info == DBL  ) )
+			{
+				emit(V,"*", entry_in1->name, "= cast_to_int (", entry_in2->name,")");
+				warning("Implicit Typecast to CHAR");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->p1->info == FLT && ( t2->info == INTEGER || t2->info == CHR || t2->info == DBL  ) )
+			{
+				emit(V,"*", entry_in1->name, "= cast_to_float (", entry_in2->name,")");
+				warning("Implicit Typecast to FLOAT");
+				entry_out = entry_in1;
+				return NULL;
+			}
+			else if(t1->p1->info == DBL && ( t2->info == FLT || t2->info == CHR || t2->info == INTEGER  ) )
+			{
+				emit(V,"*", entry_in1->name, "= cast_to_double (", entry_in2->name,")");
 				warning("Implicit Typecast to DOUBLE");
 				entry_out = entry_in1;
 				return NULL;
